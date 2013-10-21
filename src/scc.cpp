@@ -21,10 +21,14 @@ int main(int argc, char** argv)
 	uValue expr;
 	expr.Integer = 10;
 	
+	ALT(new TYPE(TYPE_INT), new EXPR(EXPR_INT, expr));
+
 	/*
 	* Define test program
 	*/
-	PROGRAM program(EXPR(new EXPR(EXPR_INT, expr), '+', new EXPR(EXPR_INT, expr)), '.');
+	PROGRAM(new EXPR(EXPR_BI_OP, new EXPR(EXPR_INT, expr), "+", new EXPR(EXPR_INT, expr)));
+
+	PROGRAM(new EXPR(EXPR_BI_OP, new EXPR(EXPR_INT, expr), "&", new EXPR(EXPR_INT, expr)));
 	
 	return 0;
 }
