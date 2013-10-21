@@ -6,6 +6,9 @@
 // http://stackoverflow.com/questions/16127385/recursive-descent-parser-example-for-c
 
 // AST - Abstrace Syntax Tree
+/*
+* TODO - docs
+*/
 namespace AST 
 {
 	/******************
@@ -103,6 +106,7 @@ private:
 class AST::EXPR
 {
 public:
+	// EXPR_INT, EXPR_BOOL, EXPR_STRING
 	EXPR(EXPRESSION_TYPE typeExpr, uValue value);
 	// EXPR_VAR_CONSTR
 	EXPR(EXPRESSION_TYPE typeExpr, std::string ID, EXPR* expr);
@@ -110,6 +114,7 @@ public:
 	EXPR(EXPRESSION_TYPE typeExpr, EXPR* expr /* ALTS */);
 	// EXPR_FOR_LOOP
 	EXPR(EXPRESSION_TYPE typeExpr, std::string ID, EXPR* expr0, EXPR* expr1);
+	// EXPR_BI_OP
 	EXPR(EXPRESSION_TYPE typeExpr, EXPR* expr0, std::string op, EXPR* expr1);
 
 	virtual ~EXPR();
@@ -143,12 +148,13 @@ class AST::PROGRAM
 public:
 	inline PROGRAM(EXPR* expr) 
 	{
+		printf("Creating new Program\n");
 		_expr = expr;
 	}
 
 	virtual ~PROGRAM() 
 	{
-		printf("Deleteing main PROGRAM expression\n\n");
+		printf("Delete Program expression\n\n");
 		delete _expr;
 	}
 

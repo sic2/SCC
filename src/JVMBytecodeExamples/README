@@ -1,0 +1,7 @@
+This director (JVMBytecodeExamples/) contains basic *.java programs used to
+facilitate the mapping between high-level code and JVM bytecode
+
+In order to use the files in this folder:
+
+javac *.java
+javap <CLASS_FILE>

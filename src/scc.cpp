@@ -1,57 +1,40 @@
-// scc - St andrews Case Compiler
-#include "AST.h"
+/***********************************************************
+* PLDI - A Compiler to JVM Bytecode: 
+*				scc - St andrews Case Compiler 
+* Student: 100003610
+* 
+* This software is part of University coursework and 
+* can be reused only for teaching/learning purposes. 
+* The code of the scc cannot be copied or reused in any 
+* circumstances, unless permission has been granted by the author.
+***********************************************************/
+#include "JVMByteCodeGenerator.h"
 
-#include <iostream>
-#include <fstream>
-#include <string>
-
-using namespace std;
 using namespace AST;
 
+// Test programs are encoded and evaluated 
+// in the main method.
+// A 2-steps process is used:
+// - Encode the program in AST
+// - Generate JVM bytecode from the AST
+// The JVM bytecode is printed to file if successful. 
 int main(int argc, char** argv)
 {
-
-	// TODO
-	// 1 - have hardcoded AST
-	// 2 - generate JVM bytecode from AST
-
 	/*
 	* Define values
 	*/
 	uValue expr;
 	expr.Integer = 10;
 	
-	ALT(new TYPE(TYPE_INT), new EXPR(EXPR_INT, expr));
+	// ALT(new TYPE(TYPE_INT), new EXPR(EXPR_INT, expr));
 
 	/*
 	* Define test program
 	*/
-	PROGRAM(new EXPR(EXPR_BI_OP, new EXPR(EXPR_INT, expr), "+", new EXPR(EXPR_INT, expr)));
+	PROGRAM program_0(new EXPR(EXPR_BI_OP, new EXPR(EXPR_INT, expr), "+", new EXPR(EXPR_INT, expr)));
+	JVMByteCodeGenerator byteCodeGen(program_0);
 
-	PROGRAM(new EXPR(EXPR_BI_OP, new EXPR(EXPR_INT, expr), "&", new EXPR(EXPR_INT, expr)));
+	PROGRAM program_1(new EXPR(EXPR_BI_OP, new EXPR(EXPR_INT, expr), "&", new EXPR(EXPR_INT, expr)));
 	
 	return 0;
 }
-
-
-/* XXX - ADDITIONAL STUFF
-	// FIXME - check if argument exist and if extension is .case
-	string fileName = argv[1];
-	string inputFile = "inputFiles/" + fileName;
-	ifstream myfile (inputFile.c_str());
-
-	// File input routine as in: http://www.cplusplus.com/doc/tutorial/files/
-	string line;
-	if (myfile.is_open())
-	{
-		while (getline(myfile,line))
-		{ 
-			cout << line << endl; // TODO - tokenise : http://www.cplusplus.com/reference/cstring/strtok/
-		}
-		myfile.close();
-	}
-	else
-	{
-		cout << "Unable to open file";
-	} 
-	*/
