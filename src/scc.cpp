@@ -10,6 +10,7 @@
 ***********************************************************/
 #include "JVMByteCodeGenerator.h"
 
+
 using namespace AST;
 
 // Test programs are encoded and evaluated 
@@ -20,18 +21,34 @@ using namespace AST;
 // The JVM bytecode is printed to file if successful. 
 int main(int argc, char** argv)
 {
-	/*
+		/*
 	* Define values
 	*/
 	uValue expr;
-	expr.Integer = 10;
+	expr.Integer = -2;
+	uValue expr_1;
+	expr_1.Integer = 0;
+
+
+	// In C++98 it is not possible to initialise a vector directly
+	// as in C++11 (i.e. std::vector<int> v { 34,23 }; )
+	// Therefore a 2steps initialisation is needed
+	static const ALT arr[] = 
+	{
+		ALT(new TYPE(TYPE_INT, expr_1), new EXPR(EXPR_INT, expr))
+	};
+	std::vector<ALT> vec(arr, arr + sizeof(arr) / sizeof(arr[0]));
+
+
 	
 	// ALT(new TYPE(TYPE_INT), new EXPR(EXPR_INT, expr));
 
 	/*
 	* Define test program
 	*/
-	PROGRAM program_0(new EXPR(EXPR_BI_OP, new EXPR(EXPR_INT, expr), "+", new EXPR(EXPR_INT, expr)));
+	//PROGRAM program_0(new EXPR(EXPR_BI_OP, new EXPR(EXPR_INT, expr), "+", new EXPR(EXPR_INT, expr)));
+	PROGRAM program_0(new EXPR(EXPR_INT, expr));
+	//PROGRAM program_0(new EXPR());
 	JVMByteCodeGenerator byteCodeGen(program_0);
 	byteCodeGen.generateByteCode("XXX");
 

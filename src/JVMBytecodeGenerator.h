@@ -5,7 +5,8 @@
 class JVMByteCodeGenerator
 {
 public:
-	JVMByteCodeGenerator(AST::PROGRAM& program): _program(program) {}
+	JVMByteCodeGenerator(AST::PROGRAM& program)
+		: _program(program) {}
 
 	/**
 	* Generates JVM bytecode and output to file
@@ -14,6 +15,12 @@ public:
 	*			False otherwise.
 	*/
 	bool generateByteCode(std::string outFileName);
+
+	// Dynamically format an instruction into a jasmin instruction.
+	// MACROS cannot be used on dynamic content
+	static void formatJasminInstruction(std::string& instruction);
+
+	static void printInt(std::string& output, int var);
 
 private:
 	AST::PROGRAM& _program;

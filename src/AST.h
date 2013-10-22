@@ -1,3 +1,5 @@
+#pragma once 
+
 #include <string>
 #include <vector>
 #include <stdio.h>
@@ -79,6 +81,7 @@ namespace AST
 	class TYPE;
 	class EXPR;
 	class ALT;
+	class ALTS;
 	class PROGRAM;
 }
 
@@ -89,29 +92,38 @@ namespace AST
 class AST::TYPE
 {
 public:
-	TYPE(PRIMITIVE_TYPE primitiveType);
+	TYPE(PRIMITIVE_TYPE primitiveType, uValue value);
 
   	TYPE(std::string ID, TYPE type);
 
   	TYPE(std::string ID, std::vector<TYPE> types);
 
-private:
-  PRIMITIVE_TYPE _primitiveType;
-  std::string _id;
-  std::vector<TYPE> _types;
+  	/**
+  	* @return false if the type is not an int, bool or string
+  	*/
+  	bool getValue(PRIMITIVE_TYPE* primitiveType, uValue* value);
 
-  int _whichConstructor;
+private:
+	PRIMITIVE_TYPE _primitiveType;
+	uValue _uValue;
+	std::string _id;
+	std::vector<TYPE> _types;
+
+	int _whichConstructor;
 };
 
 class AST::EXPR
 {
 public:
+	/*
+	* Constructors and destructor
+	*/
 	// EXPR_INT, EXPR_BOOL, EXPR_STRING
 	EXPR(EXPRESSION_TYPE typeExpr, uValue value);
 	// EXPR_VAR_CONSTR
 	EXPR(EXPRESSION_TYPE typeExpr, std::string ID, EXPR* expr);
 	// EXPR_CASE
-	EXPR(EXPRESSION_TYPE typeExpr, EXPR* expr /* ALTS */);
+	EXPR(EXPRESSION_TYPE typeExpr, EXPR* expr, std::vector<ALT> alternatives);
 	// EXPR_FOR_LOOP
 	EXPR(EXPRESSION_TYPE typeExpr, std::string ID, EXPR* expr0, EXPR* expr1);
 	// EXPR_BI_OP
@@ -119,14 +131,23 @@ public:
 
 	virtual ~EXPR();
 
+	/*
+	* Other methods
+	*/ 
+	void generateByteCode(std::string& output);
+
 private:
 	uValue _uValue;
 	EXPR* _expr0;
 	EXPR* _expr1;
+	std::vector<ALT> _alternatives;
 
 	EXPRESSION_TYPE _typeExpr;
 	OP _operand;
 	std::string _id;
+
+	std::string getIntByteCode();
+	void generateCaseByteCode(std::string& output);
 };
 
 /*
@@ -137,6 +158,9 @@ class AST::ALT
 public:
 	ALT(TYPE* type, EXPR* expr);
 	virtual ~ALT();
+
+	// TODO - move method implementation to cpp file
+	TYPE* getTYPE() { return this->_type; }
 
 private:
 	TYPE* _type;
@@ -163,6 +187,11 @@ public:
 			printf("Delete Program expression\n\n");
 		}
 		delete _expr;
+	}
+
+	inline void generateByteCode(std::string& output)
+	{
+		_expr->generateByteCode(output);
 	}
 
 private:

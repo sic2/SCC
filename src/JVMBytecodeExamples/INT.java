@@ -1,6 +1,7 @@
 public class INT {
 	public static void main()
 	{
-		int TEST;
+		int a = 6;
+		System.out.println(a);
 	}
 }
