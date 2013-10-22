@@ -22,7 +22,7 @@ AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, std::string ID, AST::EXPR* expr)
 }
 
 // EXPR_CASE
-AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, AST::EXPR* expr, std::vector<ALT> alternatives)
+AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, AST::EXPR* expr, std::vector< boost::shared_ptr<ALT> >& alternatives)
 {
 	_typeExpr = typeExpr;
 	_expr0 = expr;
@@ -135,7 +135,7 @@ AST::EXPR::~EXPR()
 
 void AST::EXPR::generateByteCode(std::string& output)
 {
-	
+	printf("switch!\n");
 	switch(_typeExpr)
 	{
 	case EXPR_INT:
@@ -163,6 +163,7 @@ void AST::EXPR::generateByteCode(std::string& output)
 		break;
 	case EXPR_CASE:
 		{
+			printf("case expr \n");
 			generateCaseByteCode(output);
 		}
 		break;
@@ -212,14 +213,14 @@ std::string AST::EXPR::getIntByteCode()
 // [ ASSUMPTION ] - case of integers
 void AST::EXPR::generateCaseByteCode(std::string& output) 
 {
+	printf("fuuuuuck\n");
 	output += "\t istore_0 \n"; // FIXME - hardcoded bytecode
 	output += "\t lookupswitch \n";
 
 	// A vector is created to store each ALTernative, its own label as well
-	std::vector< std::pair<AST::ALT, std::string> > pairsAltsLabels;  // FIXME - do not limit this to integers
+	std::vector< std::pair< boost::shared_ptr<AST::ALT>, std::string> > pairsAltsLabels;  // FIXME - do not limit this to integers
 	int labelIndex = 0;
-	std::ostringstream convert; 
-
+	
 	/*
 	* Loop through all alternatives and print the first part of the lookupswitch
 	* example:
@@ -228,12 +229,12 @@ void AST::EXPR::generateCaseByteCode(std::string& output)
 	* 324 : Label_2
 	* etc..
 	*/
-	for(std::vector<AST::ALT>::iterator it = _alternatives.begin(); it != _alternatives.end(); ++it) 
+	for(std::vector< boost::shared_ptr<AST::ALT> >::iterator it = _alternatives.begin(); it != _alternatives.end(); ++it) 
 	{
 		PRIMITIVE_TYPE primitiveType;
 		uValue value;
 	
-		bool valid = (*it).getTYPE()->getValue(&primitiveType, &value);
+		bool valid = (*it)->getTYPE()->getValue(&primitiveType, &value);
 		if (valid)
 		{
 			if (primitiveType == TYPE_INT)
@@ -242,15 +243,21 @@ void AST::EXPR::generateCaseByteCode(std::string& output)
 				* example:
 				* 	1 : Label_0
 				*/
+				// Two ostringstream objects are used because clearing/erasing
+				// an ostringstream is not trivial
+				std::ostringstream convert; 
+				std::ostringstream labelConvert; 
+
 				int caseIntegerValue = value.Integer;
 				convert << caseIntegerValue;
 				output += "\t\t " + convert.str();
-				convert << labelIndex;
-				std::string label = "Label_" + convert.str();
+
+				labelConvert << labelIndex;
+				std::string label = "Label_" + labelConvert.str();
 				output += " : " + label + "\n";
 
 				// Adding the integer and the label to pairsAltsLabels
-				pairsAltsLabels.push_back(std::make_pair<AST::ALT, std::string>((*it), label));
+				pairsAltsLabels.push_back(std::make_pair< boost::shared_ptr<AST::ALT>, std::string>((*it), label));
 			}
 		}
 	} // end for-loop for _alternatives vector
@@ -263,11 +270,10 @@ void AST::EXPR::generateCaseByteCode(std::string& output)
 		EXPR
 	* etc...
 	*/
-	for(std::vector< std::pair<AST::ALT, std::string> >::iterator it = pairsAltsLabels.begin(); it != pairsAltsLabels.end(); ++it) 
+	for(std::vector< std::pair< boost::shared_ptr<AST::ALT>, std::string> >::iterator it = pairsAltsLabels.begin(); it != pairsAltsLabels.end(); ++it) 
 	{
-		AST::ALT alternative = (*it).first;
+		boost::shared_ptr<AST::ALT> alternative = (*it).first;
 		std::string label = (*it).second;
 		output += label + ": \n";
-		
 	} // end for-loop for pairsAltsLabels vector
 }

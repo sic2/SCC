@@ -4,6 +4,8 @@
 #include <vector>
 #include <stdio.h>
 
+#include <boost/shared_ptr.hpp>
+
 // http://stackoverflow.com/questions/18188612/abstract-syntax-tree-representation-in-c
 // http://stackoverflow.com/questions/16127385/recursive-descent-parser-example-for-c
 
@@ -123,7 +125,7 @@ public:
 	// EXPR_VAR_CONSTR
 	EXPR(EXPRESSION_TYPE typeExpr, std::string ID, EXPR* expr);
 	// EXPR_CASE
-	EXPR(EXPRESSION_TYPE typeExpr, EXPR* expr, std::vector<ALT> alternatives);
+	EXPR(EXPRESSION_TYPE typeExpr, EXPR* expr, std::vector< boost::shared_ptr<ALT> >& alternatives);
 	// EXPR_FOR_LOOP
 	EXPR(EXPRESSION_TYPE typeExpr, std::string ID, EXPR* expr0, EXPR* expr1);
 	// EXPR_BI_OP
@@ -140,7 +142,7 @@ private:
 	uValue _uValue;
 	EXPR* _expr0;
 	EXPR* _expr1;
-	std::vector<ALT> _alternatives;
+	std::vector< boost::shared_ptr<ALT> > _alternatives;
 
 	EXPRESSION_TYPE _typeExpr;
 	OP _operand;
