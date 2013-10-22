@@ -130,6 +130,8 @@ public:
 	EXPR(EXPRESSION_TYPE typeExpr, std::string ID, EXPR* expr0, EXPR* expr1);
 	// EXPR_BI_OP
 	EXPR(EXPRESSION_TYPE typeExpr, EXPR* expr0, std::string op, EXPR* expr1);
+	// EXPR_GROUP
+	EXPR(EXPRESSION_TYPE typeExpr, std::vector< boost::shared_ptr<EXPR> >& expressions);
 
 	virtual ~EXPR();
 
@@ -139,16 +141,18 @@ public:
 	void generateByteCode(std::string& output);
 
 private:
+	// [ TODO ] - use union for all these data structures, so that only the one needed are there
 	uValue _uValue;
 	EXPR* _expr0;
 	EXPR* _expr1;
 	std::vector< boost::shared_ptr<ALT> > _alternatives;
+	std::vector< boost::shared_ptr<EXPR> > _expressions;
 
 	EXPRESSION_TYPE _typeExpr;
 	OP _operand;
 	std::string _id;
 
-	std::string getIntByteCode();
+	std::string getIntByteCode(int Integer);
 	void generateCaseByteCode(std::string& output);
 };
 
@@ -163,6 +167,7 @@ public:
 
 	// TODO - move method implementation to cpp file
 	TYPE* getTYPE() { return this->_type; }
+	EXPR* getEXPR() { return this->_expr; }
 
 private:
 	TYPE* _type;

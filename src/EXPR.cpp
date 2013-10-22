@@ -38,6 +38,7 @@ AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, std::string ID, AST::EXPR* expr0,
 	_expr1 = expr1;
 }
 
+// EXPR_BI_OP
 AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, AST::EXPR* expr0, std::string op, AST::EXPR* expr1) 
 {
 	_typeExpr = typeExpr;
@@ -89,6 +90,13 @@ AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, AST::EXPR* expr0, std::string op,
 
 }
 
+// EXPR_GROUP 
+EXPR(EXPRESSION_TYPE typeExpr, std::vector< boost::shared_ptr<EXPR> >& expressions)
+{
+	_typeExpr = typeExpr;
+	_expressions = expressions;
+}
+
 // Destructor
 AST::EXPR::~EXPR() 
 {	
@@ -135,18 +143,17 @@ AST::EXPR::~EXPR()
 
 void AST::EXPR::generateByteCode(std::string& output)
 {
-	printf("switch!\n");
 	switch(_typeExpr)
 	{
 	case EXPR_INT:
 		{
-			std::string bytecode = getIntByteCode();
+			std::string bytecode = getIntByteCode(_uValue.Integer);
 			JVMByteCodeGenerator::formatJasminInstruction(bytecode);
 			output += bytecode;
 			std::string store = "istore_0"; // FIXME - hardcoded bytecode
 			JVMByteCodeGenerator::formatJasminInstruction(store);
 			output += store;
-			JVMByteCodeGenerator::printInt(output, 0);
+			//JVMByteCodeGenerator::printInt(output, 0);
 
 		}
 		break;
@@ -163,14 +170,13 @@ void AST::EXPR::generateByteCode(std::string& output)
 		break;
 	case EXPR_CASE:
 		{
-			printf("case expr \n");
 			generateCaseByteCode(output);
 		}
 		break;
 	case EXPR_FOR_LOOP:
 	case EXPR_BI_OP:
 		{
-			// TODO
+			generateBiOPByteCode(output);
 		}
 		break;
 	// TODO	
@@ -192,17 +198,17 @@ void AST::EXPR::generateByteCode(std::string& output)
 /*
 * Private methods
 */
-std::string AST::EXPR::getIntByteCode()
+std::string AST::EXPR::getIntByteCode(int Integer)
 {
 	std::ostringstream convert; 
-	convert << _uValue.Integer;
+	convert << Integer;
 
 	std::string retval = "iconst_";
-	if (_uValue.Integer == -1)
+	if (Integer == -1)
 	{
 		return "iconst_m1";
 	}
-	else if (_uValue.Integer < -1 || _uValue.Integer > 5)
+	else if (Integer < -1 || Integer > 5)
 	{
 		retval = "bipush ";
 	}
@@ -213,9 +219,9 @@ std::string AST::EXPR::getIntByteCode()
 // [ ASSUMPTION ] - case of integers
 void AST::EXPR::generateCaseByteCode(std::string& output) 
 {
-	printf("fuuuuuck\n");
-	output += "\t istore_0 \n"; // FIXME - hardcoded bytecode
-	output += "\t lookupswitch \n";
+	_expr0->generateByteCode(output);
+	output += "\tiload_0 \n"; // FIXME - hardcoded bytecode
+	output += "\tlookupswitch \n";
 
 	// A vector is created to store each ALTernative, its own label as well
 	std::vector< std::pair< boost::shared_ptr<AST::ALT>, std::string> > pairsAltsLabels;  // FIXME - do not limit this to integers
@@ -250,17 +256,21 @@ void AST::EXPR::generateCaseByteCode(std::string& output)
 
 				int caseIntegerValue = value.Integer;
 				convert << caseIntegerValue;
-				output += "\t\t " + convert.str();
+				output += "\t\t" + convert.str();
 
 				labelConvert << labelIndex;
 				std::string label = "Label_" + labelConvert.str();
 				output += " : " + label + "\n";
+				labelIndex++;
 
 				// Adding the integer and the label to pairsAltsLabels
 				pairsAltsLabels.push_back(std::make_pair< boost::shared_ptr<AST::ALT>, std::string>((*it), label));
 			}
 		}
 	} // end for-loop for _alternatives vector
+	// Default label must always be specified - but it won't have
+	// any functionality in the Case language
+	output += "\t\tdefault : DLABEL\n"; 
 
 	/* Loop pairsAltsLabels to expand each case 
 	* example:
@@ -270,10 +280,18 @@ void AST::EXPR::generateCaseByteCode(std::string& output)
 		EXPR
 	* etc...
 	*/
-	for(std::vector< std::pair< boost::shared_ptr<AST::ALT>, std::string> >::iterator it = pairsAltsLabels.begin(); it != pairsAltsLabels.end(); ++it) 
+	for(std::vector< std::pair< boost::shared_ptr<AST::ALT>, std::string> >::iterator it = pairsAltsLabels.begin(); 
+		it != pairsAltsLabels.end(); ++it) 
 	{
-		boost::shared_ptr<AST::ALT> alternative = (*it).first;
-		std::string label = (*it).second;
-		output += label + ": \n";
+		output += (*it).second + ": \n";
+		(*it).first->getEXPR()->generateByteCode(output);
 	} // end for-loop for pairsAltsLabels vector
+	// Handle default label
+	output += "DLABEL: \n"; 
+	output += "return\n";
+}
+
+void AST::EXPR::generateBiOPByteCode(std::string& output)
+{
+	// TODO
 }

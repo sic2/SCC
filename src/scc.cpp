@@ -10,8 +10,6 @@
 ***********************************************************/
 #include "JVMByteCodeGenerator.h"
 
-#include <boost/shared_ptr.hpp>
-
 using namespace AST;
 
 // Test programs are encoded and evaluated 
@@ -22,38 +20,32 @@ using namespace AST;
 // The JVM bytecode is printed to file if successful. 
 int main(int argc, char** argv)
 {
-		/*
+	/*
 	* Define values
 	*/
-	uValue expr;
-	expr.Integer = -2;
-	uValue expr_1;
-	expr_1.Integer = 0;
+	uValue expr_0 = {Integer: 0};
+	uValue expr_1 = {Integer: 1};
+	uValue expr_2 = {Integer: 2};
 
+	// Create alternatives one by one and add them to vector of alternatives
+	std::vector< boost::shared_ptr<ALT> > alternatives;
+	boost::shared_ptr<ALT> alt_0(new ALT(new TYPE(TYPE_INT, expr_0), new EXPR(EXPR_INT, expr_1))); 
+	boost::shared_ptr<ALT> alt_1(new ALT(new TYPE(TYPE_INT, expr_1), new EXPR(EXPR_INT, expr_0))); 
+	alternatives.push_back(alt_0);
+	alternatives.push_back(alt_1);
 
-	// In C++98 it is not possible to initialise a vector directly
-	// as in C++11 (i.e. std::vector<int> v { 34,23 }; )
-	// Therefore a 2steps initialisation is needed
-	EXPR* e_0 = new EXPR(EXPR_INT, expr);
-	boost::shared_ptr<ALT> alt(new ALT(new TYPE(TYPE_INT, expr_1), e_0)); 
-	static const boost::shared_ptr<ALT> arr[] = 
-	{
-		alt
-	};
-	std::vector< boost::shared_ptr<ALT> > alternatives(arr, arr + sizeof(arr) / sizeof(arr[0]));
-
+	PROGRAM program_0(new EXPR(EXPR_CASE, new EXPR(EXPR_INT, expr_0), alternatives));
 	
-	// ALT(new TYPE(TYPE_INT), new EXPR(EXPR_INT, expr));
+	JVMByteCodeGenerator byteCodeGen(program_0);
+	byteCodeGen.generateByteCode("XXX");
+
 
 	/*
 	* Define test program
 	*/
 	//PROGRAM program_0(new EXPR(EXPR_BI_OP, new EXPR(EXPR_INT, expr), "+", new EXPR(EXPR_INT, expr)));
 	// PROGRAM program_0(new EXPR(EXPR_INT, expr));
-	PROGRAM program_0(new EXPR(EXPR_CASE, new EXPR(EXPR_INT, expr), alternatives));
 	//PROGRAM program_0(new EXPR());
-	JVMByteCodeGenerator byteCodeGen(program_0);
-	byteCodeGen.generateByteCode("XXX");
 
 	// Operand '&' is not defined in the Case language,
 	// while the operands 'and' and '&&' are defined in the Case Language
