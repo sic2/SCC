@@ -12,7 +12,12 @@ program_LIBRARIES :=
 CPPFLAGS += $(foreach includedir,$(program_INCLUDE_DIRS),-I$(includedir))
 LDFLAGS += $(foreach librarydir,$(program_LIBRARY_DIRS),-L$(librarydir))
 LDFLAGS += $(foreach library,$(program_LIBRARIES),-l$(library))
-CXXFLAGS = -Wall -g 
+# Set -DDEBUG_MODE to print
+# 0 - nothing in the console
+# 1 - the jasmin bytecode and errors
+# 2 - constructors/destructors information
+# 3 - any debugging information
+CXXFLAGS = -Wall -g -DDEBUG_MODE=1
 
 .PHONY: all clean distclean
 

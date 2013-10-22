@@ -33,8 +33,13 @@ int main(int argc, char** argv)
 	*/
 	PROGRAM program_0(new EXPR(EXPR_BI_OP, new EXPR(EXPR_INT, expr), "+", new EXPR(EXPR_INT, expr)));
 	JVMByteCodeGenerator byteCodeGen(program_0);
+	byteCodeGen.generateByteCode("XXX");
 
-	PROGRAM program_1(new EXPR(EXPR_BI_OP, new EXPR(EXPR_INT, expr), "&", new EXPR(EXPR_INT, expr)));
+	// Operand '&' is not defined in the Case language,
+	// while the operands 'and' and '&&' are defined in the Case Language
+	PROGRAM(new EXPR(EXPR_BI_OP, new EXPR(EXPR_INT, expr), "&", new EXPR(EXPR_INT, expr)));
+	PROGRAM(new EXPR(EXPR_BI_OP, new EXPR(EXPR_INT, expr), "&&", new EXPR(EXPR_INT, expr)));
+	PROGRAM(new EXPR(EXPR_BI_OP, new EXPR(EXPR_INT, expr), "and", new EXPR(EXPR_INT, expr)));
 	
 	return 0;
 }

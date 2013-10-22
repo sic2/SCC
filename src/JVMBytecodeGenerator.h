@@ -17,4 +17,7 @@ public:
 
 private:
 	AST::PROGRAM& _program;
+
+	void addInitialJasminCode(std::string& output);
+	void addFinalJasminCode(std::string& output);
 };

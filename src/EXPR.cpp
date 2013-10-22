@@ -74,7 +74,10 @@ AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, AST::EXPR* expr0, std::string op,
 	}
 	else
 	{
-		printf("Operand %d Unknown\n", _operand);
+		if(DEBUG_MODE >= 1)
+		{
+			printf("Operand %d Unknown\n", _operand);
+		}
 	}
 
 }
@@ -82,7 +85,11 @@ AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, AST::EXPR* expr0, std::string op,
 // Destructor
 AST::EXPR::~EXPR() 
 {	
-	printf("Removing expression of typeExpr %d \n", _typeExpr);
+	if(DEBUG_MODE >= 2)
+	{
+		printf("Removing expression of typeExpr %d \n", _typeExpr);
+	}
+
 	switch(_typeExpr)
 	{
 	case EXPR_INT:
@@ -111,7 +118,10 @@ AST::EXPR::~EXPR()
 	case EXPR_TYPE_DEF:
 	case EXPR_NEW_VAR:
 	default:
-	  printf("Error EXPR Destructor\n");
+		if(DEBUG_MODE >= 1)
+		{
+	  		printf("Error EXPR Destructor\n");
+	  	}
 	  break;
 	}  // end switch
 }

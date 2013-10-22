@@ -8,7 +8,11 @@ AST::ALT::ALT(AST::TYPE* type, AST::EXPR* expr)
 
 AST::ALT::~ALT()
 {
-	printf("Delete ALT\n");
+	if(DEBUG_MODE >= 2)
+	{
+		printf("Delete ALT\n");
+	}
+	
 	delete _type;
 	delete _expr;
 } 

@@ -148,13 +148,20 @@ class AST::PROGRAM
 public:
 	inline PROGRAM(EXPR* expr) 
 	{
-		printf("Creating new Program\n");
+		if(DEBUG_MODE >= 2)
+		{
+			printf("Creating new Program\n");
+		}
+		
 		_expr = expr;
 	}
 
 	virtual ~PROGRAM() 
 	{
-		printf("Delete Program expression\n\n");
+		if(DEBUG_MODE >= 2)
+		{
+			printf("Delete Program expression\n\n");
+		}
 		delete _expr;
 	}
 
