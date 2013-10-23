@@ -125,103 +125,26 @@ namespace AST
 		std::vector< boost::shared_ptr<EXPR> >* expressions;
 	} Expr_Group;
 
+	// EXPR_NEW_VAR
+	typedef struct Expr_New_Var 
+	{
+		std::string* ID;
+		boost::shared_ptr<EXPR>* expr;
+	} Expr_New_Var;
+
 	/*
 	* Expressions
 	*/ 
 	typedef union uValue
 	{
-		int Integer; // int value
-		bool Bool; // bool value
-		std::string* Str; // string value
+		int Integer; 
+		bool Bool; 
+		std::string* Str; 
 		Expr_Var_Constr exprVarConstr; 
 		Expr_Case exprCase; 
 		Expr_For_Loop exprForLoop; 
 		Expr_Bi_Op exprBiOp; 
 		Expr_Group exprGroup; 
+		Expr_New_Var exprNewVar;
 	} uValue;
 }
-
-/*******************
-** CLASSES DEFs ****
-*******************/
-
-class AST::TYPE
-{
-public:
-	TYPE(PRIMITIVE_TYPE primitiveType, uValue value);
-
-  	TYPE(std::string ID, TYPE type);
-
-  	TYPE(std::string ID, std::vector<TYPE> types);
-
-  	/**
-  	* @param [out] primitiveType
-  	* @param [out] value
-  	* @return false if the type is not an int, bool or string
-  	*/
-  	bool getValue(PRIMITIVE_TYPE* primitiveType, uValue* value);
-
-private:
-	PRIMITIVE_TYPE _primitiveType;
-	uValue _uValue;
-	std::string _id;
-	std::vector<TYPE> _types;
-
-	int _whichConstructor;
-};
-
-class AST::EXPR
-{
-public:
-
-	EXPR(EXPRESSION_TYPE typeExpr, uValue value);
-	virtual ~EXPR();
-
-	/*
-	* Other methods
-	*/ 
-	void generateByteCode(std::string& jasminProgram, std::string& mainMethod);
-
-private:
-	EXPRESSION_TYPE _typeExpr;
-	uValue _uValue;
-
-	std::string getIntByteCode(int Integer);
-	void generateCaseByteCode(std::string& jasminProgram, std::string& mainMethod);
-	void generateBiOPByteCode(std::string& jasminProgram, std::string& mainMethod);
-};
-
-class AST::ALT
-{
-public:
-	ALT(boost::shared_ptr<TYPE>* type, boost::shared_ptr<EXPR>* expr);
-	virtual ~ALT() {}
-
-	boost::shared_ptr<TYPE>* getTYPE(); 
-	boost::shared_ptr<EXPR>* getEXPR();
-
-private:
-	boost::shared_ptr<TYPE>* _type;
-	boost::shared_ptr<EXPR>* _expr;
-};
-
-class AST::PROGRAM 
-{
-public:
-	PROGRAM(boost::shared_ptr<EXPR>* expr);
-	virtual ~PROGRAM() {}
-
-	/**
-	* Traverse the AST tree and transform it
-	* in Jasmin bytecode.
-	* @param [out] jasminProgram represent the entire jasmin bytecode program, 
-	*				excluding the main method. 
-	*				Additional methods should be added to it.
-	* @param [out] mainMethod used for the bytecode of the main method of the program.
-	* @note The mainMethod should added at the end of the jasminProgram by the caller.
-	*/
-	void generateByteCode(std::string& jasminProgram, std::string& mainMethod);
-
-private:
-	boost::shared_ptr<EXPR>* _expr;
-};

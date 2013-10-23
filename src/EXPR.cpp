@@ -1,4 +1,7 @@
-#include "AST.h"
+#include "EXPR.h"
+#include "ALT.h"
+#include "TYPE.h"
+
 #include "JVMByteCodeGenerator.h"
 
 #include <sstream>
@@ -7,7 +10,7 @@
 #define INTEGER_BASE 10
 #define MAX_NUMBER_DIGITS 32
 
-#define GET_TYPE_FROM_ALT(iterator) (*((* iterator)->getTYPE()))
+#define GET_Condition_FROM_ALT(iterator) (*((* iterator)->getCondition()))
 #define GET_EXPR_FROM_PAIR(iterator) (*(* iterator).first->getEXPR())
 
 
@@ -24,56 +27,19 @@ AST::EXPR::~EXPR()
 	{
 		printf("Removing expression of typeExpr %d \n", _typeExpr);
 	}
-
-	switch(_typeExpr)
-	{
-	case EXPR_INT:
-	case EXPR_BOOL:
-	case EXPR_STRING:
-		break;
-	case EXPR_VAR_CONSTR:
-		{
-			// printf("this statement should never be reached\n");
-		}
-		break;
-	case EXPR_CASE:
-		{
-			// delete _expr0;
-		}
-		break;
-	case EXPR_FOR_LOOP:
-		break;
-	case EXPR_BI_OP:
-		{
-			// delete _expr0;
-			// delete _expr1;
-		}
-		break;
-	// TODO	
-	case EXPR_GROUP:
-	case EXPR_TYPE_DEF:
-	case EXPR_NEW_VAR:
-	default:
-		if(DEBUG_MODE >= 1)
-		{
-	  		printf("Error EXPR Destructor\n");
-	  	}
-	  break;
-	}  // end switch
 }
 
-void AST::EXPR::generateByteCode(std::string& jasminProgram, std::string& mainMethod)
+void AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
 {
-	printf("\t\t\tgeneraing bytecode %d\n", _typeExpr);
 	switch(_typeExpr)
 	{
 	case EXPR_INT:
 		{
-			std::string bytecode = getIntByteCode(_uValue.Integer);
-			JVMByteCodeGenerator::formatJasminInstruction(bytecode);
+			std::string bytecode = getIntByteCode(bytecodeGenerator, _uValue.Integer);
+			bytecodeGenerator->formatJasminInstruction(bytecode);
 			mainMethod += bytecode;
-			std::string store = "istore_0"; // FIXME - hardcoded bytecode
-			JVMByteCodeGenerator::formatJasminInstruction(store);
+			std::string store = "istore_0"; // FIXME - hardcoded bytecode // FIXME - SHOULD NOT STORE!	
+			bytecodeGenerator->formatJasminInstruction(store);
 			mainMethod += store;
 			//JVMByteCodeGenerator::printInt(output, 0);
 		}
@@ -91,14 +57,14 @@ void AST::EXPR::generateByteCode(std::string& jasminProgram, std::string& mainMe
 		break;
 	case EXPR_CASE:
 		{
-			generateCaseByteCode(jasminProgram, mainMethod);
+			generateCaseByteCode(bytecodeGenerator, jasminProgram, mainMethod);
 		}
 		break;
 	case EXPR_FOR_LOOP:
 		break;
 	case EXPR_BI_OP:
 		{
-			generateBiOPByteCode(jasminProgram, mainMethod);
+			generateBiOPByteCode(bytecodeGenerator, jasminProgram, mainMethod);
 		}
 		break;
 	// TODO	
@@ -107,7 +73,10 @@ void AST::EXPR::generateByteCode(std::string& jasminProgram, std::string& mainMe
 	case EXPR_TYPE_DEF:
 		// TODO
 	case EXPR_NEW_VAR:
-		// TODO
+		{
+			generateNewVarByteCode(bytecodeGenerator, jasminProgram, mainMethod);
+		}
+		break;
 	default:
 		if(DEBUG_MODE >= 1)
 		{
@@ -120,7 +89,7 @@ void AST::EXPR::generateByteCode(std::string& jasminProgram, std::string& mainMe
 /*
 * Private methods
 */
-std::string AST::EXPR::getIntByteCode(int Integer)
+std::string AST::EXPR::getIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, int Integer)
 {
 	std::ostringstream convert; 
 	convert << Integer;
@@ -139,10 +108,10 @@ std::string AST::EXPR::getIntByteCode(int Integer)
 }
 
 // [ ASSUMPTION ] - case of integers
-void AST::EXPR::generateCaseByteCode(std::string& jasminProgram, std::string& mainMethod) 
+void AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod) 
 {
 	boost::shared_ptr<EXPR>* expr = _uValue.exprCase.expr;
-	(*expr)->generateByteCode(jasminProgram, mainMethod);
+	(*expr)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod);
 
 	mainMethod += "\tiload_0 \n"; // FIXME - hardcoded bytecode
 	mainMethod += "\tlookupswitch \n";
@@ -162,36 +131,38 @@ void AST::EXPR::generateCaseByteCode(std::string& jasminProgram, std::string& ma
 	std::vector< boost::shared_ptr<ALT> >* alternatives = _uValue.exprCase.alternatives;
 	for(std::vector< boost::shared_ptr<AST::ALT> >::iterator it = alternatives->begin(); it != alternatives->end(); ++it) 
 	{
-		PRIMITIVE_TYPE primitiveType;
+		EXPRESSION_TYPE expressionType;
 		uValue value;
 		
-		bool valid = GET_TYPE_FROM_ALT(it)->getValue(&primitiveType, &value);
-		if (valid)
+		// [ ENORMOUS BULLSHIT ]
+		// getValue function does not even exist
+		expressionType = GET_Condition_FROM_ALT(it)->getExprType(); 
+		value = GET_Condition_FROM_ALT(it)->getValue(); // FIXME - do not use type, but var!
+		
+		if (expressionType == EXPR_INT)
 		{
-			if (primitiveType == TYPE_INT)
-			{
-				/*
-				* example:
-				* 	1 : Label_0
-				*/
-				// Two ostringstream objects are used because clearing/erasing
-				// an ostringstream is not trivial
-				std::ostringstream convert; 
-				std::ostringstream labelConvert; 
+			/*
+			* example:
+			* 	1 : Label_0
+			*/
+			// Two ostringstream objects are used because clearing/erasing
+			// an ostringstream is not trivial
+			std::ostringstream convert; 
+			std::ostringstream labelConvert; 
 
-				int caseIntegerValue = value.Integer;
-				convert << caseIntegerValue;
-				mainMethod += "\t\t" + convert.str();
+			int caseIntegerValue = value.Integer;
+			convert << caseIntegerValue;
+			mainMethod += "\t\t" + convert.str();
 
-				labelConvert << labelIndex;
-				std::string label = "Label_" + labelConvert.str();
-				mainMethod += " : " + label + "\n";
-				labelIndex++;
+			labelConvert << labelIndex;
+			std::string label = "Label_" + labelConvert.str();
+			mainMethod += " : " + label + "\n";
+			labelIndex++;
 
-				// Adding the integer and the label to pairsAltsLabels
-				pairsAltsLabels.push_back(std::make_pair< boost::shared_ptr<AST::ALT>, std::string>((*it), label));
-			}
+			// Adding the integer and the label to pairsAltsLabels
+			pairsAltsLabels.push_back(std::make_pair< boost::shared_ptr<AST::ALT>, std::string>((*it), label));
 		}
+		
 	} // end for-loop for _alternatives vector
 	
 	// Default label must always be specified - but it won't have
@@ -210,7 +181,7 @@ void AST::EXPR::generateCaseByteCode(std::string& jasminProgram, std::string& ma
 		it != pairsAltsLabels.end(); ++it) 
 	{
 		mainMethod += (*it).second + ": \n";
-		GET_EXPR_FROM_PAIR(it)->generateByteCode(jasminProgram, mainMethod);
+		GET_EXPR_FROM_PAIR(it)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod);
 	} // end for-loop for pairsAltsLabels vector
 	
 	// Handle default label
@@ -218,14 +189,42 @@ void AST::EXPR::generateCaseByteCode(std::string& jasminProgram, std::string& ma
 	mainMethod += "return\n";
 }
 
-void AST::EXPR::generateBiOPByteCode(std::string& jasminProgram, std::string& mainMethod)
+void AST::EXPR::generateBiOPByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
 {
 	// TODO
 	// Generate appropriate subroutine if not there already
 	// then make a call to this subroutine
 	// and get the result
-	//if (!JVMByteCodeGenerator::addSubroutineEnabled)
-	//{
+	
+	// two variables
+	mainMethod += "\tinvokestatic " + JVMByteCodeGenerator::ADD_SUBROUTINE + "(II)I\n";
+	if (!bytecodeGenerator->isAddSubroutineEnabled())
+	{
+		bytecodeGenerator->addSubroutine(jasminProgram);
+	}
+	mainMethod += "\tpop\n"; // FIXME - or "istore_"
+}
 
-	//}
+void AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
+{	
+	std::map< std::string, std::pair<int, AST::EXPRESSION_TYPE> > env = bytecodeGenerator->getEnvironment();
+	unsigned int environmentSize = env.size();
+	std::string* ID = _uValue.exprNewVar.ID;
+	boost::shared_ptr<EXPR>* expr = _uValue.exprNewVar.expr;
+
+	if ((*expr)->getExprType() == EXPR_INT)
+	{
+		int value = (*expr)->getValue().Integer;
+		mainMethod += getIntByteCode(bytecodeGenerator, value) + std::string("\t; Var: ") + *ID + std::string("\n");
+
+		std::ostringstream convert; 
+		convert << environmentSize;
+		std::string storeBytecode = "istore_" + convert.str();
+		mainMethod += storeBytecode + "\n";
+
+		// Update environment
+		env.insert(std::make_pair<std::string, std::pair<int, AST::EXPRESSION_TYPE> > 
+							(*ID, std::make_pair<int, AST::EXPRESSION_TYPE>(value, EXPR_INT)));
+	}
+
 }

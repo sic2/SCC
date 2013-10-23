@@ -1,14 +1,21 @@
-#include "AST.h"
+#include "ALT.h"
 
-AST::ALT::ALT(boost::shared_ptr<AST::TYPE>* type, boost::shared_ptr<AST::EXPR>* expr)
+#include "EXPR.h"
+
+AST::ALT::ALT(boost::shared_ptr<AST::EXPR>* condition, boost::shared_ptr<AST::EXPR>* expr)
 {
-	_type = type;
+	if ((*condition)->getExprType() != EXPR_INT) // TODO - support bools and strings
+	{
+		printf("Alternative is wrong\n");
+	}
+
+	_condition = condition;
 	_expr = expr;
 }
 
-boost::shared_ptr<AST::TYPE>* AST::ALT::getTYPE() 
+boost::shared_ptr<AST::EXPR>* AST::ALT::getCondition() 
 { 
-	return this->_type; 
+	return this->_condition; 
 }
 	
 boost::shared_ptr<AST::EXPR>* AST::ALT::getEXPR() 

@@ -1,41 +1,11 @@
 #include "JVMByteCodeGenerator.h"
 
+#include "PROGRAM.h"
+
 #include <sstream>
 
-/**********
-* MACROS
-**********/
-#define NEW_LINE "\n"
-#define TAB "\t"
-#define SPACE " "
-
-/*
-* JASMIN output formatting 
-*/
-#define JASMIN_WITHOUT_NEWLINE(stream, x) stream += TAB x
-#define JASMIN_WITH_NEWLINE(stream, x) stream += x NEW_LINE
-#define JASMIN_DIRECTIVE(stream, x) JASMIN_WITH_NEWLINE(stream, x)
-#define JASMIN_LABEL(stream, x) JASMIN_WITH_NEWLINE(stream, SPACE x)
-#define JASMIN_INSTR(stream, x) JASMIN_WITH_NEWLINE(stream, TAB x)
-
-/*
-* Stack and locals
-*/
-#define JASMIN_STACK(stream, size) JASMIN_WITH_NEWLINE(stream, TAB ".limit stack " #size)
-#define JASMIN_LOCALS(stream, size) JASMIN_WITH_NEWLINE(stream, TAB ".limit locals " #size)
-
-/*
-* Invokations
-*/
-#define INVOKE_SPECIAL_INT "invokespecial java/lang/Object/<init>()V"
-#define PRINT_STREAM "getstatic java/lang/System/out Ljava/io/PrintStream;"
-#define INVOKE_PRINTLN "invokevirtual java/io/PrintStream/println(I)V"
-
-/*
-* Static variables
-*/
-const std::string JVMByteCodeGenerator::ADD_SUBROUTINE = "ADD_SUB";
-
+// TODO - other subroutine names
+const std::string JVMByteCodeGenerator::ADD_SUBROUTINE = "ADD_SUBROUTINE";
 
 JVMByteCodeGenerator::JVMByteCodeGenerator(boost::shared_ptr<AST::PROGRAM> program)
 {
@@ -52,16 +22,14 @@ bool JVMByteCodeGenerator::generateByteCode(std::string outFileName)
 	std::string jasminProgram;
 	std::string mainMethod;
 	addInitialJasminCode(jasminProgram);
-	JASMIN_STACK(jasminProgram, 5);
-	JASMIN_LOCALS(jasminProgram, 100);
+	addInitialMainJasminCode(mainMethod);
 
 	// Traversing the AST and generate program
-	printf("generating bytecode prog\n");
-	(*_program).generateByteCode(jasminProgram, mainMethod);	
-	jasminProgram += mainMethod;
+	(*_program).generateByteCode(this, jasminProgram, mainMethod);	
 
-	addFinalJasminCode(jasminProgram);
-	
+	addFinalMainJasminCode(mainMethod);
+	jasminProgram += mainMethod; // Stich the main method with the rest of the program
+
 	if(DEBUG_MODE >= 1)
 	{
 		printf("JASMIN BYTECODE: \n\n%s\n\nEND JASMIN BYTECODE\n", jasminProgram.c_str());
@@ -74,7 +42,6 @@ void JVMByteCodeGenerator::formatJasminInstruction(std::string& instruction)
 {
 	instruction = TAB + instruction + NEW_LINE;
 }
-
 
 void JVMByteCodeGenerator::printInt(std::string& output, int var)
 {
@@ -108,10 +75,15 @@ void JVMByteCodeGenerator::addInitialJasminCode(std::string& output)
 	JASMIN_INSTR(output, "return");
 	JASMIN_DIRECTIVE(output, ".end method");
 	output += "\n";
-	JASMIN_DIRECTIVE(output, ".method public static main([Ljava/lang/String;)V");
 }
 
-void JVMByteCodeGenerator::addFinalJasminCode(std::string& output)
+void JVMByteCodeGenerator::addInitialMainJasminCode(std::string& output)
+{
+	JASMIN_DIRECTIVE(output, ".method public static main([Ljava/lang/String;)V");	
+	JASMIN_STACK(output, 5);
+	JASMIN_LOCALS(output, 100);
+}
+void JVMByteCodeGenerator::addFinalMainJasminCode(std::string& output)
 {
 	JASMIN_INSTR(output, "return\t; return from main"); 
 	JASMIN_DIRECTIVE(output, ".end method");
@@ -119,11 +91,17 @@ void JVMByteCodeGenerator::addFinalJasminCode(std::string& output)
 
 void JVMByteCodeGenerator::addSubroutine(std::string& bytecodeProgram)
 {
-	if (!addSubroutineEnabled)
+	if (!_addSubroutineEnabled)
 	{
-		// TODO
+		JASMIN_DIRECTIVE(bytecodeProgram, SUBROUTINE(ADD_SUBROUTINE));
+		JASMIN_DIRECTIVE(bytecodeProgram, ".limit stack 2");
+		JASMIN_DIRECTIVE(bytecodeProgram, ".limit locals 2");
+		JASMIN_INSTR(bytecodeProgram, "iload_0");
+		JASMIN_INSTR(bytecodeProgram, "iload_0");
+		JASMIN_INSTR(bytecodeProgram, "iadd");
+		JASMIN_INSTR(bytecodeProgram, "ireturn");
+		JASMIN_DIRECTIVE(bytecodeProgram, ".end method");
+		bytecodeProgram += "\n";
 	}
-	addSubroutineEnabled = true;
+	_addSubroutineEnabled = true;
 }
-
-    

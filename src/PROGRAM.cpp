@@ -1,4 +1,6 @@
-#include "AST.h"
+#include "PROGRAM.h"
+
+#include "EXPR.h"
 
 AST::PROGRAM::PROGRAM(boost::shared_ptr<AST::EXPR>* expr) 
 {
@@ -8,11 +10,9 @@ AST::PROGRAM::PROGRAM(boost::shared_ptr<AST::EXPR>* expr)
 	}
 	
 	_expr = expr;
-	printf("start: expr %p from program\n", _expr);
 }
 
-void AST::PROGRAM::generateByteCode(std::string& jasminProgram, std::string& mainMethod)
+void AST::PROGRAM::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
 {
-	printf("expr %p from program\n", _expr);
-	(*_expr)->generateByteCode(jasminProgram, mainMethod);
+	(*_expr)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod);
 }

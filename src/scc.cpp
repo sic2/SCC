@@ -8,6 +8,13 @@
 * The code of the scc cannot be copied or reused in any 
 * circumstances, unless permission has been granted by the author.
 ***********************************************************/
+
+#include "ALT.h"
+#include "EXPR.h"
+#include "PROGRAM.h"
+#include "TYPE.h"
+
+
 #include "JVMByteCodeGenerator.h"
 
 using namespace AST;
@@ -33,13 +40,13 @@ int main(int argc, char** argv)
 	boost::shared_ptr<EXPR> expr_0(new EXPR(EXPR_INT, value_0));
 	boost::shared_ptr<EXPR> expr_1(new EXPR(EXPR_INT, value_1));
 
-	boost::shared_ptr<TYPE> type_0(new TYPE(TYPE_INT, value_0));
-	boost::shared_ptr<TYPE> type_1(new TYPE(TYPE_INT, value_1));
+	boost::shared_ptr<TYPE> type_0(new TYPE(TYPE_INT));
+	boost::shared_ptr<TYPE> type_1(new TYPE(TYPE_INT));
 
 	// Create alternatives one by one and add them to vector of alternatives
 	std::vector< boost::shared_ptr<ALT> > alternatives;
-	boost::shared_ptr<ALT> alt_0(new ALT(&type_0, &expr_1)); 
-	boost::shared_ptr<ALT> alt_1(new ALT(&type_1, &expr_0)); 
+	boost::shared_ptr<ALT> alt_0(new ALT(&expr_0, &expr_1)); 
+	boost::shared_ptr<ALT> alt_1(new ALT(&expr_1, &expr_0)); 
 	alternatives.push_back(alt_0);
 	alternatives.push_back(alt_1);
 
@@ -63,6 +70,9 @@ int main(int argc, char** argv)
 						}
 					};
 
+	/*
+	* 0 + 1
+	*/
 	uValue value_5 = {
 					exprBiOp:
 						{
@@ -72,7 +82,19 @@ int main(int argc, char** argv)
 						}
 					};
 
-	boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_CASE, value_4));
+	/*
+	* testVar :: INT = 0
+	*/
+	uValue value_6 = {
+					exprNewVar:
+						{
+						ID: new std::string("testVar"),
+						expr: &expr_1,
+						}
+					};
+
+	// boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_5));
+	boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_NEW_VAR, value_6));
 
 	boost::shared_ptr<AST::PROGRAM> program_0(new PROGRAM(&mainExpr));
 	JVMByteCodeGenerator byteCodeGen(program_0);
