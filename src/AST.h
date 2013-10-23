@@ -10,15 +10,8 @@
 // http://stackoverflow.com/questions/16127385/recursive-descent-parser-example-for-c
 
 // AST - Abstrace Syntax Tree
-/*
-* TODO - docs
-*/
 namespace AST 
 {
-	/******************
-	**** ENUMS *********
-	*******************/
-
 	/*
 	* Operands
 	*/
@@ -50,10 +43,29 @@ namespace AST
 	***** CLASSES DEFS *****
 	** FW - DECLARATIONS ***
 	************************/
+
+	/**
+	* Type
+	*/
 	class TYPE;
+
+	/**
+	* Expression
+	*/
 	class EXPR;
+
+	/**
+	* Alternative
+	*/
 	class ALT;
-	class ALTS;
+	
+	/**
+	* Program
+	* This class defines the root of the AST.
+	* Each program defined in the Case language 
+	* consists of one #AST::PROGRAM .
+	* Each PROGRAM consists of one and only one #AST::EXPR
+	*/
 	class PROGRAM;
 
 	/*********************
@@ -81,29 +93,33 @@ namespace AST
 	typedef struct Expr_Var_Constr 
 	{
 		std::string* ID;
-		EXPR* expr;
+		boost::shared_ptr<EXPR>* expr;
 	} Expr_Var_Constr;
 
+	// EXPR_CASE
 	typedef struct Expr_Case 
 	{
-		 EXPR* expr;
+		 boost::shared_ptr<EXPR>* expr;
 		 std::vector< boost::shared_ptr<ALT> >* alternatives;
 	} Expr_Case;
 
+	// EXPR_FOR_LOOP
 	typedef struct Expr_For_Loop 
 	{
 		std::string* ID;
-		EXPR* expr;
-		EXPR* expr1;
+		boost::shared_ptr<EXPR>* expr;
+		boost::shared_ptr<EXPR>* expr1;
 	} Expr_For_Loop;
 
+	// EXPR_BI_OP
 	typedef struct Expr_Bi_Op 
 	{
-		EXPR* expr;
+		boost::shared_ptr<EXPR>* expr;
 		OP op;
-		EXPR* expr1;
+		boost::shared_ptr<EXPR>* expr1;
 	} Expr_Bi_Op;
 
+	// EXPR_GROUP
 	typedef struct Expr_Group 
 	{
 		std::vector< boost::shared_ptr<EXPR> >* expressions;
@@ -139,6 +155,8 @@ public:
   	TYPE(std::string ID, std::vector<TYPE> types);
 
   	/**
+  	* @param [out] primitiveType
+  	* @param [out] value
   	* @return false if the type is not an int, bool or string
   	*/
   	bool getValue(PRIMITIVE_TYPE* primitiveType, uValue* value);
@@ -162,62 +180,48 @@ public:
 	/*
 	* Other methods
 	*/ 
-	void generateByteCode(std::string& output);
+	void generateByteCode(std::string& jasminProgram, std::string& mainMethod);
 
 private:
 	EXPRESSION_TYPE _typeExpr;
 	uValue _uValue;
 
 	std::string getIntByteCode(int Integer);
-	void generateCaseByteCode(std::string& output);
-	void generateBiOPByteCode(std::string& output);
+	void generateCaseByteCode(std::string& jasminProgram, std::string& mainMethod);
+	void generateBiOPByteCode(std::string& jasminProgram, std::string& mainMethod);
 };
 
-/*
-* Alternatives
-*/
 class AST::ALT
 {
 public:
-	ALT(TYPE* type, EXPR* expr);
-	virtual ~ALT();
+	ALT(boost::shared_ptr<TYPE>* type, boost::shared_ptr<EXPR>* expr);
+	virtual ~ALT() {}
 
-	// TODO - move method implementation to cpp file
-	TYPE* getTYPE() { return this->_type; }
-	EXPR* getEXPR() { return this->_expr; }
+	boost::shared_ptr<TYPE>* getTYPE(); 
+	boost::shared_ptr<EXPR>* getEXPR();
 
 private:
-	TYPE* _type;
-	EXPR* _expr;
+	boost::shared_ptr<TYPE>* _type;
+	boost::shared_ptr<EXPR>* _expr;
 };
 
 class AST::PROGRAM 
 {
 public:
-	inline PROGRAM(EXPR* expr) 
-	{
-		if(DEBUG_MODE >= 2)
-		{
-			printf("Creating new Program\n");
-		}
-		
-		_expr = expr;
-	}
+	PROGRAM(boost::shared_ptr<EXPR>* expr);
+	virtual ~PROGRAM() {}
 
-	virtual ~PROGRAM() 
-	{
-		if(DEBUG_MODE >= 2)
-		{
-			printf("Delete Program expression\n\n");
-		}
-		delete _expr;
-	}
-
-	inline void generateByteCode(std::string& output)
-	{
-		_expr->generateByteCode(output);
-	}
+	/**
+	* Traverse the AST tree and transform it
+	* in Jasmin bytecode.
+	* @param [out] jasminProgram represent the entire jasmin bytecode program, 
+	*				excluding the main method. 
+	*				Additional methods should be added to it.
+	* @param [out] mainMethod used for the bytecode of the main method of the program.
+	* @note The mainMethod should added at the end of the jasminProgram by the caller.
+	*/
+	void generateByteCode(std::string& jasminProgram, std::string& mainMethod);
 
 private:
-	EXPR* _expr;
+	boost::shared_ptr<EXPR>* _expr;
 };

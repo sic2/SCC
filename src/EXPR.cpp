@@ -7,6 +7,10 @@
 #define INTEGER_BASE 10
 #define MAX_NUMBER_DIGITS 32
 
+#define GET_TYPE_FROM_ALT(iterator) (*((* iterator)->getTYPE()))
+#define GET_EXPR_FROM_PAIR(iterator) (*(* iterator).first->getEXPR())
+
+
 AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, AST::uValue value) 
 {
 	_typeExpr = typeExpr;
@@ -58,20 +62,20 @@ AST::EXPR::~EXPR()
 	}  // end switch
 }
 
-void AST::EXPR::generateByteCode(std::string& output)
+void AST::EXPR::generateByteCode(std::string& jasminProgram, std::string& mainMethod)
 {
+	printf("\t\t\tgeneraing bytecode %d\n", _typeExpr);
 	switch(_typeExpr)
 	{
 	case EXPR_INT:
 		{
 			std::string bytecode = getIntByteCode(_uValue.Integer);
 			JVMByteCodeGenerator::formatJasminInstruction(bytecode);
-			output += bytecode;
+			mainMethod += bytecode;
 			std::string store = "istore_0"; // FIXME - hardcoded bytecode
 			JVMByteCodeGenerator::formatJasminInstruction(store);
-			output += store;
+			mainMethod += store;
 			//JVMByteCodeGenerator::printInt(output, 0);
-
 		}
 		break;
 	case EXPR_BOOL:
@@ -87,14 +91,14 @@ void AST::EXPR::generateByteCode(std::string& output)
 		break;
 	case EXPR_CASE:
 		{
-			generateCaseByteCode(output);
+			generateCaseByteCode(jasminProgram, mainMethod);
 		}
 		break;
 	case EXPR_FOR_LOOP:
 		break;
 	case EXPR_BI_OP:
 		{
-			generateBiOPByteCode(output);
+			generateBiOPByteCode(jasminProgram, mainMethod);
 		}
 		break;
 	// TODO	
@@ -135,12 +139,13 @@ std::string AST::EXPR::getIntByteCode(int Integer)
 }
 
 // [ ASSUMPTION ] - case of integers
-void AST::EXPR::generateCaseByteCode(std::string& output) 
+void AST::EXPR::generateCaseByteCode(std::string& jasminProgram, std::string& mainMethod) 
 {
-	_uValue.exprCase.expr->generateByteCode(output);
-	//_expr0->generateByteCode(output);
-	output += "\tiload_0 \n"; // FIXME - hardcoded bytecode
-	output += "\tlookupswitch \n";
+	boost::shared_ptr<EXPR>* expr = _uValue.exprCase.expr;
+	(*expr)->generateByteCode(jasminProgram, mainMethod);
+
+	mainMethod += "\tiload_0 \n"; // FIXME - hardcoded bytecode
+	mainMethod += "\tlookupswitch \n";
 
 	// A vector is created to store each ALTernative, its own label as well
 	std::vector< std::pair< boost::shared_ptr<AST::ALT>, std::string> > pairsAltsLabels;  // FIXME - do not limit this to integers
@@ -159,8 +164,8 @@ void AST::EXPR::generateCaseByteCode(std::string& output)
 	{
 		PRIMITIVE_TYPE primitiveType;
 		uValue value;
-	
-		bool valid = (*it)->getTYPE()->getValue(&primitiveType, &value);
+		
+		bool valid = GET_TYPE_FROM_ALT(it)->getValue(&primitiveType, &value);
 		if (valid)
 		{
 			if (primitiveType == TYPE_INT)
@@ -176,11 +181,11 @@ void AST::EXPR::generateCaseByteCode(std::string& output)
 
 				int caseIntegerValue = value.Integer;
 				convert << caseIntegerValue;
-				output += "\t\t" + convert.str();
+				mainMethod += "\t\t" + convert.str();
 
 				labelConvert << labelIndex;
 				std::string label = "Label_" + labelConvert.str();
-				output += " : " + label + "\n";
+				mainMethod += " : " + label + "\n";
 				labelIndex++;
 
 				// Adding the integer and the label to pairsAltsLabels
@@ -188,9 +193,10 @@ void AST::EXPR::generateCaseByteCode(std::string& output)
 			}
 		}
 	} // end for-loop for _alternatives vector
+	
 	// Default label must always be specified - but it won't have
 	// any functionality in the Case language
-	output += "\t\tdefault : DLABEL\n"; 
+	mainMethod += "\t\tdefault : DLABEL\n"; 
 
 	/* Loop pairsAltsLabels to expand each case 
 	* example:
@@ -203,15 +209,23 @@ void AST::EXPR::generateCaseByteCode(std::string& output)
 	for(std::vector< std::pair< boost::shared_ptr<AST::ALT>, std::string> >::iterator it = pairsAltsLabels.begin(); 
 		it != pairsAltsLabels.end(); ++it) 
 	{
-		output += (*it).second + ": \n";
-		(*it).first->getEXPR()->generateByteCode(output);
+		mainMethod += (*it).second + ": \n";
+		GET_EXPR_FROM_PAIR(it)->generateByteCode(jasminProgram, mainMethod);
 	} // end for-loop for pairsAltsLabels vector
+	
 	// Handle default label
-	output += "DLABEL: \n"; 
-	output += "return\n";
+	mainMethod += "DLABEL: \n"; 
+	mainMethod += "return\n";
 }
 
-void AST::EXPR::generateBiOPByteCode(std::string& output)
+void AST::EXPR::generateBiOPByteCode(std::string& jasminProgram, std::string& mainMethod)
 {
 	// TODO
+	// Generate appropriate subroutine if not there already
+	// then make a call to this subroutine
+	// and get the result
+	//if (!JVMByteCodeGenerator::addSubroutineEnabled)
+	//{
+
+	//}
 }

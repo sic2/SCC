@@ -1,18 +1,17 @@
 #include "AST.h"
 
-AST::ALT::ALT(AST::TYPE* type, AST::EXPR* expr)
+AST::ALT::ALT(boost::shared_ptr<AST::TYPE>* type, boost::shared_ptr<AST::EXPR>* expr)
 {
 	_type = type;
 	_expr = expr;
 }
 
-AST::ALT::~ALT()
-{
-	if(DEBUG_MODE >= 2)
-	{
-		printf("Delete ALT\n");
-	}
+boost::shared_ptr<AST::TYPE>* AST::ALT::getTYPE() 
+{ 
+	return this->_type; 
+}
 	
-	delete _type;
-	delete _expr;
-} 
+boost::shared_ptr<AST::EXPR>* AST::ALT::getEXPR() 
+{ 
+	return this->_expr; 
+}

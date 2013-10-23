@@ -23,42 +23,65 @@ int main(int argc, char** argv)
 	/*
 	* Define values
 	*/
-	uValue expr_0 = {Integer: 0};
-	uValue expr_1 = {Integer: 1};
+	uValue value_0 = {
+					Integer: 0
+					};
+	uValue value_1 = {
+					Integer: 1
+					};
+
+	boost::shared_ptr<EXPR> expr_0(new EXPR(EXPR_INT, value_0));
+	boost::shared_ptr<EXPR> expr_1(new EXPR(EXPR_INT, value_1));
+
+	boost::shared_ptr<TYPE> type_0(new TYPE(TYPE_INT, value_0));
+	boost::shared_ptr<TYPE> type_1(new TYPE(TYPE_INT, value_1));
 
 	// Create alternatives one by one and add them to vector of alternatives
 	std::vector< boost::shared_ptr<ALT> > alternatives;
-	boost::shared_ptr<ALT> alt_0(new ALT(new TYPE(TYPE_INT, expr_0), new EXPR(EXPR_INT, expr_1))); 
-	boost::shared_ptr<ALT> alt_1(new ALT(new TYPE(TYPE_INT, expr_1), new EXPR(EXPR_INT, expr_0))); 
+	boost::shared_ptr<ALT> alt_0(new ALT(&type_0, &expr_1)); 
+	boost::shared_ptr<ALT> alt_1(new ALT(&type_1, &expr_0)); 
 	alternatives.push_back(alt_0);
 	alternatives.push_back(alt_1);
 
-	uValue expr_2 = {Integer: 2};
-	uValue expr_3 = {exprVarConstr: 
-						{ID: new std::string(""), 
-						expr: new EXPR(EXPR_INT, expr_1)}
-					};
-	uValue expr_4 = {exprCase: 
-						{expr: new EXPR(EXPR_INT, expr_0), 
-						alternatives: &alternatives}
+	uValue value_2 = {
+					Integer: 2
 					};
 
-	uValue expr_5 = {exprBiOp:
-						{expr: new EXPR(EXPR_INT, expr_0),
+	uValue value_3 = {
+					exprVarConstr: 
+						{
+						ID: new std::string(""), 
+						expr: &expr_0
+						}
+					};
+
+	uValue value_4 = {
+					exprCase: 
+						{
+						expr: &expr_1, 
+						alternatives: &alternatives
+						}
+					};
+
+	uValue value_5 = {
+					exprBiOp:
+						{
+						expr: &expr_0,
 						op: OP_ADDITION,
-						expr1: new EXPR(EXPR_INT, expr_0)}
+						expr1: &expr_1
+						}
 					};
 
-	PROGRAM program_0(new EXPR(EXPR_CASE, expr_4));
-	//PROGRAM program_0(new EXPR(EXPR_BI_OP, expr_5));
-	
+	boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_CASE, value_4));
+
+	boost::shared_ptr<AST::PROGRAM> program_0(new PROGRAM(&mainExpr));
 	JVMByteCodeGenerator byteCodeGen(program_0);
 	byteCodeGen.generateByteCode("XXX");
-
 
 	/*
 	* Define test program
 	*/
+	//PROGRAM program_0(new EXPR(EXPR_BI_OP, value_5));
 	//PROGRAM program_0(new EXPR(EXPR_BI_OP, new EXPR(EXPR_INT, expr), "+", new EXPR(EXPR_INT, expr)));
 	// PROGRAM program_0(new EXPR(EXPR_INT, expr));
 	//PROGRAM program_0(new EXPR());
