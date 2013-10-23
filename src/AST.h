@@ -45,6 +45,21 @@ namespace AST
 		TYPE_STRING
 	} PRIMITIVE_TYPE;
 
+	
+	/***********************
+	***** CLASSES DEFS *****
+	** FW - DECLARATIONS ***
+	************************/
+	class TYPE;
+	class EXPR;
+	class ALT;
+	class ALTS;
+	class PROGRAM;
+
+	/*********************
+	***** UNIONS *********
+	**********************/
+
 	/*
 	* Expression Types
 	*/
@@ -62,9 +77,37 @@ namespace AST
 		EXPR_NEW_VAR
 	} EXPRESSION_TYPE;
 
-	/*********************
-	***** UNIONS *********
-	**********************/
+	// EXPR_VAR_CONSTR
+	typedef struct Expr_Var_Constr 
+	{
+		std::string* ID;
+		EXPR* expr;
+	} Expr_Var_Constr;
+
+	typedef struct Expr_Case 
+	{
+		 EXPR* expr;
+		 std::vector< boost::shared_ptr<ALT> >* alternatives;
+	} Expr_Case;
+
+	typedef struct Expr_For_Loop 
+	{
+		std::string* ID;
+		EXPR* expr;
+		EXPR* expr1;
+	} Expr_For_Loop;
+
+	typedef struct Expr_Bi_Op 
+	{
+		EXPR* expr;
+		OP op;
+		EXPR* expr1;
+	} Expr_Bi_Op;
+
+	typedef struct Expr_Group 
+	{
+		std::vector< boost::shared_ptr<EXPR> >* expressions;
+	} Expr_Group;
 
 	/*
 	* Expressions
@@ -74,21 +117,16 @@ namespace AST
 		int Integer; // int value
 		bool Bool; // bool value
 		std::string* Str; // string value
+		Expr_Var_Constr exprVarConstr; 
+		Expr_Case exprCase; 
+		Expr_For_Loop exprForLoop; 
+		Expr_Bi_Op exprBiOp; 
+		Expr_Group exprGroup; 
 	} uValue;
-
-	/***********************
-	***** CLASSES DEFS *****
-	** FW - DECLARATIONS ***
-	************************/
-	class TYPE;
-	class EXPR;
-	class ALT;
-	class ALTS;
-	class PROGRAM;
 }
 
 /*******************
-** CLASSES DEFS ****
+** CLASSES DEFs ****
 *******************/
 
 class AST::TYPE
@@ -117,22 +155,8 @@ private:
 class AST::EXPR
 {
 public:
-	/*
-	* Constructors and destructor
-	*/
-	// EXPR_INT, EXPR_BOOL, EXPR_STRING
-	EXPR(EXPRESSION_TYPE typeExpr, uValue value);
-	// EXPR_VAR_CONSTR
-	EXPR(EXPRESSION_TYPE typeExpr, std::string ID, EXPR* expr);
-	// EXPR_CASE
-	EXPR(EXPRESSION_TYPE typeExpr, EXPR* expr, std::vector< boost::shared_ptr<ALT> >& alternatives);
-	// EXPR_FOR_LOOP
-	EXPR(EXPRESSION_TYPE typeExpr, std::string ID, EXPR* expr0, EXPR* expr1);
-	// EXPR_BI_OP
-	EXPR(EXPRESSION_TYPE typeExpr, EXPR* expr0, std::string op, EXPR* expr1);
-	// EXPR_GROUP
-	EXPR(EXPRESSION_TYPE typeExpr, std::vector< boost::shared_ptr<EXPR> >& expressions);
 
+	EXPR(EXPRESSION_TYPE typeExpr, uValue value);
 	virtual ~EXPR();
 
 	/*
@@ -141,19 +165,12 @@ public:
 	void generateByteCode(std::string& output);
 
 private:
-	// [ TODO ] - use union for all these data structures, so that only the one needed are there
-	uValue _uValue;
-	EXPR* _expr0;
-	EXPR* _expr1;
-	std::vector< boost::shared_ptr<ALT> > _alternatives;
-	std::vector< boost::shared_ptr<EXPR> > _expressions;
-
 	EXPRESSION_TYPE _typeExpr;
-	OP _operand;
-	std::string _id;
+	uValue _uValue;
 
 	std::string getIntByteCode(int Integer);
 	void generateCaseByteCode(std::string& output);
+	void generateBiOPByteCode(std::string& output);
 };
 
 /*

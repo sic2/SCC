@@ -13,90 +13,6 @@ AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, AST::uValue value)
 	_uValue = value;
 }
 
-// EXPR_VAR_CONSTR
-AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, std::string ID, AST::EXPR* expr)
-{
-	_typeExpr = typeExpr;
-    _id = ID;
-    _expr0 = expr;
-}
-
-// EXPR_CASE
-AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, AST::EXPR* expr, std::vector< boost::shared_ptr<ALT> >& alternatives)
-{
-	_typeExpr = typeExpr;
-	_expr0 = expr;
-	_alternatives = alternatives;
-}
-
-// EXPR_FOR_LOOP
-AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, std::string ID, AST::EXPR* expr0, AST::EXPR* expr1)
-{
-	_typeExpr = typeExpr;
-	_id = ID;
-	_expr0 = expr0;
-	_expr1 = expr1;
-}
-
-// EXPR_BI_OP
-AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, AST::EXPR* expr0, std::string op, AST::EXPR* expr1) 
-{
-	_typeExpr = typeExpr;
-	_expr0 = expr0;
-	_expr1 = expr1;
-	if (op.compare("+") == 0)
-	{
-		 _operand = OP_ADDITION;
-	}
-	else if (op.compare("-") == 0)
-	{
-		_operand = OP_SUBTRACTION;
-	}
-	else if (op.compare("*") == 0)
-	{
-		_operand = OP_MULTIPLICATION;
-	}
-	else if (op.compare("div") == 0)
-	{
-		_operand = OP_DIVISION;
-	}
-	else if (op.compare("==") == 0)
-	{
-		_operand = OP_EQUALITY;
-	}
-	else if (op.compare("<") == 0)
-	{
-		_operand = OP_LESS;
-	}
-	else if (op.compare("or") == 0 || op.compare("||") == 0)
-	{
-		_operand = OP_OR;
-	}
-	else if (op.compare("and") == 0 || op.compare("&&") == 0)
-	{
-		_operand = OP_AND;
-	}
-	else if (op.compare("..") == 0)
-	{
-		_operand = OP_RANGE;
-	}
-	else
-	{
-		if(DEBUG_MODE >= 1)
-		{
-			printf("Operand %d Unknown\n", _operand);
-		}
-	}
-
-}
-
-// EXPR_GROUP 
-EXPR(EXPRESSION_TYPE typeExpr, std::vector< boost::shared_ptr<EXPR> >& expressions)
-{
-	_typeExpr = typeExpr;
-	_expressions = expressions;
-}
-
 // Destructor
 AST::EXPR::~EXPR() 
 {	
@@ -113,19 +29,20 @@ AST::EXPR::~EXPR()
 		break;
 	case EXPR_VAR_CONSTR:
 		{
-			delete _expr0;
+			// printf("this statement should never be reached\n");
 		}
 		break;
 	case EXPR_CASE:
 		{
-			delete _expr0;
+			// delete _expr0;
 		}
 		break;
 	case EXPR_FOR_LOOP:
+		break;
 	case EXPR_BI_OP:
 		{
-			delete _expr0;
-			delete _expr1;
+			// delete _expr0;
+			// delete _expr1;
 		}
 		break;
 	// TODO	
@@ -165,7 +82,7 @@ void AST::EXPR::generateByteCode(std::string& output)
 		break;
 	case EXPR_VAR_CONSTR:
 		{
-			// TODO
+			// printf("destr: this statement should never be reached\n");
 		}
 		break;
 	case EXPR_CASE:
@@ -174,6 +91,7 @@ void AST::EXPR::generateByteCode(std::string& output)
 		}
 		break;
 	case EXPR_FOR_LOOP:
+		break;
 	case EXPR_BI_OP:
 		{
 			generateBiOPByteCode(output);
@@ -219,7 +137,8 @@ std::string AST::EXPR::getIntByteCode(int Integer)
 // [ ASSUMPTION ] - case of integers
 void AST::EXPR::generateCaseByteCode(std::string& output) 
 {
-	_expr0->generateByteCode(output);
+	_uValue.exprCase.expr->generateByteCode(output);
+	//_expr0->generateByteCode(output);
 	output += "\tiload_0 \n"; // FIXME - hardcoded bytecode
 	output += "\tlookupswitch \n";
 
@@ -235,7 +154,8 @@ void AST::EXPR::generateCaseByteCode(std::string& output)
 	* 324 : Label_2
 	* etc..
 	*/
-	for(std::vector< boost::shared_ptr<AST::ALT> >::iterator it = _alternatives.begin(); it != _alternatives.end(); ++it) 
+	std::vector< boost::shared_ptr<ALT> >* alternatives = _uValue.exprCase.alternatives;
+	for(std::vector< boost::shared_ptr<AST::ALT> >::iterator it = alternatives->begin(); it != alternatives->end(); ++it) 
 	{
 		PRIMITIVE_TYPE primitiveType;
 		uValue value;

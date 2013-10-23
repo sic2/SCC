@@ -1,8 +1,13 @@
 public class SUM_INT {
-	public static void main()
+	public static void TEST()
 	{
 		int a = 3;
 		int b = 4;
 		int c = a + b;
+	}
+
+	public static void main(String[] vars)
+	{
+		SUM_INT.TEST();
 	}
 }

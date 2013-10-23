@@ -46,7 +46,7 @@ bool JVMByteCodeGenerator::generateByteCode(std::string outFileName)
 	// examine the _program
 	//JASMIN_INSTR(output, "iconst_1");
 	//JASMIN_INSTR(output, "istore_0");
-	_program.generateByteCode(output);
+	_program.generateByteCode(output);	
 
 	addFinalJasminCode(output);
 	
@@ -88,7 +88,7 @@ void JVMByteCodeGenerator::printInt(std::string& output, int var)
 */
 void JVMByteCodeGenerator::addInitialJasminCode(std::string& output)
 {
-	JASMIN_DIRECTIVE(output, ".class public simple");
+	JASMIN_DIRECTIVE(output, ".class public simple"); // XXX - simple is the name of the program and must be saved as simple.j
 	JASMIN_DIRECTIVE(output, ".super java/lang/Object");
 	JASMIN_DIRECTIVE(output, ".method public <init>()V");
 	JASMIN_INSTR(output, "aload_0");

@@ -25,7 +25,6 @@ int main(int argc, char** argv)
 	*/
 	uValue expr_0 = {Integer: 0};
 	uValue expr_1 = {Integer: 1};
-	uValue expr_2 = {Integer: 2};
 
 	// Create alternatives one by one and add them to vector of alternatives
 	std::vector< boost::shared_ptr<ALT> > alternatives;
@@ -34,7 +33,24 @@ int main(int argc, char** argv)
 	alternatives.push_back(alt_0);
 	alternatives.push_back(alt_1);
 
-	PROGRAM program_0(new EXPR(EXPR_CASE, new EXPR(EXPR_INT, expr_0), alternatives));
+	uValue expr_2 = {Integer: 2};
+	uValue expr_3 = {exprVarConstr: 
+						{ID: new std::string(""), 
+						expr: new EXPR(EXPR_INT, expr_1)}
+					};
+	uValue expr_4 = {exprCase: 
+						{expr: new EXPR(EXPR_INT, expr_0), 
+						alternatives: &alternatives}
+					};
+
+	uValue expr_5 = {exprBiOp:
+						{expr: new EXPR(EXPR_INT, expr_0),
+						op: OP_ADDITION,
+						expr1: new EXPR(EXPR_INT, expr_0)}
+					};
+
+	PROGRAM program_0(new EXPR(EXPR_CASE, expr_4));
+	//PROGRAM program_0(new EXPR(EXPR_BI_OP, expr_5));
 	
 	JVMByteCodeGenerator byteCodeGen(program_0);
 	byteCodeGen.generateByteCode("XXX");
