@@ -35,6 +35,7 @@ uValue value_2 = {
 
 boost::shared_ptr<EXPR> expr_0(new EXPR(EXPR_INT, value_0));
 boost::shared_ptr<EXPR> expr_1(new EXPR(EXPR_INT, value_1));
+boost::shared_ptr<EXPR> expr_2(new EXPR(EXPR_INT, value_2));
 
 boost::shared_ptr<TYPE> type_0(new TYPE(TYPE_INT));
 boost::shared_ptr<TYPE> type_1(new TYPE(TYPE_INT));
@@ -83,9 +84,21 @@ uValue value_6 = {
 					}
 				};
 
- //boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_5));
+/*
+* 2 - 1
+*/
+uValue value_7 = {
+				exprBiOp:
+					{
+					expr: &expr_1,
+					op: OP_SUBTRACTION,
+					expr1: &expr_2
+					}
+				};
+
+ boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_7));
  //boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_INT, value_2));
- boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_CASE, value_4));
+ //boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_CASE, value_4));
 
 // Test programs are encoded and evaluated 
 // in the main method.
@@ -122,4 +135,4 @@ int main(int argc, char** argv)
 	PROGRAM(new EXPR(EXPR_BI_OP, new EXPR(EXPR_INT, expr), "and", new EXPR(EXPR_INT, expr)));
 	*/
 	return 0;
-}
+}	

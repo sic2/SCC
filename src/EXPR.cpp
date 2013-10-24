@@ -7,9 +7,6 @@
 #include <sstream>
 #include <map>
 
-#define INTEGER_BASE 10
-#define MAX_NUMBER_DIGITS 32
-
 #define GET_Condition_FROM_ALT(iterator) (*((* iterator)->getCondition()))
 #define GET_EXPR_FROM_PAIR(iterator) (*(* iterator).first->getEXPR())
 
@@ -23,23 +20,19 @@ AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, AST::uValue value)
 // Destructor
 AST::EXPR::~EXPR() 
 {	
-	printf("delete expr with typeExpr %d\n", _typeExpr);
 	if(DEBUG_MODE >= 2)
 	{
 		printf("Removing expression of typeExpr %d \n", _typeExpr);
 	}
 }
 
-void AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
+void AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool printStream)
 {
-	// Update the bytecodeGenerator with the current type of expression.
-	//bytecodeGenerator->∞pressionType(_typeExpr);
-
 	switch(_typeExpr)
 	{
 	case EXPR_INT:
 		{
-			generateIntByteCode(bytecodeGenerator, jasminProgram, mainMethod);
+			generateIntByteCode(bytecodeGenerator, jasminProgram, mainMethod, printStream);
 		}
 		break;
 	case EXPR_BOOL:
@@ -59,14 +52,14 @@ void AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::s
 		break;
 	case EXPR_CASE:
 		{
-			generateCaseByteCode(bytecodeGenerator, jasminProgram, mainMethod);
+			generateCaseByteCode(bytecodeGenerator, jasminProgram, mainMethod, printStream);
 		}
 		break;
 	case EXPR_FOR_LOOP:
 		break;
 	case EXPR_BI_OP:
 		{
-			generateBiOPByteCode(bytecodeGenerator, jasminProgram, mainMethod);
+			generateBiOPByteCode(bytecodeGenerator, jasminProgram, mainMethod, printStream);
 		}
 		break;
 	case EXPR_GROUP:
@@ -82,7 +75,7 @@ void AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::s
 		break;
 	case EXPR_NEW_VAR:
 		{
-			generateNewVarByteCode(bytecodeGenerator, jasminProgram, mainMethod);
+			generateNewVarByteCode(bytecodeGenerator, jasminProgram, mainMethod, printStream);
 		}
 		break;
 	default:
@@ -113,30 +106,26 @@ std::string AST::EXPR::getIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, i
 	return retval + integerToString(Integer);
 }
 
-void AST::EXPR::generateIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
-{
-	mainMethod += PRINT_STREAM + std::string("\n");
+void AST::EXPR::generateIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool printStream)
+{	
+	if (printStream)
+	{
+		mainMethod += PRINT_STREAM + std::string("\n");
+	}
+	
 	std::string bytecode = getIntByteCode(bytecodeGenerator, _uValue.Integer);
 	bytecodeGenerator->formatJasminInstruction(bytecode);
 	mainMethod += bytecode;
 
-	// std::ostringstream convert; 
-	// convert << environmentSize;
-	// std::string storeBytecode = "istore_" + convert.str();
-
-	// bytecodeGenerator->formatJasminInstruction(storeBytecode);
-	// mainMethod += storeBytecode;
-
-	std::string ID = ""; // FIXME - dummy ID
+	std::string ID = ""; // dummy ID
 	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, false);
-	//updateEnvironment(bytecodeGenerator, &ID, environmentSize, EXPR_INT);
 }
 
 // [ ASSUMPTION ] - case of integers
-void AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod) 
+void AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool printStream) 
 {
 	boost::shared_ptr<EXPR>* expr = _uValue.exprCase.expr;
-	(*expr)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod);
+	(*expr)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false);
 
 	mainMethod += "\tistore_0\n"; // FIXME - hardcoded. 
 	mainMethod += "\tiload_0 \n"; // FIXME - hardcoded bytecode
@@ -199,7 +188,7 @@ void AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, st
 		it != pairsAltsLabels.end(); ++it) 
 	{
 		mainMethod += (*it).second + ": \n";
-		GET_EXPR_FROM_PAIR(it)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod);
+		GET_EXPR_FROM_PAIR(it)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false); // FIXME - not sure about last param
 		mainMethod += "\treturn\n";
 	} // end for-loop for pairsAltsLabels vector
 	
@@ -211,26 +200,58 @@ void AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, st
 	bytecodeGenerator->updateEnvironment(&ID, EXPR_CASE, false);
 }
 
-void AST::EXPR::generateBiOPByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
+void AST::EXPR::generateBiOPByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool printStream)
 {
 	// TODO
 	// Generate appropriate subroutine if not there already
 	// then make a call to this subroutine
 	// and get the result
-	
 	// two variables
-	mainMethod += "\tinvokestatic " + JVMByteCodeGenerator::ADD_SUBROUTINE + "(II)I\n";
-	if (!bytecodeGenerator->isAddSubroutineEnabled())
-	{
-		bytecodeGenerator->addSubroutine(jasminProgram);
-	}
-	mainMethod += "\tpop\n"; // FIXME - or "istore_"
 
-	std::string ID = "";
-	bytecodeGenerator->updateEnvironment(&ID, EXPR_BI_OP, false);
+	// FIXME - assuming OP is ADDITION
+	// FIXME - assuming operands are integers
+
+	// Generate bytecode for operands
+	boost::shared_ptr<EXPR>* operand_0 = _uValue.exprBiOp.expr;
+	(*operand_0)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true);
+
+	boost::shared_ptr<EXPR>* operand_1 = _uValue.exprBiOp.expr1;
+	(*operand_1)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false);
+
+	OP op = _uValue.exprBiOp.op;
+	switch(op)
+	{
+		case OP_ADDITION:
+			generateAdditionByteCode(bytecodeGenerator, jasminProgram, mainMethod);
+			break;
+		case OP_SUBTRACTION:
+			generateSubtractionByteCode(bytecodeGenerator, jasminProgram, mainMethod);
+			break;
+		case OP_MULTIPLICATION:
+			break;
+		case OP_DIVISION:
+			break;
+		case OP_EQUALITY:
+			break;
+		case OP_LESS:
+			break;
+		case OP_OR:
+			break;
+		case OP_AND:
+			break;
+		case OP_RANGE:
+			break;
+		default:
+			if(DEBUG_MODE >= 1)
+			{
+		  		printf("Error on operand: %d\n", op);
+		  	}
+			break;
+	}
+
 }
 
-void AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
+void AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool printStream)
 {	
 	std::string* ID = _uValue.exprNewVar.ID;
 	boost::shared_ptr<EXPR>* expr = _uValue.exprNewVar.expr;
@@ -240,11 +261,46 @@ void AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
 		int value = (*expr)->getValue().Integer;
 		mainMethod += getIntByteCode(bytecodeGenerator, value) + std::string("\t; Var: ") + *ID + std::string("\n");
 
-		std::string storeBytecode = "istore_" + integerToString(bytecodeGenerator->getEnvironmentSize());
+		std::string storeBytecode = getIStoreByteCode(bytecodeGenerator);
 		mainMethod += storeBytecode + "\n";
 
 		bytecodeGenerator->updateEnvironment(ID, EXPR_INT, true);
 	}
+}
+
+void AST::EXPR::generateAdditionByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
+{
+	mainMethod += "\tinvokestatic " + std::string(PROGRAM_NAME) + "." + JVMByteCodeGenerator::ADD_SUBROUTINE + "(II)I\n";
+	if (!bytecodeGenerator->isAddSubroutineEnabled())
+	{
+		bytecodeGenerator->addSubroutine(jasminProgram);
+	}
+	mainMethod += getIStoreByteCode(bytecodeGenerator) + "\n";
+
+	std::string ID = "ADDITION";
+	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true); // FIXME - assume integer addition
+}
+
+void AST::EXPR::generateSubtractionByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
+{
+	mainMethod += "\tinvokestatic " + std::string(PROGRAM_NAME) + "." + JVMByteCodeGenerator::SUB_SUBROUTINE + "(II)I\n";
+	if (!bytecodeGenerator->isSubSubroutineEnabled())
+	{
+		bytecodeGenerator->subSubroutine(jasminProgram);
+	}
+	mainMethod += getIStoreByteCode(bytecodeGenerator) + "\n";
+
+	std::string ID = "SUBTRACTION";
+	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true); // FIXME - assume integer addition
+}
+
+
+/*
+* Utility functions
+*/
+std::string AST::EXPR::getIStoreByteCode(JVMByteCodeGenerator* bytecodeGenerator)
+{
+	return "istore_" + integerToString(bytecodeGenerator->getEnvironmentSize());
 }
 
 std::string AST::EXPR::integerToString(int value)

@@ -4,8 +4,11 @@
 
 #include <sstream>
 
+#define JASMIN_DIRECTIVE_progr(stream, x, progr_Name) stream += x progr_Name NEW_LINE
+
 // TODO - other subroutine names
 const std::string JVMByteCodeGenerator::ADD_SUBROUTINE = "ADD_SUBROUTINE";
+const std::string JVMByteCodeGenerator::SUB_SUBROUTINE = "SUB_SUBROUTINE";
 
 JVMByteCodeGenerator::JVMByteCodeGenerator(boost::shared_ptr<AST::PROGRAM> program)
 {
@@ -67,25 +70,14 @@ void JVMByteCodeGenerator::printLastStatement(std::string& output)
 }
 
 void JVMByteCodeGenerator::printInt(std::string& output)
-{
-	/*
-	Assumption:
-	The int variable to be printed is stored in #var
-	using istore_var
-	Example:
-	 getstatic       #2; //Field java/lang/System.out:Ljava/io/PrintStream;
-	 iload_0  
-	 invokevirtual   #3; //Method java/io/PrintStream.println:(I)V
-	*/
-	//JASMIN_INSTR(output, PRINT_STREAM);
-	// std::pair<int, AST::EXPRESSION_TYPE> secondPair = lastAdded->second;
-	// int test = secondPair.first;
-
-	 // std::ostringstream convert; 
-	 // convert << test;
-	 // JASMIN_WITHOUT_NEWLINE(output, "iload_");
-	 // output += convert.str() + "\n";
-	JASMIN_INSTR(output, INVOKE_PRINTLN);
+{	
+	if (_lastAddedExpression.first.compare("") != 0)
+	{
+		std::ostringstream convert; 
+		convert << _environment.find(_lastAddedExpression.first)->second.first;
+		output += "iload_" + convert.str() + "\n";
+	}
+	JASMIN_INSTR(output, INVOKE_PRINTLN_INT);
 }
 
 /**
@@ -93,7 +85,7 @@ void JVMByteCodeGenerator::printInt(std::string& output)
 */
 void JVMByteCodeGenerator::addInitialJasminCode(std::string& output)
 {
-	JASMIN_DIRECTIVE(output, ".class public simple"); // XXX - simple is the name of the program and must be saved as simple.j
+	JASMIN_DIRECTIVE_progr(output, ".class public ", PROGRAM_NAME); // XXX - simple is the name of the program and must be saved as simple.j
 	JASMIN_DIRECTIVE(output, ".super java/lang/Object");
 	JASMIN_DIRECTIVE(output, ".method public <init>()V");
 	JASMIN_INSTR(output, "aload_0");
@@ -119,11 +111,11 @@ void JVMByteCodeGenerator::addSubroutine(std::string& bytecodeProgram)
 {
 	if (!_addSubroutineEnabled)
 	{
-		JASMIN_DIRECTIVE(bytecodeProgram, SUBROUTINE(ADD_SUBROUTINE));
+		bytecodeProgram += SUBROUTINE + ADD_SUBROUTINE + "(II)I" + "\n";
 		JASMIN_DIRECTIVE(bytecodeProgram, ".limit stack 2");
 		JASMIN_DIRECTIVE(bytecodeProgram, ".limit locals 2");
 		JASMIN_INSTR(bytecodeProgram, "iload_0");
-		JASMIN_INSTR(bytecodeProgram, "iload_0");
+		JASMIN_INSTR(bytecodeProgram, "iload_1");
 		JASMIN_INSTR(bytecodeProgram, "iadd");
 		JASMIN_INSTR(bytecodeProgram, "ireturn");
 		JASMIN_DIRECTIVE(bytecodeProgram, ".end method");
@@ -132,14 +124,32 @@ void JVMByteCodeGenerator::addSubroutine(std::string& bytecodeProgram)
 	_addSubroutineEnabled = true;
 }
 
+void JVMByteCodeGenerator::subSubroutine(std::string& bytecodeProgram)
+{
+	if (!_subSubroutineEnabled)
+	{
+		bytecodeProgram += SUBROUTINE + SUB_SUBROUTINE + "(II)I" + "\n";
+		JASMIN_DIRECTIVE(bytecodeProgram, ".limit stack 2");
+		JASMIN_DIRECTIVE(bytecodeProgram, ".limit locals 2");
+		JASMIN_INSTR(bytecodeProgram, "iload_0");  // FIXME - merge with addSubroutine
+		JASMIN_INSTR(bytecodeProgram, "iload_1");
+		JASMIN_INSTR(bytecodeProgram, "isub");
+		JASMIN_INSTR(bytecodeProgram, "ireturn");
+		JASMIN_DIRECTIVE(bytecodeProgram, ".end method");
+		bytecodeProgram += "\n";
+	}
+	_subSubroutineEnabled = true;
+}
+
 void JVMByteCodeGenerator::updateEnvironment(std::string* ID, AST::EXPRESSION_TYPE exprType, bool onStack)
 {
 	
 	int varIndex = _environment.size();
-	_lastAddedExpression = std::make_pair<int, AST::EXPRESSION_TYPE> (varIndex, exprType);
+	printf("var index is %d\n", varIndex);
+	_lastAddedExpression = std::make_pair<std::string, AST::EXPRESSION_TYPE> (*ID, exprType);
 	if (onStack)
 	{
 		_environment.insert(std::make_pair<std::string, std::pair<int, AST::EXPRESSION_TYPE> > 
-								(*ID, _lastAddedExpression)); // XXX - not sure if copied or passed by reference
+								(*ID, std::make_pair<int, AST::EXPRESSION_TYPE> (varIndex, exprType))); // XXX - not sure if copied or passed by reference
 	}
 }
