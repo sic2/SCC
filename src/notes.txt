@@ -1,0 +1,4 @@
+notes:
+
+- i.e. Person age addr <- translate this as a java class/object
+- use some ADT to keep track of objects 

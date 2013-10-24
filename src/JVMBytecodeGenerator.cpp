@@ -55,10 +55,10 @@ void JVMByteCodeGenerator::formatJasminInstruction(std::string& instruction)
 void JVMByteCodeGenerator::printLastStatement(std::string& output)
 {
 	
-	switch(_lastExpressionAddedOnStack)
+	switch(_lastAddedExpression.second)
 	{
 		case AST::EXPR_INT:
-			printInt(output, 10);
+			printInt(output);
 			break;
 		default:
 			printf("Printing last statement - type NOT SUPPORTED\n");
@@ -66,7 +66,7 @@ void JVMByteCodeGenerator::printLastStatement(std::string& output)
 	} // end switch
 }
 
-void JVMByteCodeGenerator::printInt(std::string& output, int var)
+void JVMByteCodeGenerator::printInt(std::string& output)
 {
 	/*
 	Assumption:
@@ -77,16 +77,14 @@ void JVMByteCodeGenerator::printInt(std::string& output, int var)
 	 iload_0  
 	 invokevirtual   #3; //Method java/io/PrintStream.println:(I)V
 	*/
-	JASMIN_INSTR(output, PRINT_STREAM);
-	//output += "pop\n";
-	//output += "\tiload_0\n"; // FIXME - 
-	std::pair<int, AST::EXPRESSION_TYPE> secondPair = lastAdded->second;
-	int test = secondPair.first;
+	//JASMIN_INSTR(output, PRINT_STREAM);
+	// std::pair<int, AST::EXPRESSION_TYPE> secondPair = lastAdded->second;
+	// int test = secondPair.first;
 
-	 std::ostringstream convert; 
-	 convert << test;
-	 JASMIN_WITHOUT_NEWLINE(output, "iload_");
-	 output += convert.str() + "\n";
+	 // std::ostringstream convert; 
+	 // convert << test;
+	 // JASMIN_WITHOUT_NEWLINE(output, "iload_");
+	 // output += convert.str() + "\n";
 	JASMIN_INSTR(output, INVOKE_PRINTLN);
 }
 
@@ -132,4 +130,16 @@ void JVMByteCodeGenerator::addSubroutine(std::string& bytecodeProgram)
 		bytecodeProgram += "\n";
 	}
 	_addSubroutineEnabled = true;
+}
+
+void JVMByteCodeGenerator::updateEnvironment(std::string* ID, AST::EXPRESSION_TYPE exprType, bool onStack)
+{
+	
+	int varIndex = _environment.size();
+	_lastAddedExpression = std::make_pair<int, AST::EXPRESSION_TYPE> (varIndex, exprType);
+	if (onStack)
+	{
+		_environment.insert(std::make_pair<std::string, std::pair<int, AST::EXPRESSION_TYPE> > 
+								(*ID, _lastAddedExpression)); // XXX - not sure if copied or passed by reference
+	}
 }

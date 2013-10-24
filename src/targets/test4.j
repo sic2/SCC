@@ -9,10 +9,10 @@
 .method public static main([Ljava/lang/String;)V
 	.limit stack 5
 	.limit locals 100
-	iconst_2
-	istore_0
 	getstatic java/lang/System/out Ljava/io/PrintStream;
-	iload_0
+	iconst_1
+	getstatic java/lang/System/out Ljava/io/PrintStream;
+	iconst_2
 	invokevirtual java/io/PrintStream/println(I)V
 	return	; return from main
 .end method

@@ -83,9 +83,9 @@ public:
 	void addSubroutine(std::string& bytecodeProgram);
 
 	/**
-	* @return environment
+	* @return size of the environment (i.e. symbols table)
 	*/
-	std::map< std::string, std::pair<int, AST::EXPRESSION_TYPE> > getEnvironment() { return this->_environment; }
+	int getEnvironmentSize() { return this->_environment.size(); }
 
 	/**
 	* Dynamically format an instruction into a jasmin instruction.
@@ -94,14 +94,16 @@ public:
 	void formatJasminInstruction(std::string& instruction);
 
 	/**
+	* Add print statement bytecode to output for 
+	* an integer value which must be on the stack.
+	*/
+	void printInt(std::string& output);
+
+	/**
 	* TODO
 	*/
-	void printInt(std::string& output, int var);
+	void updateEnvironment(std::string* ID, AST::EXPRESSION_TYPE exprType, bool onStack);
 
-	void updateLastExpressionType(AST::EXPRESSION_TYPE expressionType) { this->_lastExpressionAddedOnStack = expressionType; }
-
-	// FIXME - use better naming
-	void updateLast(std::map< std::string, std::pair<int, AST::EXPRESSION_TYPE> >::iterator it) { this->lastAdded = it; }
 
 private:
 	boost::shared_ptr<AST::PROGRAM> _program;
@@ -123,10 +125,5 @@ private:
 	* Appel A., Modern Compiler Implementation in C
 	*/
 	std::map< std::string, std::pair<int, AST::EXPRESSION_TYPE> > _environment;
-
-	std::map< std::string, std::pair<int, AST::EXPRESSION_TYPE> >::iterator lastAdded;
-
-	// TODO
-	// not sure if type is correct
-	AST::EXPRESSION_TYPE _lastExpressionAddedOnStack;
+	std::pair<int, AST::EXPRESSION_TYPE> _lastAddedExpression; 
 };

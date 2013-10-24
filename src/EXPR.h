@@ -19,6 +19,8 @@ public:
 	AST::uValue getValue() { return this->_uValue; }
 
 private:
+	std::string integerToString(int value);
+
 	AST::EXPRESSION_TYPE _typeExpr;
 	AST::uValue _uValue;
 
@@ -29,5 +31,5 @@ private:
 	void generateBiOPByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod);
 	void generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod);
 
-	void updateEnvironment(JVMByteCodeGenerator* bytecodeGenerator, std::string* ID, int index, AST::EXPRESSION_TYPE exprType);
+	//void updateEnvironment(JVMByteCodeGenerator* bytecodeGenerator, std::string* ID, int index, AST::EXPRESSION_TYPE exprType);
 };
