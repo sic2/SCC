@@ -94,7 +94,7 @@ int main(int argc, char** argv)
 					};
 
 	// boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_5));
-	boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_NEW_VAR, value_6));
+	boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_INT, value_2));
 
 	boost::shared_ptr<AST::PROGRAM> program_0(new PROGRAM(&mainExpr));
 	JVMByteCodeGenerator byteCodeGen(program_0);

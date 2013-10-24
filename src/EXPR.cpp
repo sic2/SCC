@@ -23,6 +23,7 @@ AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, AST::uValue value)
 // Destructor
 AST::EXPR::~EXPR() 
 {	
+	printf("delete expr with typeExpr %d\n", _typeExpr);
 	if(DEBUG_MODE >= 2)
 	{
 		printf("Removing expression of typeExpr %d \n", _typeExpr);
@@ -31,17 +32,21 @@ AST::EXPR::~EXPR()
 
 void AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
 {
+	// Update the bytecodeGenerator with the current type of expression.
+	bytecodeGenerator->updateLastExpressionType(_typeExpr);
+
 	switch(_typeExpr)
 	{
 	case EXPR_INT:
 		{
-			std::string bytecode = getIntByteCode(bytecodeGenerator, _uValue.Integer);
-			bytecodeGenerator->formatJasminInstruction(bytecode);
-			mainMethod += bytecode;
-			std::string store = "istore_0"; // FIXME - hardcoded bytecode // FIXME - SHOULD NOT STORE!	
-			bytecodeGenerator->formatJasminInstruction(store);
-			mainMethod += store;
+			// std::string bytecode = getIntByteCode(bytecodeGenerator, _uValue.Integer);
+			// bytecodeGenerator->formatJasminInstruction(bytecode);
+			// mainMethod += bytecode;
+			// std::string store = "istore_0"; // FIXME - hardcoded bytecode // FIXME - SHOULD NOT STORE!	
+			// bytecodeGenerator->formatJasminInstruction(store);
+			// mainMethod += store;
 			//JVMByteCodeGenerator::printInt(output, 0);
+			generateIntByteCode(bytecodeGenerator, jasminProgram, mainMethod);
 		}
 		break;
 	case EXPR_BOOL:
@@ -89,6 +94,26 @@ void AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::s
 /*
 * Private methods
 */
+void AST::EXPR::generateIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
+{
+	std::map< std::string, std::pair<int, AST::EXPRESSION_TYPE> > env = bytecodeGenerator->getEnvironment();
+	unsigned int environmentSize = env.size();
+
+	std::string bytecode = getIntByteCode(bytecodeGenerator, _uValue.Integer);
+	bytecodeGenerator->formatJasminInstruction(bytecode);
+	mainMethod += bytecode;
+
+	std::ostringstream convert; 
+	convert << environmentSize;
+	std::string storeBytecode = "istore_" + convert.str();
+
+	bytecodeGenerator->formatJasminInstruction(storeBytecode);
+	mainMethod += storeBytecode;
+
+	std::string ID = ""; // FIXME - dummy ID
+	updateEnvironment(bytecodeGenerator, &ID, environmentSize, EXPR_INT);
+}
+
 std::string AST::EXPR::getIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, int Integer)
 {
 	std::ostringstream convert; 
@@ -222,9 +247,19 @@ void AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
 		std::string storeBytecode = "istore_" + convert.str();
 		mainMethod += storeBytecode + "\n";
 
-		// Update environment
-		env.insert(std::make_pair<std::string, std::pair<int, AST::EXPRESSION_TYPE> > 
-							(*ID, std::make_pair<int, AST::EXPRESSION_TYPE>(value, EXPR_INT)));
+		updateEnvironment(bytecodeGenerator, ID, environmentSize, EXPR_INT);
 	}
 
+}
+
+void AST::EXPR::updateEnvironment(JVMByteCodeGenerator* bytecodeGenerator, std::string* ID, int index, AST::EXPRESSION_TYPE exprType)
+{
+	std::map< std::string, std::pair<int, AST::EXPRESSION_TYPE> > env = bytecodeGenerator->getEnvironment();
+	// Update environment
+	std::pair< 
+		std::map< std::string, std::pair<int, AST::EXPRESSION_TYPE> >::iterator,
+		bool> pair = env.insert(std::make_pair<std::string, std::pair<int, AST::EXPRESSION_TYPE> > 
+								(*ID, std::make_pair<int, AST::EXPRESSION_TYPE>(index, exprType)));
+		printf("updating last");
+	bytecodeGenerator->updateLast(pair.first);
 }

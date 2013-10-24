@@ -27,13 +27,21 @@ bool JVMByteCodeGenerator::generateByteCode(std::string outFileName)
 	// Traversing the AST and generate program
 	(*_program).generateByteCode(this, jasminProgram, mainMethod);	
 
+	printLastStatement(mainMethod);
 	addFinalMainJasminCode(mainMethod);
+
 	jasminProgram += mainMethod; // Stich the main method with the rest of the program
+
+	// TODO - print last statement on stack
+	// pop
+	// appropriate print [ SHIT ]
 
 	if(DEBUG_MODE >= 1)
 	{
 		printf("JASMIN BYTECODE: \n\n%s\n\nEND JASMIN BYTECODE\n", jasminProgram.c_str());
 	}
+
+
 	
 	return false;
 }
@@ -41,6 +49,21 @@ bool JVMByteCodeGenerator::generateByteCode(std::string outFileName)
 void JVMByteCodeGenerator::formatJasminInstruction(std::string& instruction)
 {
 	instruction = TAB + instruction + NEW_LINE;
+}
+
+
+void JVMByteCodeGenerator::printLastStatement(std::string& output)
+{
+	
+	switch(_lastExpressionAddedOnStack)
+	{
+		case AST::EXPR_INT:
+			printInt(output, 10);
+			break;
+		default:
+			printf("Printing last statement - type NOT SUPPORTED\n");
+			break;
+	} // end switch
 }
 
 void JVMByteCodeGenerator::printInt(std::string& output, int var)
@@ -55,10 +78,15 @@ void JVMByteCodeGenerator::printInt(std::string& output, int var)
 	 invokevirtual   #3; //Method java/io/PrintStream.println:(I)V
 	*/
 	JASMIN_INSTR(output, PRINT_STREAM);
-	std::ostringstream convert; 
-	convert << var;
-	JASMIN_WITHOUT_NEWLINE(output, "iload_");
-	output += convert.str() + "\n";
+	//output += "pop\n";
+	//output += "\tiload_0\n"; // FIXME - 
+	std::pair<int, AST::EXPRESSION_TYPE> secondPair = lastAdded->second;
+	int test = secondPair.first;
+
+	 std::ostringstream convert; 
+	 convert << test;
+	 JASMIN_WITHOUT_NEWLINE(output, "iload_");
+	 output += convert.str() + "\n";
 	JASMIN_INSTR(output, INVOKE_PRINTLN);
 }
 

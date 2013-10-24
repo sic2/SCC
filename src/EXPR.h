@@ -23,7 +23,11 @@ private:
 	AST::uValue _uValue;
 
 	std::string getIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, int Integer);
+
+	void generateIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod);
 	void generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod);
 	void generateBiOPByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod);
 	void generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod);
+
+	void updateEnvironment(JVMByteCodeGenerator* bytecodeGenerator, std::string* ID, int index, AST::EXPRESSION_TYPE exprType);
 };

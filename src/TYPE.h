@@ -2,23 +2,42 @@
 
 #include "AST.h"
 
-// TODO - use union and compress all constructors into one
+#define TYPE_IS_PRIMITIVE 0
+#define TYPE_NOT_PRIMITIVE 1
+
 class AST::TYPE
 {
 public:
 	TYPE(PRIMITIVE_TYPE primitiveType);
+	TYPE(std::string ID, std::vector<TYPE> types);
 
-	TYPE(std::string ID, AST::TYPE type);
+	virtual ~TYPE() {}
 
-	TYPE(std::string ID, std::vector<AST::TYPE> types);
+	/**
+	* @return empty string if no id is set.
+	*/
+	std::string getID();
 
-  PRIMITIVE_TYPE getType() { return this->_primitiveType; } // FIXME - this will not work for types that do not have primitiveType
+	/**
+	* @return set of PRIMITIVE types
+	*/
+	PRIMITIVE_TYPE getType() { return this->_primitiveType; }
+
+	/**
+	*
+	*/
+	std::vector<TYPE> getTypes() { return this->_types; }
+
+	/**
+	*
+	*/
+	bool typeIsPrimitive() { return _whichConstructor == TYPE_IS_PRIMITIVE; }
 
 private:
 	PRIMITIVE_TYPE _primitiveType;
-	// uValue _uValue;
+
 	std::string _id;
-	std::vector<AST::TYPE> _types;
+	std::vector<TYPE> _types;
 
 	int _whichConstructor;
 };

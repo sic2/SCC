@@ -98,12 +98,18 @@ public:
 	*/
 	void printInt(std::string& output, int var);
 
+	void updateLastExpressionType(AST::EXPRESSION_TYPE expressionType) { this->_lastExpressionAddedOnStack = expressionType; }
+
+	// FIXME - use better naming
+	void updateLast(std::map< std::string, std::pair<int, AST::EXPRESSION_TYPE> >::iterator it) { this->lastAdded = it; }
+
 private:
 	boost::shared_ptr<AST::PROGRAM> _program;
 
 	void addInitialJasminCode(std::string& output);
 	void addInitialMainJasminCode(std::string& output);
 	void addFinalMainJasminCode(std::string& output);
+	void printLastStatement(std::string& output);
 
 	/**
 	* True if the add subroutine has been already added to 
@@ -117,4 +123,10 @@ private:
 	* Appel A., Modern Compiler Implementation in C
 	*/
 	std::map< std::string, std::pair<int, AST::EXPRESSION_TYPE> > _environment;
+
+	std::map< std::string, std::pair<int, AST::EXPRESSION_TYPE> >::iterator lastAdded;
+
+	// TODO
+	// not sure if type is correct
+	AST::EXPRESSION_TYPE _lastExpressionAddedOnStack;
 };
