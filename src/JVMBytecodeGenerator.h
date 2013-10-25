@@ -27,7 +27,7 @@
 #define JASMIN_WITHOUT_NEWLINE(stream, x) stream += TAB x
 #define JASMIN_WITH_NEWLINE(stream, x) stream += x NEW_LINE
 #define JASMIN_DIRECTIVE(stream, x) JASMIN_WITH_NEWLINE(stream, x)
-#define JASMIN_LABEL(stream, x) JASMIN_WITH_NEWLINE(stream, SPACE x)
+#define JASMIN_LABEL(stream, x) JASMIN_WITH_NEWLINE(stream, SPACE x) // TODO - add ":""
 #define JASMIN_INSTR(stream, x) JASMIN_WITH_NEWLINE(stream, TAB x)
 
 /*
@@ -42,6 +42,7 @@
 #define INVOKE_SPECIAL_INT "invokespecial java/lang/Object/<init>()V"
 #define PRINT_STREAM "getstatic java/lang/System/out Ljava/io/PrintStream;"
 #define INVOKE_PRINTLN_INT "invokevirtual java/io/PrintStream/println(I)V"
+#define INVOKE_PRINTLN_BOOL "invokevirtual java/io/PrintStream/println(Z)V"
 #define SUBROUTINE ".method public static "
 
 /*
@@ -61,6 +62,10 @@ public:
 	*/
 	const static std::string ADD_SUBROUTINE;
 	const static std::string SUB_SUBROUTINE;
+	const static std::string MUL_SUBROUTINE;
+	const static std::string DIV_SUBROUTINE;
+	const static std::string LESS_THAN_SUBROUTINE;
+	const static std::string EQ_TO_SUBROUTINE;
 
 public:
 	JVMByteCodeGenerator(boost::shared_ptr<AST::PROGRAM> program);
@@ -86,12 +91,6 @@ public:
 	void formatJasminInstruction(std::string& instruction);
 
 	/**
-	* Add print statement bytecode to output for 
-	* an integer value which must be on the stack.
-	*/
-	void printInt(std::string& output);
-
-	/**
 	* Update the environment with the ID of the variable/expression and
 	* the type of expression
 	* @param ID of expression
@@ -104,31 +103,21 @@ public:
 	*/
 	void updateEnvironment(std::string* ID, AST::EXPRESSION_TYPE exprType, bool onStack);
 
-
-	/********
-	* Check if subroutines are enabled
-	*********/
-
 	/**
-	* @return true if a subroutine for addition has already been added
-	*/
-	bool isAddSubroutineEnabled() { return this->_addSubroutineEnabled; }
-
-	bool isSubSubroutineEnabled() { return this->_subSubroutineEnabled; }
-
-	/********
-	* Appending subroutines
-	*********/
-
-	/**
-	* Append an add subroutine at the end of the given bytecode jasmin program
+	* Append a subroutine at the end of the given bytecode jasmin program
+	* IF and ONLY IF the subroutine does not exist already.
 	* @param bytecodeProgram
 	*/
-	void addSubroutine(std::string& bytecodeProgram);
-
-	void subSubroutine(std::string& bytecodeProgram);
+	void addSubroutine(AST::OP op, std::string& bytecodeProgram);
 
 private:
+	/**
+	* Adding Print statement bytecode to output for 
+	* a value which must be on top of the stack.
+	*/
+	void printInt(std::string& output);
+	void printBool(std::string& output);
+
 	boost::shared_ptr<AST::PROGRAM> _program;
 
 	void addInitialJasminCode(std::string& output);
@@ -142,6 +131,10 @@ private:
 	*/
 	bool _addSubroutineEnabled;
 	bool _subSubroutineEnabled;
+	bool _mulSubroutineEnabled;
+	bool _divSubroutineEnabled;
+	bool _lessThanSubroutineEnabled;
+	bool _eqToSubroutineEnabled;
 
 	/**
 	* The environment or symbol tables

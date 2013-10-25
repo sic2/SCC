@@ -4,11 +4,19 @@
 
 #include <sstream>
 
+// MACROS
 #define JASMIN_DIRECTIVE_progr(stream, x, progr_Name) stream += x progr_Name NEW_LINE
+
+// String literals
+#define INVALID_OPERATION "INVALID_OPERATION"
 
 // TODO - other subroutine names
 const std::string JVMByteCodeGenerator::ADD_SUBROUTINE = "ADD_SUBROUTINE";
 const std::string JVMByteCodeGenerator::SUB_SUBROUTINE = "SUB_SUBROUTINE";
+const std::string JVMByteCodeGenerator::MUL_SUBROUTINE = "MUL_SUBROUTINE";
+const std::string JVMByteCodeGenerator::DIV_SUBROUTINE = "DIV_SUBROUTINE";
+const std::string JVMByteCodeGenerator::LESS_THAN_SUBROUTINE = "LESS_THAN_SUBROUTINE";
+const std::string JVMByteCodeGenerator::EQ_TO_SUBROUTINE = "EQ_TO_SUBROUTINE";
 
 JVMByteCodeGenerator::JVMByteCodeGenerator(boost::shared_ptr<AST::PROGRAM> program)
 {
@@ -57,11 +65,13 @@ void JVMByteCodeGenerator::formatJasminInstruction(std::string& instruction)
 
 void JVMByteCodeGenerator::printLastStatement(std::string& output)
 {
-	
 	switch(_lastAddedExpression.second)
 	{
 		case AST::EXPR_INT:
 			printInt(output);
+			break;
+		case AST::EXPR_BOOL:
+			printBool(output);
 			break;
 		default:
 			printf("Printing last statement - type NOT SUPPORTED\n");
@@ -78,6 +88,17 @@ void JVMByteCodeGenerator::printInt(std::string& output)
 		output += "iload_" + convert.str() + "\n";
 	}
 	JASMIN_INSTR(output, INVOKE_PRINTLN_INT);
+}
+
+void JVMByteCodeGenerator::printBool(std::string& output)
+{	
+	if (_lastAddedExpression.first.compare("") != 0)
+	{
+		std::ostringstream convert; 
+		convert << _environment.find(_lastAddedExpression.first)->second.first;
+		output += "iload_" + convert.str() + "\n";
+	}
+	JASMIN_INSTR(output, INVOKE_PRINTLN_BOOL);
 }
 
 /**
@@ -107,45 +128,140 @@ void JVMByteCodeGenerator::addFinalMainJasminCode(std::string& output)
 	JASMIN_DIRECTIVE(output, ".end method");
 }
 
-void JVMByteCodeGenerator::addSubroutine(std::string& bytecodeProgram)
+// TODO - pass operands types too
+void JVMByteCodeGenerator::addSubroutine(AST::OP op, std::string& bytecodeProgram)
 {
-	if (!_addSubroutineEnabled)
+	bool subroutineNeeded = false;
+	std::string operation = INVALID_OPERATION;
+	std::string nameSubroutine;
+	AST::PRIMITIVE_TYPE returnType = AST::TYPE_INT; // default return type for subroutine
+	switch(op)
 	{
-		bytecodeProgram += SUBROUTINE + ADD_SUBROUTINE + "(II)I" + "\n";
+		case AST::OP_ADDITION:
+			if (!_addSubroutineEnabled)
+			{
+				subroutineNeeded = true;
+				_addSubroutineEnabled = true;
+				operation = "iadd";
+				nameSubroutine = ADD_SUBROUTINE;
+			}
+		break;
+		case AST::OP_SUBTRACTION:
+			if (!_subSubroutineEnabled)
+			{
+				subroutineNeeded = true;
+				_subSubroutineEnabled = true;
+				operation = "isub";
+				nameSubroutine = SUB_SUBROUTINE;
+			}
+		break;
+		case AST::OP_MULTIPLICATION:
+			if (!_mulSubroutineEnabled)
+			{
+				subroutineNeeded = true;
+				_mulSubroutineEnabled = true;
+				operation = "imul";
+				nameSubroutine = MUL_SUBROUTINE;
+			}
+		break;
+		case AST::OP_DIVISION:
+			if (!_divSubroutineEnabled)
+			{
+				subroutineNeeded = true;
+				_divSubroutineEnabled = true;
+				operation = "idiv";
+				nameSubroutine = DIV_SUBROUTINE;
+			}
+		break;
+		case AST::OP_EQUALITY:
+			if (!_eqToSubroutineEnabled)
+			{
+				subroutineNeeded = true;
+				_eqToSubroutineEnabled = true;
+				nameSubroutine = EQ_TO_SUBROUTINE;
+				returnType = AST::TYPE_BOOL;
+			}
+			break;
+		case AST::OP_LESS:
+			if (!_lessThanSubroutineEnabled)
+			{
+				subroutineNeeded = true;
+				_lessThanSubroutineEnabled = true;
+				nameSubroutine = LESS_THAN_SUBROUTINE;
+				returnType = AST::TYPE_BOOL;
+			}
+			break;
+		case AST::OP_OR:
+		case AST::OP_AND:
+		case AST::OP_RANGE:
+		default:
+			printf("operation not supported\n");
+		break;
+	} // end switch
+
+	// Construct subroutine params
+	if (subroutineNeeded)
+	{
+		switch(returnType)
+		{
+			case AST::TYPE_INT:
+				bytecodeProgram += SUBROUTINE + nameSubroutine + "(II)I" + "\n"; 
+			break;
+			case AST::TYPE_BOOL:
+				bytecodeProgram += SUBROUTINE + nameSubroutine + "(II)Z" + "\n"; 
+			break;
+			case AST::TYPE_STRING:
+				printf("Return type for subroutine not supported\n");
+			default: 
+			break;
+		}
+
+		// Initialise subroutine - common for all types of subroutines taking 2 arguments
 		JASMIN_DIRECTIVE(bytecodeProgram, ".limit stack 2");
 		JASMIN_DIRECTIVE(bytecodeProgram, ".limit locals 2");
 		JASMIN_INSTR(bytecodeProgram, "iload_0");
 		JASMIN_INSTR(bytecodeProgram, "iload_1");
-		JASMIN_INSTR(bytecodeProgram, "iadd");
-		JASMIN_INSTR(bytecodeProgram, "ireturn");
-		JASMIN_DIRECTIVE(bytecodeProgram, ".end method");
-		bytecodeProgram += "\n";
-	}
-	_addSubroutineEnabled = true;
-}
 
-void JVMByteCodeGenerator::subSubroutine(std::string& bytecodeProgram)
-{
-	if (!_subSubroutineEnabled)
-	{
-		bytecodeProgram += SUBROUTINE + SUB_SUBROUTINE + "(II)I" + "\n";
-		JASMIN_DIRECTIVE(bytecodeProgram, ".limit stack 2");
-		JASMIN_DIRECTIVE(bytecodeProgram, ".limit locals 2");
-		JASMIN_INSTR(bytecodeProgram, "iload_0");  // FIXME - merge with addSubroutine
-		JASMIN_INSTR(bytecodeProgram, "iload_1");
-		JASMIN_INSTR(bytecodeProgram, "isub");
+		if (operation.compare(INVALID_OPERATION) != 0)
+		{
+			bytecodeProgram += "\t" + operation + "\n";
+		}
+		else if (nameSubroutine.compare(LESS_THAN_SUBROUTINE) == 0 ||
+				nameSubroutine.compare(EQ_TO_SUBROUTINE) == 0)
+		{	
+			// Apply the correct branch comparison
+			if (nameSubroutine.compare(LESS_THAN_SUBROUTINE) == 0)
+			{
+				JASMIN_INSTR(bytecodeProgram, "if_icmpge Label_NT");
+			} 
+			else if (nameSubroutine.compare(EQ_TO_SUBROUTINE) == 0)
+			{
+				JASMIN_INSTR(bytecodeProgram, "if_icmpne Label_NT");
+			}
+			
+			// Branch flow is the same for all routines above
+			JASMIN_INSTR(bytecodeProgram, "iconst_1");
+			JASMIN_INSTR(bytecodeProgram, "goto Label_T");
+			JASMIN_LABEL(bytecodeProgram, "Label_NT:"); 
+			JASMIN_INSTR(bytecodeProgram, "iconst_0");
+			JASMIN_LABEL(bytecodeProgram, "Label_T:"); 
+		}
+		else
+		{
+			printf("operation not supported yet\n");
+		}
+
+		// Return from subroutine - common for all types of subroutines
 		JASMIN_INSTR(bytecodeProgram, "ireturn");
 		JASMIN_DIRECTIVE(bytecodeProgram, ".end method");
 		bytecodeProgram += "\n";
 	}
-	_subSubroutineEnabled = true;
 }
 
 void JVMByteCodeGenerator::updateEnvironment(std::string* ID, AST::EXPRESSION_TYPE exprType, bool onStack)
 {
 	
 	int varIndex = _environment.size();
-	printf("var index is %d\n", varIndex);
 	_lastAddedExpression = std::make_pair<std::string, AST::EXPRESSION_TYPE> (*ID, exprType);
 	if (onStack)
 	{

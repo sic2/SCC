@@ -85,7 +85,7 @@ uValue value_6 = {
 				};
 
 /*
-* 2 - 1
+* (1 - 2)
 */
 uValue value_7 = {
 				exprBiOp:
@@ -96,7 +96,55 @@ uValue value_7 = {
 					}
 				};
 
- boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_7));
+/*
+* 1 * 2
+*/
+uValue value_8 = {
+				exprBiOp:
+					{
+					expr: &expr_1,
+					op: OP_MULTIPLICATION,
+					expr1: &expr_2
+					}
+				};
+
+/*
+* 2 / 1
+*/
+uValue value_9 = {
+				exprBiOp:
+					{
+					expr: &expr_2,
+					op: OP_DIVISION,
+					expr1: &expr_1
+					}
+				};
+
+/*
+* 2 < 1
+*/
+uValue value_10 = {
+				exprBiOp:
+					{
+					expr: &expr_2,
+					op: OP_LESS,
+					expr1: &expr_1
+					}
+				};
+
+/*
+* 2 == 1
+*/
+uValue value_11 = {
+				exprBiOp:
+					{
+					expr: &expr_2,
+					op: OP_EQUALITY,
+					expr1: &expr_1
+					}
+				};
+
+ boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_11));
  //boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_INT, value_2));
  //boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_CASE, value_4));
 

@@ -228,12 +228,16 @@ void AST::EXPR::generateBiOPByteCode(JVMByteCodeGenerator* bytecodeGenerator, st
 			generateSubtractionByteCode(bytecodeGenerator, jasminProgram, mainMethod);
 			break;
 		case OP_MULTIPLICATION:
+			generateMultiplicationByteCode(bytecodeGenerator, jasminProgram, mainMethod);
 			break;
 		case OP_DIVISION:
+			generateDivisionByteCode(bytecodeGenerator, jasminProgram, mainMethod);
 			break;
 		case OP_EQUALITY:
+			generateEqToByteCode(bytecodeGenerator, jasminProgram, mainMethod);
 			break;
 		case OP_LESS:
+			generateLessThanByteCode(bytecodeGenerator, jasminProgram, mainMethod);
 			break;
 		case OP_OR:
 			break;
@@ -268,13 +272,14 @@ void AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
 	}
 }
 
+/*
+* Bi-OP Subroutines generation and callees.
+* TODO - merge these functions together if possible
+*/
 void AST::EXPR::generateAdditionByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
 {
 	mainMethod += "\tinvokestatic " + std::string(PROGRAM_NAME) + "." + JVMByteCodeGenerator::ADD_SUBROUTINE + "(II)I\n";
-	if (!bytecodeGenerator->isAddSubroutineEnabled())
-	{
-		bytecodeGenerator->addSubroutine(jasminProgram);
-	}
+	bytecodeGenerator->addSubroutine(_uValue.exprBiOp.op, jasminProgram);
 	mainMethod += getIStoreByteCode(bytecodeGenerator) + "\n";
 
 	std::string ID = "ADDITION";
@@ -284,16 +289,54 @@ void AST::EXPR::generateAdditionByteCode(JVMByteCodeGenerator* bytecodeGenerator
 void AST::EXPR::generateSubtractionByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
 {
 	mainMethod += "\tinvokestatic " + std::string(PROGRAM_NAME) + "." + JVMByteCodeGenerator::SUB_SUBROUTINE + "(II)I\n";
-	if (!bytecodeGenerator->isSubSubroutineEnabled())
-	{
-		bytecodeGenerator->subSubroutine(jasminProgram);
-	}
+	bytecodeGenerator->addSubroutine(_uValue.exprBiOp.op, jasminProgram);
 	mainMethod += getIStoreByteCode(bytecodeGenerator) + "\n";
 
 	std::string ID = "SUBTRACTION";
 	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true); // FIXME - assume integer addition
 }
 
+void AST::EXPR::generateMultiplicationByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
+{
+	mainMethod += "\tinvokestatic " + std::string(PROGRAM_NAME) + "." + JVMByteCodeGenerator::MUL_SUBROUTINE + "(II)I\n";
+	bytecodeGenerator->addSubroutine(_uValue.exprBiOp.op, jasminProgram);
+	mainMethod += getIStoreByteCode(bytecodeGenerator) + "\n";
+
+	std::string ID = "MULTIPLICATION";
+	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true); // FIXME - assume integer addition
+}
+
+void AST::EXPR::generateDivisionByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
+{
+	mainMethod += "\tinvokestatic " + std::string(PROGRAM_NAME) + "." + JVMByteCodeGenerator::DIV_SUBROUTINE + "(II)I\n";
+	bytecodeGenerator->addSubroutine(_uValue.exprBiOp.op, jasminProgram);
+	mainMethod += getIStoreByteCode(bytecodeGenerator) + "\n";
+
+	std::string ID = "DIVISION";
+	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true); // FIXME - assume integer addition
+}
+
+void AST::EXPR::generateLessThanByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
+{
+	// TODO
+	mainMethod += "\tinvokestatic " + std::string(PROGRAM_NAME) + "." + JVMByteCodeGenerator::LESS_THAN_SUBROUTINE + "(II)Z\n";
+	bytecodeGenerator->addSubroutine(_uValue.exprBiOp.op, jasminProgram);
+	mainMethod += getIStoreByteCode(bytecodeGenerator) + "\n";
+
+	std::string ID = "LESS_THAN";
+	bytecodeGenerator->updateEnvironment(&ID, EXPR_BOOL, true);
+}
+
+void AST::EXPR::generateEqToByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
+{
+	// TODO
+	mainMethod += "\tinvokestatic " + std::string(PROGRAM_NAME) + "." + JVMByteCodeGenerator::EQ_TO_SUBROUTINE + "(II)Z\n";
+	bytecodeGenerator->addSubroutine(_uValue.exprBiOp.op, jasminProgram);
+	mainMethod += getIStoreByteCode(bytecodeGenerator) + "\n";
+
+	std::string ID = "EQ_TO";
+	bytecodeGenerator->updateEnvironment(&ID, EXPR_BOOL, true);
+}
 
 /*
 * Utility functions
