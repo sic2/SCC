@@ -155,9 +155,9 @@ uValue value_11 = {
 					}
 				};
 
-boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_10));
+//boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_10));
  //boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_INT, value_2));
- //boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_CASE, value_4));
+ boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_CASE, value_4));
 
 // Test programs are encoded and evaluated 
 // in the main method.

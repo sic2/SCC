@@ -28,7 +28,6 @@
 #define JASMIN_WITHOUT_NEWLINE(stream, x) stream += TAB x
 #define JASMIN_WITH_NEWLINE(stream, x) stream += x NEW_LINE
 #define JASMIN_DIRECTIVE(stream, x) JASMIN_WITH_NEWLINE(stream, x)
-#define JASMIN_LABEL(stream, x) JASMIN_WITH_NEWLINE(stream, SPACE x) // TODO - add ":""
 #define JASMIN_INSTR(stream, x) JASMIN_WITH_NEWLINE(stream, TAB x)
 
 /*
@@ -98,7 +97,6 @@ public:
 	bool addSubroutine(std::string subroutine);
 
 private:
-
 	boost::shared_ptr<AST::PROGRAM> _program;
 
 	void addInitialJasminCode(std::string& output);

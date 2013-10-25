@@ -46,11 +46,11 @@ void JVMByteCodeGenerator::formatJasminInstruction(std::string& instruction)
 
 void JVMByteCodeGenerator::printLastStatement(std::string& output)
 {
-	if (_lastAddedExpression.first.compare("") != 0)
+	// if (_lastAddedExpression.first.compare("") != 0)
 	{
 		std::ostringstream convert; 
-		convert << _environment.find(_lastAddedExpression.first)->second.first;
-		output += "\t iload_" + convert.str() + "\n";
+		convert << (_environment.size()); //_environment.find(_lastAddedExpression.first)->second.first;
+		output += "\tiload_" + convert.str() + "\n";
 	}
 	switch(_lastAddedExpression.second)
 	{

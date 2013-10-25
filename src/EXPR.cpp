@@ -121,20 +121,23 @@ AST::EXPRESSION_TYPE AST::EXPR::generateIntByteCode(JVMByteCodeGenerator* byteco
 	bytecodeGenerator->formatJasminInstruction(bytecode);
 	mainMethod += bytecode;
 
-	std::string ID = ""; // dummy ID
+	std::string storeBytecode = getIStoreByteCode(bytecodeGenerator);
+	mainMethod += storeBytecode + "\n";
+
+	std::string ID = "";
 	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, false);
 
 	return EXPR_INT;
 }
 
-// [ ASSUMPTION ] - case of integers
+// [ ASSUMPTION ] - case of integers 
+// TODO - case for other types !? 
 AST::EXPRESSION_TYPE AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool printStream) 
 {
 	boost::shared_ptr<EXPR>* expr = _uValue.exprCase.expr;
-	(*expr)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false);
-
-	mainMethod += "\tistore_0\n"; // FIXME - hardcoded. 
-	mainMethod += "\tiload_0 \n"; // FIXME - hardcoded bytecode
+	(*expr)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true);
+ 
+ 	mainMethod += std::string("\tiload_") + integerToString(bytecodeGenerator->getEnvironmentSize()) + std::string("\n");
 	mainMethod += "\tlookupswitch \n";
 
 	// A vector is created to store each ALTernative, its own label as well
@@ -194,16 +197,12 @@ AST::EXPRESSION_TYPE AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytec
 		it != pairsAltsLabels.end(); ++it) 
 	{
 		mainMethod += (*it).second + ": \n";
-		GET_EXPR_FROM_PAIR(it)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false); // FIXME - not sure about last param
-		mainMethod += "\treturn\n";
+		GET_EXPR_FROM_PAIR(it)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false);
+		mainMethod += "\tgoto DLABEL\n";
 	} // end for-loop for pairsAltsLabels vector
 	
 	// Handle default label
 	mainMethod += "DLABEL: \n"; 
-	mainMethod += "\treturn\n";
-
-	std::string ID = "";
-	bytecodeGenerator->updateEnvironment(&ID, EXPR_CASE, false);
 
 	return EXPR_CASE;
 }
@@ -221,14 +220,11 @@ AST::EXPRESSION_TYPE AST::EXPR::generateBiOPByteCode(JVMByteCodeGenerator* bytec
 	boost::shared_ptr<EXPR>* operand_1 = _uValue.exprBiOp.expr1;
 	EXPRESSION_TYPE op1Type = (*operand_1)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false);
 
-	// TODO - assuming operands are in their simplest form
-	// what if one of the operands expands? then the result should be loaded as well.
 	EXPRESSION_TYPE exprType =  (*_uValue.exprBiOp.op)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, op0Type, op1Type);
 	mainMethod += getIStoreByteCode(bytecodeGenerator) + "\n";
 
-	std::string ID = "SUBROUTINE"; // FIXME - assuming same ID for all subroutines
+	std::string ID = "SUBROUTINE";
 	bytecodeGenerator->updateEnvironment(&ID, exprType, true);
-
 	return exprType; 
 }
 
@@ -252,77 +248,11 @@ AST::EXPRESSION_TYPE AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* byt
 }
 
 /*
-* Bi-OP Subroutines generation and callees.
-* TODO - merge these functions together if possible
-*/
-void AST::EXPR::generateAdditionByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
-{
-	// mainMethod += "\tinvokestatic " + std::string(PROGRAM_NAME) + "." + JVMByteCodeGenerator::ADD_SUBROUTINE + "(II)I\n";
-	// bytecodeGenerator->addSubroutine(_uValue.exprBiOp.op, jasminProgram);
-	// mainMethod += getIStoreByteCode(bytecodeGenerator) + "\n";
-
-	// std::string ID = "ADDITION";
-	// bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true); // FIXME - assume integer addition
-}
-
-void AST::EXPR::generateSubtractionByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
-{
-	// mainMethod += "\tinvokestatic " + std::string(PROGRAM_NAME) + "." + JVMByteCodeGenerator::SUB_SUBROUTINE + "(II)I\n";
-	// bytecodeGenerator->addSubroutine(_uValue.exprBiOp.op, jasminProgram);
-	// mainMethod += getIStoreByteCode(bytecodeGenerator) + "\n";
-
-	// std::string ID = "SUBTRACTION";
-	// bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true); // FIXME - assume integer addition
-}
-
-void AST::EXPR::generateMultiplicationByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
-{
-	// mainMethod += "\tinvokestatic " + std::string(PROGRAM_NAME) + "." + JVMByteCodeGenerator::MUL_SUBROUTINE + "(II)I\n";
-	// bytecodeGenerator->addSubroutine(_uValue.exprBiOp.op, jasminProgram);
-	// mainMethod += getIStoreByteCode(bytecodeGenerator) + "\n";
-
-	// std::string ID = "MULTIPLICATION";
-	// bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true); // FIXME - assume integer addition
-}
-
-void AST::EXPR::generateDivisionByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
-{
-	// mainMethod += "\tinvokestatic " + std::string(PROGRAM_NAME) + "." + JVMByteCodeGenerator::DIV_SUBROUTINE + "(II)I\n";
-	// bytecodeGenerator->addSubroutine(_uValue.exprBiOp.op, jasminProgram);
-	// mainMethod += getIStoreByteCode(bytecodeGenerator) + "\n";
-
-	// std::string ID = "DIVISION";
-	// bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true); // FIXME - assume integer addition
-}
-
-void AST::EXPR::generateLessThanByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
-{
-	// TODO
-	// mainMethod += "\tinvokestatic " + std::string(PROGRAM_NAME) + "." + JVMByteCodeGenerator::LESS_THAN_SUBROUTINE + "(II)Z\n";
-	// bytecodeGenerator->addSubroutine(_uValue.exprBiOp.op, jasminProgram);
-	// mainMethod += getIStoreByteCode(bytecodeGenerator) + "\n";
-
-	// std::string ID = "LESS_THAN";
-	// bytecodeGenerator->updateEnvironment(&ID, EXPR_BOOL, true);
-}
-
-void AST::EXPR::generateEqToByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
-{
-	// TODO
-	// mainMethod += "\tinvokestatic " + std::string(PROGRAM_NAME) + "." + JVMByteCodeGenerator::EQ_TO_SUBROUTINE + "(II)Z\n";
-	// bytecodeGenerator->addSubroutine(_uValue.exprBiOp.op, jasminProgram);
-	// mainMethod += getIStoreByteCode(bytecodeGenerator) + "\n";
-
-	// std::string ID = "EQ_TO";
-	// bytecodeGenerator->updateEnvironment(&ID, EXPR_BOOL, true);
-}
-
-/*
 * Utility functions
 */
 std::string AST::EXPR::getIStoreByteCode(JVMByteCodeGenerator* bytecodeGenerator)
 {
-	return "\t istore_" + integerToString(bytecodeGenerator->getEnvironmentSize());
+	return "\tistore_" + integerToString(bytecodeGenerator->getEnvironmentSize());
 }
 
 std::string AST::EXPR::integerToString(int value)
