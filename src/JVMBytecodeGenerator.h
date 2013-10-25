@@ -66,7 +66,7 @@ public:
 	/**
 	* @return size of the environment (i.e. symbols table)
 	*/
-	int getEnvironmentSize() { return this->_environment.size(); }
+	int getEnvironmentSize() { return _expressionsOnStack; /*this->_environment.size();*/ }
 
 	/**
 	* Dynamically format an instruction into a jasmin instruction.
@@ -96,6 +96,10 @@ public:
 	*/
 	bool addSubroutine(std::string subroutine);
 
+	int nextLabel();
+
+	int currentLabel();
+
 private:
 	boost::shared_ptr<AST::PROGRAM> _program;
 
@@ -109,12 +113,14 @@ private:
 	* is used to map "identifiers to their types and locations"
 	* Appel A., Modern Compiler Implementation in C
 	*/
-	std::map< std::string, std::pair<int, AST::EXPRESSION_TYPE> > _environment;
-	std::pair<std::string, AST::EXPRESSION_TYPE> _lastAddedExpression; 
+	std::pair<std::string, AST::EXPRESSION_TYPE> _lastAddedExpression; // TODO - for what cases is string used? 
+	int _expressionsOnStack;
 
 	/**
 	* Set containing the subroutines names of all subroutines 
 	* used so far.
 	*/
 	std::set<std::string> _subRoutines;
+
+	int _numberLabels;
 };

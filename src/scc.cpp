@@ -59,7 +59,7 @@ boost::shared_ptr<ALT> alt_1(new ALT(&expr_1, &expr_0));
 uValue value_3 = {
 				exprVarConstr: 
 					{
-					ID: new std::string(""), 
+					ID: new std::string("test"), 
 					expr: &expr_0
 					}
 				};
@@ -155,9 +155,9 @@ uValue value_11 = {
 					}
 				};
 
-//boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_10));
+boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_7));
  //boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_INT, value_2));
- boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_CASE, value_4));
+// boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_CASE, value_4));
 
 // Test programs are encoded and evaluated 
 // in the main method.

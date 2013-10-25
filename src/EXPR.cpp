@@ -9,8 +9,7 @@
 #include <map>
 
 #define GET_Condition_FROM_ALT(iterator) (*((* iterator)->getCondition()))
-#define GET_EXPR_FROM_PAIR(iterator) (*(* iterator).first->getEXPR())
-
+#define GET_EXPR_FROM_ALT(iterator) (*((* iterator)->getEXPR()))
 
 AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, AST::uValue value) 
 {
@@ -27,14 +26,14 @@ AST::EXPR::~EXPR()
 	}
 }
 
-AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool printStream)
+AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack)
 {
 	EXPRESSION_TYPE retval = EXPR_UNDEFINED;
 	switch(_typeExpr)
 	{
 	case EXPR_INT:
 		{
-			retval = generateIntByteCode(bytecodeGenerator, jasminProgram, mainMethod, printStream);
+			retval = generateIntByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack);
 		}
 		break;
 	case EXPR_BOOL:
@@ -54,14 +53,14 @@ AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeG
 		break;
 	case EXPR_CASE:
 		{
-			retval = generateCaseByteCode(bytecodeGenerator, jasminProgram, mainMethod, printStream);
+			retval = generateCaseByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack);
 		}
 		break;
 	case EXPR_FOR_LOOP:
 		break;
 	case EXPR_BI_OP:
 		{
-			retval = generateBiOPByteCode(bytecodeGenerator, jasminProgram, mainMethod, printStream);
+			retval = generateBiOPByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack);
 		}
 		break;
 	case EXPR_GROUP:
@@ -77,7 +76,7 @@ AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeG
 		break;
 	case EXPR_NEW_VAR:
 		{
-			retval = generateNewVarByteCode(bytecodeGenerator, jasminProgram, mainMethod, printStream);
+			retval = generateNewVarByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack);
 		}
 		break;
 	default:
@@ -110,13 +109,8 @@ std::string AST::EXPR::getIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, i
 	return retval + integerToString(Integer);
 }
 
-AST::EXPRESSION_TYPE AST::EXPR::generateIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool printStream)
+AST::EXPRESSION_TYPE AST::EXPR::generateIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack)
 {	
-	if (printStream)
-	{
-		mainMethod += std::string("\t") + PRINT_STREAM + std::string("\n");
-	}
-	
 	std::string bytecode = getIntByteCode(bytecodeGenerator, _uValue.Integer);
 	bytecodeGenerator->formatJasminInstruction(bytecode);
 	mainMethod += bytecode;
@@ -125,85 +119,41 @@ AST::EXPRESSION_TYPE AST::EXPR::generateIntByteCode(JVMByteCodeGenerator* byteco
 	mainMethod += storeBytecode + "\n";
 
 	std::string ID = "";
-	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, false);
-
+	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, onStack);
 	return EXPR_INT;
 }
 
-// [ ASSUMPTION ] - case of integers 
-// TODO - case for other types !? 
-AST::EXPRESSION_TYPE AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool printStream) 
+AST::EXPRESSION_TYPE AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack) 
 {
 	boost::shared_ptr<EXPR>* expr = _uValue.exprCase.expr;
-	(*expr)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true);
- 
- 	mainMethod += std::string("\tiload_") + integerToString(bytecodeGenerator->getEnvironmentSize()) + std::string("\n");
-	mainMethod += "\tlookupswitch \n";
+	(*expr)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true); 	
+ 	int caseValue = bytecodeGenerator->getEnvironmentSize(); 
 
-	// A vector is created to store each ALTernative, its own label as well
-	std::vector< std::pair< boost::shared_ptr<AST::ALT>, std::string> > pairsAltsLabels;  // FIXME - do not limit this to integers
-	int labelIndex = 0;
-	
-	/*
-	* Loop through all alternatives and print the first part of the lookupswitch
-	* example:
-	* 1 : Label_0
-	* 2 : Label_1
-	* 324 : Label_2
-	* etc..
-	*/
+ 	EXPRESSION_TYPE caseExpr;
 	std::vector< boost::shared_ptr<ALT> >* alternatives = _uValue.exprCase.alternatives;
 	for(std::vector< boost::shared_ptr<AST::ALT> >::iterator it = alternatives->begin(); it != alternatives->end(); ++it) 
 	{
-		EXPRESSION_TYPE expressionType;
-		uValue value;
-		
-		expressionType = GET_Condition_FROM_ALT(it)->getExprType(); 
-		value = GET_Condition_FROM_ALT(it)->getValue();
-		
-		if (expressionType == EXPR_INT)
+		if (it != alternatives->begin())
 		{
-			/*
-			* example:
-			* 	0 : Label_0
-			* OR
-			* 	1 : Label_1
-			* etc..
-			*/
-			mainMethod += "\t\t" + integerToString(value.Integer);
-			std::string label = "Label_" + integerToString(labelIndex);
-			mainMethod += " : " + label + "\n";
-			labelIndex++;
-
-			// Adding the integer and the label to pairsAltsLabels
-			pairsAltsLabels.push_back(std::make_pair< boost::shared_ptr<AST::ALT>, std::string>((*it), label));
+			mainMethod += "Label_" + integerToString(bytecodeGenerator->currentLabel()) + std::string(":\n");
 		}
-		
+
+		EXPRESSION_TYPE conditionType = GET_Condition_FROM_ALT(it)->getExprType(); 
+		if (conditionType == EXPR_INT)
+		{		
+			mainMethod += std::string("\tiload_") + integerToString(caseValue - 1) + std::string("\n"); // FIXME - assume integer
+			GET_Condition_FROM_ALT(it)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false);
+			mainMethod += std::string("\tiload_") + integerToString(caseValue) + std::string("\n"); // FIXME - assume integer
+
+			std::string label = "Label_" + integerToString(bytecodeGenerator->nextLabel());
+			mainMethod += std::string("\t if_icmpne ") + label + std::string("\n");
+			caseExpr = GET_EXPR_FROM_ALT(it)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false);
+		}
 	} // end for-loop for _alternatives vector
-	
-	// Default label must always be specified - but it won't have
-	// any functionality in the Case language
-	mainMethod += "\t\tdefault : DLABEL\n"; 
+	mainMethod += "Label_" + integerToString(bytecodeGenerator->currentLabel()) + std::string(":\n");
 
-	/* Loop pairsAltsLabels to expand each case 
-	* example:
-	* Label_0:
-		EXPR
-	* Label_1:
-		EXPR
-	* etc...
-	*/
-	for(std::vector< std::pair< boost::shared_ptr<AST::ALT>, std::string> >::iterator it = pairsAltsLabels.begin(); 
-		it != pairsAltsLabels.end(); ++it) 
-	{
-		mainMethod += (*it).second + ": \n";
-		GET_EXPR_FROM_PAIR(it)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false);
-		mainMethod += "\tgoto DLABEL\n";
-	} // end for-loop for pairsAltsLabels vector
-	
-	// Handle default label
-	mainMethod += "DLABEL: \n"; 
-
+	std::string ID = "";
+	bytecodeGenerator->updateEnvironment(&ID, caseExpr, true);
 	return EXPR_CASE;
 }
 
@@ -211,14 +161,18 @@ AST::EXPRESSION_TYPE AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytec
 // then make a call to this subroutine
 // and get the result
 // two variables
-AST::EXPRESSION_TYPE AST::EXPR::generateBiOPByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool printStream)
+AST::EXPRESSION_TYPE AST::EXPR::generateBiOPByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack)
 {
+	int caseValue = bytecodeGenerator->getEnvironmentSize();
 	// Generate bytecode for operands
+
 	boost::shared_ptr<EXPR>* operand_0 = _uValue.exprBiOp.expr;
-	EXPRESSION_TYPE op0Type = (*operand_0)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true);
+	EXPRESSION_TYPE op0Type = (*operand_0)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true); // Push to stack, so that next operand can be pushed too
+	mainMethod += std::string("\tiload_") + integerToString(caseValue) + std::string("\n"); // FIXME - assume integer
 
 	boost::shared_ptr<EXPR>* operand_1 = _uValue.exprBiOp.expr1;
-	EXPRESSION_TYPE op1Type = (*operand_1)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false);
+	EXPRESSION_TYPE op1Type = (*operand_1)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false); // can be overwritten, so do not update environment stack
+	mainMethod += std::string("\tiload_") + integerToString(caseValue + 1) + std::string("\n"); // FIXME - assume integer
 
 	EXPRESSION_TYPE exprType =  (*_uValue.exprBiOp.op)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, op0Type, op1Type);
 	mainMethod += getIStoreByteCode(bytecodeGenerator) + "\n";
@@ -228,7 +182,7 @@ AST::EXPRESSION_TYPE AST::EXPR::generateBiOPByteCode(JVMByteCodeGenerator* bytec
 	return exprType; 
 }
 
-AST::EXPRESSION_TYPE AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool printStream)
+AST::EXPRESSION_TYPE AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack)
 {	
 	std::string* ID = _uValue.exprNewVar.ID;
 	boost::shared_ptr<EXPR>* expr = _uValue.exprNewVar.expr;

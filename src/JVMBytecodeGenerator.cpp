@@ -10,6 +10,8 @@
 JVMByteCodeGenerator::JVMByteCodeGenerator(boost::shared_ptr<AST::PROGRAM> program)
 {
 	_program = program;
+	_numberLabels = -1;
+	_expressionsOnStack = 0;
 }
 
 // Resources on jasmin:
@@ -46,12 +48,12 @@ void JVMByteCodeGenerator::formatJasminInstruction(std::string& instruction)
 
 void JVMByteCodeGenerator::printLastStatement(std::string& output)
 {
-	// if (_lastAddedExpression.first.compare("") != 0)
 	{
 		std::ostringstream convert; 
-		convert << (_environment.size()); //_environment.find(_lastAddedExpression.first)->second.first;
+		convert << (_expressionsOnStack - 1); 
 		output += "\tiload_" + convert.str() + "\n";
 	}
+
 	switch(_lastAddedExpression.second)
 	{
 		case AST::EXPR_INT:
@@ -86,6 +88,7 @@ void JVMByteCodeGenerator::addInitialMainJasminCode(std::string& output)
 	JASMIN_DIRECTIVE(output, ".method public static main([Ljava/lang/String;)V");	
 	JASMIN_STACK(output, 5);
 	JASMIN_LOCALS(output, 100);
+	JASMIN_INSTR(output, "getstatic java/lang/System/out Ljava/io/PrintStream;");
 }
 void JVMByteCodeGenerator::addFinalMainJasminCode(std::string& output)
 {
@@ -106,12 +109,21 @@ bool JVMByteCodeGenerator::addSubroutine(std::string subroutine)
 
 void JVMByteCodeGenerator::updateEnvironment(std::string* ID, AST::EXPRESSION_TYPE exprType, bool onStack)
 {
-	
-	int varIndex = _environment.size();
+	printf("updating env with id %s expr type %d and onstack %d\n", ID->c_str(), exprType, onStack);
 	_lastAddedExpression = std::make_pair<std::string, AST::EXPRESSION_TYPE> (*ID, exprType);
 	if (onStack)
 	{
-		_environment.insert(std::make_pair<std::string, std::pair<int, AST::EXPRESSION_TYPE> > 
-								(*ID, std::make_pair<int, AST::EXPRESSION_TYPE> (varIndex, exprType))); // XXX - not sure if copied or passed by reference
+		_expressionsOnStack++;
 	}
+}
+
+int JVMByteCodeGenerator::nextLabel()
+{
+	this->_numberLabels++;
+	return this->_numberLabels;
+}
+
+int JVMByteCodeGenerator::currentLabel()
+{
+	return this->_numberLabels;
 }
