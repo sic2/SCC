@@ -11,6 +11,8 @@
 #define DIV_SUBROUTINE "DIV_SUBROUTINE";
 #define LESS_THAN_SUBROUTINE "LESS_THAN_SUBROUTINE";
 #define EQ_TO_SUBROUTINE "EQ_TO_SUBROUTINE";
+#define OR_SUBROUTINE "OR_SUBROUTINE";
+#define AND_SUBROUTINE "AND_SUBROUTINE";
 
 AST::OPERATOR::OPERATOR(AST::OP op)
 {
@@ -72,7 +74,19 @@ AST::EXPRESSION_TYPE AST::OPERATOR::generateByteCode(JVMByteCodeGenerator* bytec
 			}
 			break;
 		case AST::OP_OR:
+			{
+				subroutineName += OR_SUBROUTINE;
+				returnValue = BOOL_PARAM;
+				retval = EXPR_BOOL;
+			}
+			break;
 		case AST::OP_AND:
+			{
+				subroutineName += AND_SUBROUTINE;
+				returnValue = BOOL_PARAM;
+				retval = EXPR_BOOL;
+			}
+			break;
 		case AST::OP_RANGE:
 		default:
 			printf("operation not supported\n");
@@ -95,6 +109,7 @@ AST::EXPRESSION_TYPE AST::OPERATOR::generateByteCode(JVMByteCodeGenerator* bytec
 
 std::string AST::OPERATOR::getSubroutineParams(AST::EXPRESSION_TYPE op0Type, AST::EXPRESSION_TYPE op1Type)
 {
+	printf("op type is %d \n", op0Type);
 	std::string retval = "(";
 	if (op0Type == EXPR_INT)
 	{
@@ -146,8 +161,17 @@ std::string AST::OPERATOR::getSubroutine(std::string& subroutineCallerName)
 			}
 			break;
 		case AST::OP_OR:
+			{
+				subroutine += getTrivialLogicSubroutine();
+			}
+			break;
 		case AST::OP_AND:
+			{
+				subroutine += getTrivialLogicSubroutine();
+			}
+			break;
 		case AST::OP_RANGE:
+			// TODO
 		default:
 			printf("subroutine not supported yet\n");
 		break;
@@ -161,8 +185,6 @@ std::string AST::OPERATOR::getSubroutineInitialisation(std::string& subroutineCa
 	std::string retval = std::string(".method public static ") + subroutineCallerName + std::string(" ; START SUBROUTINE\n");
 	retval += ".limit stack 2 \n";
 	retval += ".limit locals 2 \n";
-	retval += "\t iload_0 \n";
-	retval += "\t iload_1 \n";
 	return retval;
 }
 
@@ -176,6 +198,8 @@ std::string AST::OPERATOR::getSubroutineReturning()
 std::string AST::OPERATOR::getTrivialMathSubroutine()
 {
 	std::string retval;
+	retval += "\t iload_0 \n";
+	retval += "\t iload_1 \n";
 	switch(this->_op)
 	{
 		case AST::OP_ADDITION:
@@ -205,6 +229,8 @@ std::string AST::OPERATOR::getTrivialMathSubroutine()
 std::string AST::OPERATOR::getTrivialCmpSubroutine()
 {
 	std::string retval;
+	retval += "\t iload_0 \n";
+	retval += "\t iload_1 \n";
 	if (this->_op == AST::OP_EQUALITY)
 	{
 		retval += "\t if_icmpne Label_NT \n";
@@ -219,5 +245,37 @@ std::string AST::OPERATOR::getTrivialCmpSubroutine()
 	retval += " Label_NT:\n";
 	retval += "\t iconst_0 \n";
 	retval += " Label_T: \n";
+	return retval;
+}
+
+std::string AST::OPERATOR::getTrivialLogicSubroutine()
+{
+	std::string retval;
+	if (this->_op == AST::OP_OR)
+	{
+		retval += "\t iload_0 \n";
+		retval += "\t ifne Label_NT \n";
+		retval += "\t iload_1 \n";
+		retval += "\t ifeq Label_T \n";
+		retval += " Label_NT:\n";
+		retval += "\t iconst_1 \n";
+		retval += "\t goto Label_R \n";
+		retval += " Label_T:\n";
+		retval += "\t iconst_0 \n";
+		retval += " Label_R:\n";
+	}
+	else
+	{
+		retval += "\t iload_0 \n";
+		retval += "\t ifeq Label_T \n";
+		retval += "\t iload_1 \n";
+		retval += "\t ifeq Label_T \n";
+		retval += "\t iconst_1 \n";
+		retval += "\t goto Label_R \n";
+		retval += " Label_T:\n";
+		retval += "\t iconst_0 \n";
+		retval += " Label_R:\n";
+	}
+
 	return retval;
 }

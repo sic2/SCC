@@ -23,6 +23,14 @@ using namespace AST;
 /*
 * Define values
 */
+uValue value_TRUE = {
+				Bool: true
+				};
+
+uValue value_FALSE = {
+				Bool: false
+				};
+
 uValue value_0 = {
 				Integer: 0
 				};
@@ -43,10 +51,16 @@ boost::shared_ptr<OPERATOR> op_mul(new OPERATOR(OP_MULTIPLICATION));
 boost::shared_ptr<OPERATOR> op_div(new OPERATOR(OP_DIVISION));
 boost::shared_ptr<OPERATOR> op_eq(new OPERATOR(OP_EQUALITY));
 boost::shared_ptr<OPERATOR> op_less_than(new OPERATOR(OP_LESS));
+boost::shared_ptr<OPERATOR> op_or(new OPERATOR(OP_OR));
+boost::shared_ptr<OPERATOR> op_and(new OPERATOR(OP_AND));
+
+boost::shared_ptr<EXPR> expr_TRUE(new EXPR(EXPR_BOOL, value_TRUE));
+boost::shared_ptr<EXPR> expr_FALSE(new EXPR(EXPR_BOOL, value_FALSE));
 
 boost::shared_ptr<EXPR> expr_0(new EXPR(EXPR_INT, value_0));
 boost::shared_ptr<EXPR> expr_1(new EXPR(EXPR_INT, value_1));
 boost::shared_ptr<EXPR> expr_2(new EXPR(EXPR_INT, value_2));
+
 
 boost::shared_ptr<TYPE> type_0(new TYPE(TYPE_INT));
 boost::shared_ptr<TYPE> type_1(new TYPE(TYPE_INT));
@@ -155,7 +169,32 @@ uValue value_11 = {
 					}
 				};
 
-boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_7));
+/*
+* true or false
+*/
+uValue value_12 = {
+				exprBiOp:
+					{
+					expr: &expr_TRUE,
+					op: &op_or,
+					expr1: &expr_FALSE
+					}
+				};
+
+
+/*
+* true and false
+*/
+uValue value_13 = {
+				exprBiOp:
+					{
+					expr: &expr_TRUE,
+					op: &op_and,
+					expr1: &expr_FALSE
+					}
+				};
+
+boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_13));
  //boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_INT, value_2));
 // boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_CASE, value_4));
 

@@ -6,12 +6,18 @@
 	return
 .end method
 
-.method public static SUB_SUBROUTINE(II)I ; START SUBROUTINE
+.method public static AND_SUBROUTINE(ZZ)Z ; START SUBROUTINE
 .limit stack 2
 .limit locals 2
 	 iload_0
+	 ifeq Label_T
 	 iload_1
-	 isub
+	 ifeq Label_T
+	 iconst_1
+	 goto Label_R
+ Label_T:
+	 iconst_0
+ Label_R:
 	 ireturn
 .end method ; END SUBROUTINE
 
@@ -22,12 +28,12 @@
 	iconst_1
 	istore_0
 	iload_0
-	iconst_2
+	iconst_1
 	istore_1
 	iload_1
-	invokestatic simple.SUB_SUBROUTINE(II)I
+	invokestatic simple.AND_SUBROUTINE(ZZ)Z
 	istore_1
 	iload_1
-	invokevirtual java/io/PrintStream/println(I)V
+	invokevirtual java/io/PrintStream/println(Z)V
 	return	; return from main
 .end method

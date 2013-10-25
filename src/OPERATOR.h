@@ -27,6 +27,8 @@ private:
 	std::string getSubroutine(std::string& subroutineCallerName);
 	std::string getSubroutineInitialisation(std::string& subroutineCallerName);
 	std::string getSubroutineReturning();
+
 	std::string getTrivialMathSubroutine();
 	std::string getTrivialCmpSubroutine();
+	std::string getTrivialLogicSubroutine();
 };

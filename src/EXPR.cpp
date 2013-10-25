@@ -38,7 +38,8 @@ AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeG
 		break;
 	case EXPR_BOOL:
 		{
-			// TODO
+			// TODO - urgent
+			retval = generateBoolByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack);
 		}
 		break;
 	case EXPR_STRING:
@@ -121,6 +122,26 @@ AST::EXPRESSION_TYPE AST::EXPR::generateIntByteCode(JVMByteCodeGenerator* byteco
 	std::string ID = "";
 	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, onStack);
 	return EXPR_INT;
+}
+
+AST::EXPRESSION_TYPE AST::EXPR::generateBoolByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack)
+{
+	if (_uValue.Bool == true)
+	{
+		mainMethod += "\ticonst_1\n";
+	} 
+	else
+	{
+		mainMethod += "\ticonst_0\n";
+	}
+
+	std::string storeBytecode = getIStoreByteCode(bytecodeGenerator);
+	mainMethod += storeBytecode + "\n";
+
+	std::string ID = "";
+	bytecodeGenerator->updateEnvironment(&ID, EXPR_BOOL, onStack);
+
+	return EXPR_BOOL;
 }
 
 AST::EXPRESSION_TYPE AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack) 
