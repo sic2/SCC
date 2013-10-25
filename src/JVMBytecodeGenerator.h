@@ -2,6 +2,7 @@
 
 #include "AST.h"
 #include <map>
+#include <set>
 
 /**********************************************************
 * MACROS
@@ -12,7 +13,7 @@
 * runtime generated content. 
 **********************************************************/
 
-#define PROGRAM_NAME "simple"
+#define PROGRAM_NAME "simple"  // TODO - define name of program from main args
 
 /*
 * General spacing and formatting
@@ -52,22 +53,6 @@
 class JVMByteCodeGenerator
 {
 public:
-	/******************
-	* Static variables
-	*******************/
-	// [ TODO ] - static variables for other subroutines
-
-	/**
-	* Define the name of the add subroutine to use over all the rest of the program
-	*/
-	const static std::string ADD_SUBROUTINE;
-	const static std::string SUB_SUBROUTINE;
-	const static std::string MUL_SUBROUTINE;
-	const static std::string DIV_SUBROUTINE;
-	const static std::string LESS_THAN_SUBROUTINE;
-	const static std::string EQ_TO_SUBROUTINE;
-
-public:
 	JVMByteCodeGenerator(boost::shared_ptr<AST::PROGRAM> program);
 	virtual ~JVMByteCodeGenerator() {}
 
@@ -104,19 +89,15 @@ public:
 	void updateEnvironment(std::string* ID, AST::EXPRESSION_TYPE exprType, bool onStack);
 
 	/**
-	* Append a subroutine at the end of the given bytecode jasmin program
+	* Add a subroutine to the environment (subroutines table)
 	* IF and ONLY IF the subroutine does not exist already.
-	* @param bytecodeProgram
+	* @param subroutine name
+	* @return true if subroutine was added, false if it was already
+	*			in the environment
 	*/
-	void addSubroutine(AST::OP op, std::string& bytecodeProgram);
+	bool addSubroutine(std::string subroutine);
 
 private:
-	/**
-	* Adding Print statement bytecode to output for 
-	* a value which must be on top of the stack.
-	*/
-	void printInt(std::string& output);
-	void printBool(std::string& output);
 
 	boost::shared_ptr<AST::PROGRAM> _program;
 
@@ -126,21 +107,16 @@ private:
 	void printLastStatement(std::string& output);
 
 	/**
-	* True if the subroutine has been already added to 
-	* the Jasmin bytecode
-	*/
-	bool _addSubroutineEnabled;
-	bool _subSubroutineEnabled;
-	bool _mulSubroutineEnabled;
-	bool _divSubroutineEnabled;
-	bool _lessThanSubroutineEnabled;
-	bool _eqToSubroutineEnabled;
-
-	/**
 	* The environment or symbol tables
 	* is used to map "identifiers to their types and locations"
 	* Appel A., Modern Compiler Implementation in C
 	*/
 	std::map< std::string, std::pair<int, AST::EXPRESSION_TYPE> > _environment;
 	std::pair<std::string, AST::EXPRESSION_TYPE> _lastAddedExpression; 
+
+	/**
+	* Set containing the subroutines names of all subroutines 
+	* used so far.
+	*/
+	std::set<std::string> _subRoutines;
 };

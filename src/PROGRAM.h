@@ -18,7 +18,7 @@ public:
 	* @param [out] mainMethod used for the bytecode of the main method of the program.
 	* @note The mainMethod should added at the end of the jasminProgram by the caller.
 	*/
-	void generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod);
+	EXPRESSION_TYPE generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod);
 
 private:
 	boost::shared_ptr<AST::EXPR>* _expr;

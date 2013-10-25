@@ -45,6 +45,11 @@ namespace AST
 	************************/
 
 	/**
+	* Operator
+	*/
+	class OPERATOR;
+
+	/**
 	* Type
 	*/
 	class TYPE;
@@ -86,7 +91,8 @@ namespace AST
 		EXPR_BI_OP,
 		EXPR_GROUP,
 		EXPR_TYPE_DEF,
-		EXPR_NEW_VAR
+		EXPR_NEW_VAR,
+		EXPR_UNDEFINED
 	} EXPRESSION_TYPE;
 
 	// EXPR_VAR_CONSTR
@@ -115,7 +121,7 @@ namespace AST
 	typedef struct Expr_Bi_Op 
 	{
 		boost::shared_ptr<EXPR>* expr;
-		OP op;
+		boost::shared_ptr<OPERATOR>* op;
 		boost::shared_ptr<EXPR>* expr1;
 	} Expr_Bi_Op;
 

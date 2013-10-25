@@ -12,7 +12,7 @@ AST::PROGRAM::PROGRAM(boost::shared_ptr<AST::EXPR>* expr)
 	_expr = expr;
 }
 
-void AST::PROGRAM::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
+AST::EXPRESSION_TYPE AST::PROGRAM::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
 {
-	(*_expr)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true);
+	return (*_expr)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true);
 }

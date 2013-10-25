@@ -9,6 +9,7 @@
 * circumstances, unless permission has been granted by the author.
 ***********************************************************/
 
+#include "OPERATOR.h"
 #include "ALT.h"
 #include "EXPR.h"
 #include "PROGRAM.h"
@@ -32,6 +33,16 @@ uValue value_1 = {
 uValue value_2 = {
 				Integer: 2
 				};
+
+/*
+* Operators
+*/
+boost::shared_ptr<OPERATOR> op_add(new OPERATOR(OP_ADDITION));
+boost::shared_ptr<OPERATOR> op_sub(new OPERATOR(OP_SUBTRACTION));
+boost::shared_ptr<OPERATOR> op_mul(new OPERATOR(OP_MULTIPLICATION));
+boost::shared_ptr<OPERATOR> op_div(new OPERATOR(OP_DIVISION));
+boost::shared_ptr<OPERATOR> op_eq(new OPERATOR(OP_EQUALITY));
+boost::shared_ptr<OPERATOR> op_less_than(new OPERATOR(OP_LESS));
 
 boost::shared_ptr<EXPR> expr_0(new EXPR(EXPR_INT, value_0));
 boost::shared_ptr<EXPR> expr_1(new EXPR(EXPR_INT, value_1));
@@ -68,7 +79,7 @@ uValue value_5 = {
 				exprBiOp:
 					{
 					expr: &expr_0,
-					op: OP_ADDITION,
+					op: &op_add,
 					expr1: &expr_1
 					}
 				};
@@ -91,7 +102,7 @@ uValue value_7 = {
 				exprBiOp:
 					{
 					expr: &expr_1,
-					op: OP_SUBTRACTION,
+					op: &op_sub,
 					expr1: &expr_2
 					}
 				};
@@ -103,7 +114,7 @@ uValue value_8 = {
 				exprBiOp:
 					{
 					expr: &expr_1,
-					op: OP_MULTIPLICATION,
+					op: &op_mul,
 					expr1: &expr_2
 					}
 				};
@@ -115,7 +126,7 @@ uValue value_9 = {
 				exprBiOp:
 					{
 					expr: &expr_2,
-					op: OP_DIVISION,
+					op: &op_div,
 					expr1: &expr_1
 					}
 				};
@@ -127,7 +138,7 @@ uValue value_10 = {
 				exprBiOp:
 					{
 					expr: &expr_2,
-					op: OP_LESS,
+					op: &op_less_than,
 					expr1: &expr_1
 					}
 				};
@@ -139,12 +150,12 @@ uValue value_11 = {
 				exprBiOp:
 					{
 					expr: &expr_2,
-					op: OP_EQUALITY,
+					op: &op_eq,
 					expr1: &expr_1
 					}
 				};
 
- boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_11));
+boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_10));
  //boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_INT, value_2));
  //boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_CASE, value_4));
 
