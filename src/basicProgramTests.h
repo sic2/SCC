@@ -2,7 +2,7 @@
 
 #include "baseProgramTest.h"
 
-class basicProgramTests : baseProgramTest
+class basicProgramTests : public baseProgramTest
 {
 public:
 	basicProgramTests() : baseProgramTest() {}
