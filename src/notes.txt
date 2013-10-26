@@ -2,3 +2,33 @@ notes:
 
 - i.e. Person age addr <- translate this as a java class/object
 - use some ADT to keep track of objects 
+
+
+typedef
+	"type" type_ID = [constr_ID [constraints]]
+
+	example:
+	"type" Person = Age Int | Addr Int      // assume all constr_ids take same args
+
+	in java:
+
+	class Person {
+		string _constr_ID;
+		_constraints;
+		Person(constr_ID, constraints)
+		{
+			_constr_ID = constr_ID;
+			_constraints = constraints;
+		}
+	}
+
+
+new var
+	var_ID :: type_ID = constr_ID [constraints]
+
+	example:
+	SIMO :: Person = Age 22
+
+	in java:
+
+	Person SIMO = new Person(Age, 22);

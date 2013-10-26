@@ -2,7 +2,7 @@
 
 #include "EXPR.h"
 
-AST::PROGRAM::PROGRAM(boost::shared_ptr<AST::EXPR>* expr) 
+AST::PROGRAM::PROGRAM(boost::shared_ptr<AST::EXPR> expr) 
 {
 	if(DEBUG_MODE >= 2)
 	{
@@ -14,5 +14,5 @@ AST::PROGRAM::PROGRAM(boost::shared_ptr<AST::EXPR>* expr)
 
 AST::EXPRESSION_TYPE AST::PROGRAM::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
 {
-	return (*_expr)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true);
+	return (_expr)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true);
 }

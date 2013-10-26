@@ -6,7 +6,7 @@
 class AST::PROGRAM 
 {
 public:
-	PROGRAM(boost::shared_ptr<AST::EXPR>* expr);
+	PROGRAM(boost::shared_ptr<AST::EXPR> expr);
 	virtual ~PROGRAM() {}
 
 	/**
@@ -21,5 +21,5 @@ public:
 	EXPRESSION_TYPE generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod);
 
 private:
-	boost::shared_ptr<AST::EXPR>* _expr;
+	boost::shared_ptr<AST::EXPR> _expr;
 };

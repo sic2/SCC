@@ -1,0 +1,30 @@
+; CREATING NEW OBJECT
+new simple$<NEW CLASS>
+dup
+new simple
+dup
+invokespecial <init>()V
+dup
+invokevirtual java/lang/Object.getClass()Ljava/lang/Class;
+pop 
+
+; PASS ARGUMENTS
+invokespecial simple$<NEW CLASS>.<init>(Lsimple;I)V ; I represent the param
+astore_1 ; storing object
+
+; GETTING FIELDS 
+aload_1 ; loading object
+getfield simple$<NEW CLASS>.<FIELD>:I ; I represent the field type
+
+; UPDATING FIELDS
+aload_1
+bipush 10 ; or other operators
+putfield simple$<NEW CLASS>.<FIELD>:I
+
+; CALLING METHOD
+aload_1
+getfield simple$<NEW CLASS>.<FIELD_0>:I ; I represent the field type
+aload_1
+getfield simple$<NEW CLASS>.<FIELD_1>:I ; I represent the field type
+invokestatic function(II)Z
+pop

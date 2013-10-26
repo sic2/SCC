@@ -38,7 +38,6 @@ AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeG
 		break;
 	case EXPR_BOOL:
 		{
-			// TODO - urgent
 			retval = generateBoolByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack);
 		}
 		break;
@@ -49,7 +48,9 @@ AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeG
 		break;
 	case EXPR_VAR_CONSTR:
 		{
-		// TODO
+			// TODO
+			// [ DESIGN ASSUMPTION ]
+			// this will work only for primitive types
 		}
 		break;
 	case EXPR_CASE:
@@ -67,17 +68,20 @@ AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeG
 	case EXPR_GROUP:
 		{
 			// TODO
+			// Iterate over all expressions
 		}
 		break;
-		
 	case EXPR_TYPE_DEF:
 		{
 			// TODO
+			// Define a new class
 		}
 		break;
 	case EXPR_NEW_VAR:
 		{
-			retval = generateNewVarByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack);
+			// TODO
+			// create instance of given class
+			//retval = generateNewVarByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack);
 		}
 		break;
 	default:
@@ -112,7 +116,7 @@ std::string AST::EXPR::getIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, i
 
 AST::EXPRESSION_TYPE AST::EXPR::generateIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack)
 {	
-	std::string bytecode = getIntByteCode(bytecodeGenerator, _uValue.Integer);
+	std::string bytecode = getIntByteCode(bytecodeGenerator, boost::get< int >(_uValue));
 	bytecodeGenerator->formatJasminInstruction(bytecode);
 	mainMethod += bytecode;
 
@@ -126,7 +130,7 @@ AST::EXPRESSION_TYPE AST::EXPR::generateIntByteCode(JVMByteCodeGenerator* byteco
 
 AST::EXPRESSION_TYPE AST::EXPR::generateBoolByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack)
 {
-	if (_uValue.Bool == true)
+	if (boost::get< bool >(_uValue) == true)
 	{
 		mainMethod += "\ticonst_1\n";
 	} 
@@ -146,15 +150,16 @@ AST::EXPRESSION_TYPE AST::EXPR::generateBoolByteCode(JVMByteCodeGenerator* bytec
 
 AST::EXPRESSION_TYPE AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack) 
 {
-	boost::shared_ptr<EXPR>* expr = _uValue.exprCase.expr;
-	(*expr)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true); 	
+
+	boost::shared_ptr<EXPR> expr = boost::get< Expr_Case >(_uValue).expr;
+	expr->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true); 	
  	int caseValue = bytecodeGenerator->getEnvironmentSize(); 
 
  	EXPRESSION_TYPE caseExpr;
-	std::vector< boost::shared_ptr<ALT> >* alternatives = _uValue.exprCase.alternatives;
-	for(std::vector< boost::shared_ptr<AST::ALT> >::iterator it = alternatives->begin(); it != alternatives->end(); ++it) 
+	std::vector< boost::shared_ptr<ALT> > alternatives = boost::get< Expr_Case >(_uValue).alternatives;
+	for(std::vector< boost::shared_ptr<AST::ALT> >::iterator it = alternatives.begin(); it != alternatives.end(); ++it) 
 	{
-		if (it != alternatives->begin())
+		if (it != alternatives.begin())
 		{
 			mainMethod += "Label_" + integerToString(bytecodeGenerator->currentLabel()) + std::string(":\n");
 		}
@@ -187,15 +192,15 @@ AST::EXPRESSION_TYPE AST::EXPR::generateBiOPByteCode(JVMByteCodeGenerator* bytec
 	int caseValue = bytecodeGenerator->getEnvironmentSize();
 	// Generate bytecode for operands
 
-	boost::shared_ptr<EXPR>* operand_0 = _uValue.exprBiOp.expr;
-	EXPRESSION_TYPE op0Type = (*operand_0)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true); // Push to stack, so that next operand can be pushed too
+	boost::shared_ptr<EXPR> operand_0 = boost::get< Expr_Bi_Op >(_uValue).expr;
+	EXPRESSION_TYPE op0Type = operand_0->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true); // Push to stack, so that next operand can be pushed too
 	mainMethod += std::string("\tiload_") + integerToString(caseValue) + std::string("\n"); // FIXME - assume integer
 
-	boost::shared_ptr<EXPR>* operand_1 = _uValue.exprBiOp.expr1;
-	EXPRESSION_TYPE op1Type = (*operand_1)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false); // can be overwritten, so do not update environment stack
+	boost::shared_ptr<EXPR> operand_1 = boost::get< Expr_Bi_Op >(_uValue).expr1;
+	EXPRESSION_TYPE op1Type = operand_1->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false); // can be overwritten, so do not update environment stack
 	mainMethod += std::string("\tiload_") + integerToString(caseValue + 1) + std::string("\n"); // FIXME - assume integer
 
-	EXPRESSION_TYPE exprType =  (*_uValue.exprBiOp.op)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, op0Type, op1Type);
+	EXPRESSION_TYPE exprType =  (boost::get< Expr_Bi_Op >(_uValue).op)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, op0Type, op1Type);
 	mainMethod += getIStoreByteCode(bytecodeGenerator) + "\n";
 
 	std::string ID = "SUBROUTINE";
@@ -203,23 +208,13 @@ AST::EXPRESSION_TYPE AST::EXPR::generateBiOPByteCode(JVMByteCodeGenerator* bytec
 	return exprType; 
 }
 
+/*
+* REDO
+*/
 AST::EXPRESSION_TYPE AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack)
 {	
-	std::string* ID = _uValue.exprNewVar.ID;
-	boost::shared_ptr<EXPR>* expr = _uValue.exprNewVar.expr;
-
-	if ((*expr)->getExprType() == EXPR_INT)
-	{
-		int value = (*expr)->getValue().Integer;
-		mainMethod += getIntByteCode(bytecodeGenerator, value) + std::string("\t; Var: ") + *ID + std::string("\n");
-
-		std::string storeBytecode = getIStoreByteCode(bytecodeGenerator);
-		mainMethod += storeBytecode + "\n";
-
-		bytecodeGenerator->updateEnvironment(ID, EXPR_INT, true);
-	}
-
-	return (*expr)->getExprType();
+	// TODO
+	return EXPR_NEW_VAR; // Does this matter?
 }
 
 /*

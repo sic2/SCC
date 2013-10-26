@@ -5,9 +5,7 @@
 #include <stdio.h>
 
 #include <boost/shared_ptr.hpp>
-
-// http://stackoverflow.com/questions/18188612/abstract-syntax-tree-representation-in-c
-// http://stackoverflow.com/questions/16127385/recursive-descent-parser-example-for-c
+#include <boost/variant.hpp>
 
 // AST - Abstrace Syntax Tree
 namespace AST 
@@ -95,62 +93,104 @@ namespace AST
 		EXPR_UNDEFINED
 	} EXPRESSION_TYPE;
 
-	// EXPR_VAR_CONSTR
-	typedef struct Expr_Var_Constr 
-	{
-		std::string* ID;
-		boost::shared_ptr<EXPR>* expr;
-	} Expr_Var_Constr;
+	/*******************************************************
+	* The following classes contain public fields on purpose
+	* since the aim is to use these more like structs 
+	* even if in C++ structs == classes
+	*
+	* TODO
+	* possible to use references? 
+	*******************************************************/
+	class Expr_Var_Constr{
+	public:
+		Expr_Var_Constr(std::string ID, boost::shared_ptr<EXPR> expr)
+		{
+			this->ID = ID;
+			this->expr = expr;
+		}
 
-	// EXPR_CASE
-	typedef struct Expr_Case 
-	{
-		 boost::shared_ptr<EXPR>* expr;
-		 std::vector< boost::shared_ptr<ALT> >* alternatives;
-	} Expr_Case;
+		virtual ~Expr_Var_Constr() {}
+		std::string ID;
+		boost::shared_ptr<EXPR> expr;
+	};
 
-	// EXPR_FOR_LOOP
-	typedef struct Expr_For_Loop 
-	{
-		std::string* ID;
-		boost::shared_ptr<EXPR>* expr;
-		boost::shared_ptr<EXPR>* expr1;
-	} Expr_For_Loop;
+	class Expr_Case{
+	public:
+		Expr_Case(boost::shared_ptr<EXPR> expr, std::vector< boost::shared_ptr<ALT> > alternatives)
+		{
+			this->expr = expr;
+			this->alternatives = alternatives;
+		}
 
-	// EXPR_BI_OP
-	typedef struct Expr_Bi_Op 
-	{
-		boost::shared_ptr<EXPR>* expr;
-		boost::shared_ptr<OPERATOR>* op;
-		boost::shared_ptr<EXPR>* expr1;
-	} Expr_Bi_Op;
+		virtual ~Expr_Case() {}
+		boost::shared_ptr<EXPR> expr;
+		std::vector< boost::shared_ptr<ALT> > alternatives;
+	};
 
-	// EXPR_GROUP
-	typedef struct Expr_Group 
-	{
-		std::vector< boost::shared_ptr<EXPR> >* expressions;
-	} Expr_Group;
+	class Expr_For_Loop{
+	public:
+		Expr_For_Loop(std::string ID, boost::shared_ptr<EXPR> expr, boost::shared_ptr<EXPR> expr1)
+		{
+			this->ID = ID;
+			this->expr = expr;
+			this->expr1 = expr1;
+		}
 
-	// EXPR_NEW_VAR
-	typedef struct Expr_New_Var 
-	{
-		std::string* ID;
-		boost::shared_ptr<EXPR>* expr;
-	} Expr_New_Var;
+		virtual ~Expr_For_Loop() {}
+		std::string ID;
+		boost::shared_ptr<EXPR> expr;
+		boost::shared_ptr<EXPR> expr1;
+	};
 
-	/*
-	* Expressions
-	*/ 
-	typedef union uValue
-	{
-		int Integer; 
-		bool Bool; 
-		std::string* Str; 
-		Expr_Var_Constr exprVarConstr; 
-		Expr_Case exprCase; 
-		Expr_For_Loop exprForLoop; 
-		Expr_Bi_Op exprBiOp; 
-		Expr_Group exprGroup; 
-		Expr_New_Var exprNewVar;
-	} uValue;
+	class Expr_Bi_Op{
+	public:
+		Expr_Bi_Op(boost::shared_ptr<EXPR> expr, boost::shared_ptr<OPERATOR> op, boost::shared_ptr<EXPR> expr1)
+		{
+			this->expr = expr;
+			this->op = op;
+			this->expr1 = expr1;
+		}
+
+		virtual ~Expr_Bi_Op() {}
+		boost::shared_ptr<EXPR> expr;
+		boost::shared_ptr<OPERATOR> op;
+		boost::shared_ptr<EXPR> expr1;
+	};
+
+	
+	class Expr_Group{
+	public:
+		Expr_Group(std::vector< boost::shared_ptr<EXPR> > expressions)
+		{
+			this->expressions = expressions;
+		}
+
+		virtual ~Expr_Group() {}
+		std::vector< boost::shared_ptr<EXPR> > expressions;
+	};
+
+	class Expr_New_Var{
+	public:
+		Expr_New_Var(std::string ID, boost::shared_ptr<EXPR> expr)
+		{
+			this->ID = ID;
+			this->expr = expr;
+		}
+
+		virtual ~Expr_New_Var() {}
+		std::string ID;
+		boost::shared_ptr<EXPR> expr;
+	};
+
+	typedef boost::variant< 
+							int, 
+							bool,
+							std::string,
+							Expr_Var_Constr, 
+							Expr_Case, 
+							Expr_For_Loop, 
+							Expr_Bi_Op, 
+							Expr_Group,
+							Expr_New_Var
+						> uValue; 
 }
