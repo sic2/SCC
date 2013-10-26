@@ -1,6 +1,6 @@
 #include "basicProgramTests.h"
 
-boost::shared_ptr<AST::PROGRAM> basicProgramTests::getIt()
+boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest0()
 {
 	boost::shared_ptr<OPERATOR> op_add(new OPERATOR(OP_ADDITION));
 
@@ -21,7 +21,19 @@ boost::shared_ptr<AST::PROGRAM> basicProgramTests::getIt()
 	return program_0;
 }
 
+boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest1()
+{
+	// TODO
+}
 
+boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest2()
+{
+	// TODO
+}
+
+/******************
+* Some previous examples
+*******************/
 
 // uValue value_3 = {
 // 				exprVarConstr: 

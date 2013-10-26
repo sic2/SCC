@@ -52,7 +52,7 @@
 class JVMByteCodeGenerator
 {
 public:
-	JVMByteCodeGenerator(boost::shared_ptr<AST::PROGRAM>* program);
+	JVMByteCodeGenerator(boost::shared_ptr<AST::PROGRAM> program);
 	virtual ~JVMByteCodeGenerator() {}
 
 	/**
@@ -101,7 +101,7 @@ public:
 	int currentLabel();
 
 private:
-	boost::shared_ptr<AST::PROGRAM>* _program;
+	boost::shared_ptr<AST::PROGRAM> _program;
 
 	void addInitialJasminCode(std::string& output);
 	void addInitialMainJasminCode(std::string& output);

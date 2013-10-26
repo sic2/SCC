@@ -71,10 +71,6 @@ namespace AST
 	*/
 	class PROGRAM;
 
-	/*********************
-	***** UNIONS *********
-	**********************/
-
 	/*
 	* Expression Types
 	*/
@@ -156,7 +152,6 @@ namespace AST
 		boost::shared_ptr<OPERATOR> op;
 		boost::shared_ptr<EXPR> expr1;
 	};
-
 	
 	class Expr_Group{
 	public:

@@ -24,13 +24,12 @@ using namespace AST;
 int main(int argc, char** argv)
 {
 	// TODO - get params from argc and argv
-	
+
 	/**************
 	* TEST PROGRAMS
 	***************/
 	basicProgramTests test0;
-	boost::shared_ptr<AST::PROGRAM> program_0 = test0.getIt();
-	JVMByteCodeGenerator byteCodeGen(&program_0);
+	JVMByteCodeGenerator byteCodeGen(test0.getTest0());
 	byteCodeGen.generateByteCode("XXX");
 
 	return 0;

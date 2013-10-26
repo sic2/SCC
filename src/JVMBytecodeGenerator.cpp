@@ -7,7 +7,7 @@
 // MACROS
 #define JASMIN_DIRECTIVE_progr(stream, x, progr_Name) stream += x progr_Name NEW_LINE
 
-JVMByteCodeGenerator::JVMByteCodeGenerator(boost::shared_ptr<AST::PROGRAM>* program)
+JVMByteCodeGenerator::JVMByteCodeGenerator(boost::shared_ptr<AST::PROGRAM> program)
 {
 	_program = program;
 	_numberLabels = -1;
@@ -25,8 +25,7 @@ bool JVMByteCodeGenerator::generateByteCode(std::string outFileName)
 	addInitialMainJasminCode(mainMethod);
 
 	// Traversing the AST and generate program
-	printf("prog-JVM %p \n", &_program);
-	(*_program)->generateByteCode(this, jasminProgram, mainMethod);	
+	_program->generateByteCode(this, jasminProgram, mainMethod);	
 
 	printLastStatement(mainMethod);
 	addFinalMainJasminCode(mainMethod);
