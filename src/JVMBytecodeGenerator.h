@@ -89,6 +89,10 @@ public:
 
 	void addTypedef(std::string typeID, AST::Expr_Typedef typeDefinition);
 
+	bool typeIsDefined(std::string typeID);
+
+	AST::Expr_Typedef getTypeDef(std::string typeID);
+
 	/**
 	* Add a subroutine to the environment (subroutines table)
 	* IF and ONLY IF the subroutine does not exist already.
@@ -102,6 +106,17 @@ public:
 
 	int currentLabel();
 
+	/**
+	* Generate byte code for Algebric data types.
+	* The code is generate only once for all the program.
+	*/
+	void addGenericClassForADTs() { this->_genericClassForADTsEnabled = true; }
+
+	/**
+	* TODO
+	*/
+	void addNewGenericObject(std::string str, int labelIndex);
+
 private:
 	boost::shared_ptr<AST::PROGRAM> _program;
 
@@ -110,13 +125,15 @@ private:
 	void addFinalMainJasminCode(std::string& output);
 	void printLastStatement(std::string& output);
 
-
-	// TODO
 	/*
 	* Keep track of ids -> type
 	*/
 	std::map<std::string, AST::Expr_Typedef> _typeDefinitions;
-
+	/*
+	* Keep track of created objects and registers
+	* used to store instances
+	*/
+	std::map<std::string, int> _objects;
 
 	/**
 	* The environment or symbol tables
@@ -133,4 +150,5 @@ private:
 	std::set<std::string> _subRoutines;
 
 	int _numberLabels;
+	bool _genericClassForADTsEnabled;
 };

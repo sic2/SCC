@@ -104,15 +104,15 @@ namespace AST
 	*******************************************************/
 	class Expr_Var_Constr{
 	public:
-		Expr_Var_Constr(std::string ID, boost::shared_ptr<EXPR> expr)
+		Expr_Var_Constr(std::string ID, std::vector< boost::shared_ptr<EXPR> > expressions)
 		{
 			this->ID = ID;
-			this->expr = expr;
+			this->expressions = expressions;
 		}
 
 		virtual ~Expr_Var_Constr() {}
 		std::string ID;
-		boost::shared_ptr<EXPR> expr;
+		std::vector< boost::shared_ptr<EXPR> > expressions;
 	};
 
 	class Expr_Case{

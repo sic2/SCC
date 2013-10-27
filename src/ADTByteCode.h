@@ -9,8 +9,7 @@ public:
 	{
 		std::string byteCode = ".source ADTByteCode.j \n";
 		byteCode += ".class public ADTByteCode \n";
-		byteCode += ".super java/lang/Object \n";
-		byteCode += ".class public ADTByteCode \n\n";
+		byteCode += ".super java/lang/Object \n\n";
 
 		// Fields
 		/*
@@ -23,12 +22,15 @@ public:
 		*/
 		byteCode += ".field public typeTag Ljava/lang/String; \n";
 		byteCode += ".field public constrTag Ljava/lang/String; \n";
-		// TODO
+		byteCode += ".field public objs [LADTByteCode; \n";
+		byteCode += ".field public intVal I \n";
+		byteCode += ".field public boolVal Z \n";
+		byteCode += ".field public strVal Ljava/lang/String; \n";
 
 		// Constructor
 		byteCode += "\n.method public <init>()V \n";
 		byteCode += ".limit stack 5 \n";
-		byteCode += ".limit locals 100 \n";
+		byteCode += ".limit locals 10 \n";
 		byteCode += "\t aload_0 \n";
 		byteCode += "\t invokespecial java/lang/Object/<init>()V \n";
 		byteCode += "\t return \n";

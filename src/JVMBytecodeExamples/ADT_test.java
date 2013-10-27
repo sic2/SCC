@@ -1,14 +1,18 @@
 class TestClass {
-		int testA;
+		int integer;
+		boolean bool;
+		String str;
+		TestClass[] classes;
 		// int testB;
 
 		// String str;
 
 		public TestClass()
 		{
-			testA = 4;
+			//testA = 4;
 			// testB = 10;
 			// str = "hello";
+			classes = new TestClass[10];
 		}	
 
 	}
@@ -23,7 +27,9 @@ public class ADT_test {
 	public static void main(String[] vars)
 	{
 	  TestClass testONE = new TestClass();
-	  TestClass testTWO = new TestClass();
+	  testONE.integer = 10;
+	  testONE.str = "hello";
+	 //TestClass testTWO = new TestClass();
 	   
 	  //System.out.println(ADT_test.eq(test.testA, test.testB));
 	  

@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 	// byteCodeGen.generateByteCode("XXX");
 
 	ADTProgramTests test0;
-	JVMByteCodeGenerator byteCodeGen(test0.getTest0());
+	JVMByteCodeGenerator byteCodeGen(test0.getTest1());
 	byteCodeGen.generateByteCode("XXX");
 
 	return 0;

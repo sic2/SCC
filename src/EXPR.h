@@ -34,7 +34,7 @@ private:
 	AST::EXPRESSION_TYPE _typeExpr;
 	AST::uValue _uValue;
 
-	std::string getIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, int Integer);
+	std::string getIntByteCode(int Integer);
 
 	/*
 	* Bytecode generators

@@ -18,6 +18,10 @@
 	astore_1
 
 	aload_1
+	iconst_2
+	putfield Jasminclass/testField I
+	
+	aload_1
 	getfield Jasminclass/testField I
 	istore_2
 

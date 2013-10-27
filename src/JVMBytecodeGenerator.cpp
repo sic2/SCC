@@ -13,6 +13,7 @@ JVMByteCodeGenerator::JVMByteCodeGenerator(boost::shared_ptr<AST::PROGRAM> progr
 	_program = program;
 	_numberLabels = -1;
 	_expressionsOnStack = 0;
+	_genericClassForADTsEnabled = false;
 }
 
 // Resources on jasmin:
@@ -35,15 +36,19 @@ bool JVMByteCodeGenerator::generateByteCode(std::string outFileName)
 
 	if(DEBUG_MODE >= 1)
 	{
-		// printf("JASMIN BYTECODE: \n\n%s\n\nEND JASMIN BYTECODE\n\n", jasminProgram.c_str());
+		printf("JASMIN BYTECODE: \n\n%s\n\nEND JASMIN BYTECODE\n\n", jasminProgram.c_str());
 	}
 
-	std::string adtByteCode = ADTByteCode::getByteCode(); // FIXME - if and only if needed
-	if(DEBUG_MODE >= 1)
+	if (_genericClassForADTsEnabled)
 	{
-		// printf("ADT BYTECODE: \n\n%s\n\nEND ADT BYTECODE\n", adtByteCode.c_str());
+		std::string adtByteCode = ADTByteCode::getByteCode();
+		if(DEBUG_MODE >= 1)
+		{
+			//printf("ADT BYTECODE: \n\n%s\n\nEND ADT BYTECODE\n", adtByteCode.c_str());
+		}
 	}
-
+	
+	// TODO - save code to files
 	return false;
 }
 
@@ -124,6 +129,21 @@ void JVMByteCodeGenerator::updateEnvironment(std::string* ID, AST::EXPRESSION_TY
 void JVMByteCodeGenerator::addTypedef(std::string typeID, AST::Expr_Typedef typeDefinition)
 {
 	this->_typeDefinitions.insert(std::make_pair<std::string, AST::Expr_Typedef> (typeID, typeDefinition));
+}
+
+bool JVMByteCodeGenerator::typeIsDefined(std::string typeID)
+{
+	return _typeDefinitions.find(typeID) != _typeDefinitions.end();
+}
+
+AST::Expr_Typedef JVMByteCodeGenerator::getTypeDef(std::string typeID)
+{
+	return _typeDefinitions.find(typeID)->second;
+}
+
+void JVMByteCodeGenerator::addNewGenericObject(std::string str, int labelIndex)
+{
+	this->_objects.insert(std::make_pair<std::string, int>(str, labelIndex));
 }
 
 int JVMByteCodeGenerator::nextLabel()

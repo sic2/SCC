@@ -12,7 +12,7 @@
 class AST::TYPE
 {
 public:
-	TYPE(std::string ID, std::vector<TYPE> types);
+	TYPE(std::string ID, std::vector< boost::shared_ptr<TYPE> > types);
 
 	virtual ~TYPE() {}
 
@@ -24,9 +24,11 @@ public:
 	/**
 	* @return vector of types
 	*/
-	std::vector<TYPE> getTypes() { return this->_types; }
+	std::vector< boost::shared_ptr<TYPE> > getTypes() { return this->_types; }
+
+	bool isPrimitive();
 
 private:
 	std::string _id;
-	std::vector<TYPE> _types;
+	std::vector< boost::shared_ptr<TYPE> > _types;
 };

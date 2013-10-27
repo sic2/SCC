@@ -30,7 +30,7 @@ AST::EXPR::~EXPR()
 AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
 						std::string& jasminProgram, std::string& mainMethod, bool onStack)
 {
-	EXPRESSION_TYPE retval = EXPR_UNDEFINED;
+	EXPRESSION_TYPE retval = _typeExpr;
 	switch(_typeExpr)
 	{
 	case EXPR_INT:
@@ -61,6 +61,9 @@ AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeG
 		}
 		break;
 	case EXPR_FOR_LOOP:
+		{
+			// TODO
+		}
 		break;
 	case EXPR_BI_OP:
 		{
@@ -69,8 +72,12 @@ AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeG
 		break;
 	case EXPR_GROUP:
 		{
-			// TODO
 			// Iterate over all expressions
+			std::vector< boost::shared_ptr<EXPR> > expressions = boost::get< Expr_Group >(_uValue).expressions;
+			for(std::vector< boost::shared_ptr<EXPR> >::iterator it = expressions.begin(); it != expressions.end(); ++it) 
+			{
+    			(*it)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack);
+			}
 		}
 		break;
 	case EXPR_TYPE_DEF:
@@ -82,10 +89,10 @@ AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeG
 		break;
 	case EXPR_NEW_VAR:
 		{
-			printf("hello hello\n");
-			// TODO
-			// create instance of given class
-			//retval = generateNewVarByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack);
+			// create instance of given type, assuming this was previously defined
+			// with typedef
+			retval = generateNewVarByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack);
+			bytecodeGenerator->addGenericClassForADTs();
 		}
 		break;
 	default:
@@ -103,7 +110,7 @@ AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeG
 * Private methods
 *******************/
 
-std::string AST::EXPR::getIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, int Integer)
+std::string AST::EXPR::getIntByteCode(int Integer)
 {
 	std::string retval = "iconst_";
 	if (Integer == -1)
@@ -121,7 +128,7 @@ std::string AST::EXPR::getIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, i
 AST::EXPRESSION_TYPE AST::EXPR::generateIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
 	std::string& jasminProgram, std::string& mainMethod, bool onStack)
 {	
-	std::string bytecode = getIntByteCode(bytecodeGenerator, boost::get< int >(_uValue));
+	std::string bytecode = getIntByteCode(boost::get< int >(_uValue));
 	bytecodeGenerator->formatJasminInstruction(bytecode);
 	mainMethod += bytecode;
 
@@ -221,13 +228,101 @@ AST::EXPRESSION_TYPE AST::EXPR::generateBiOPByteCode(JVMByteCodeGenerator* bytec
 	return exprType; 
 }
 
-/*
-* REDO
-*/
+// TODO - refactor
 AST::EXPRESSION_TYPE AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
 	std::string& jasminProgram, std::string& mainMethod, bool onStack)
 {	
-	// TODO
+	std::string ID = boost::get< Expr_New_Var >(_uValue).ID;
+	std::string typeID = boost::get< Expr_New_Var >(_uValue).typeID;
+	std::string constructorID = boost::get< Expr_New_Var >(_uValue).constructorID;
+	boost::shared_ptr<EXPR> expr = boost::get< Expr_New_Var >(_uValue).expr;
+
+	if (bytecodeGenerator->typeIsDefined(typeID))
+	{
+		AST::Expr_Typedef typeDefinition = bytecodeGenerator->getTypeDef(typeID);
+
+		// Check if a constructor matching constructorID exist
+		bool constructorDefined = false;
+		std::vector< boost::shared_ptr<CONSTR> > constructors = typeDefinition.constructors;
+		for(std::vector< boost::shared_ptr<CONSTR> >::iterator it = constructors.begin(); it != constructors.end(); ++it) 
+		{	
+			if ((*it)->getID().compare(constructorID) == 0)
+			{
+				// TODO 
+				/*
+				* Traverse tree defined by expr and constructor from leaves to root
+				* for each node instantiate a new generic object
+				* the object contains:
+				* 	- typeTag = typeID
+				*	- constrTag = constructorID
+				* 	- genericObjects[] = sub types
+				*	- values (if any)
+				*/
+
+				constructorDefined = true;
+				std::vector< boost::shared_ptr<AST::TYPE> > types = (*it)->getTypes();
+
+				// Start by creating a new object for this type_id and constructor_id
+				// store object at register X
+				// if type is not primitive, 
+				// 		then create new generic obj, to be stored at register X + 1
+				// 		and add to array field in object X
+				// otherwise 
+				// 		set field in current object X
+				mainMethod += "\n\tnew ADTByteCode ; create new generic object for type " + typeID + "\n";
+				mainMethod += "\tdup \n";
+				mainMethod += "\tinvokespecial ADTByteCode.<init>()V \n";
+				int labelIndex = bytecodeGenerator->nextLabel();
+				mainMethod += "\tastore_" + integerToString(labelIndex) + std::string("\n");
+				// Update environment
+				bytecodeGenerator->addNewGenericObject(ID, labelIndex);
+
+				
+				std::vector< boost::shared_ptr<EXPR> > exprs = boost::get< Expr_Group >(expr->getValue()).expressions;
+				for(std::vector< boost::shared_ptr<AST::EXPR> >::iterator itt = exprs.begin(); itt != exprs.end(); ++itt)
+				{
+					if ((*itt)->getExprType() == EXPR_INT)
+					{
+						mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
+						mainMethod += "\t" + getIntByteCode(boost::get< int >((*itt)->getValue())) + "\n";
+						mainMethod += "putfield ADTByteCode/intVal I \n";
+					}
+					else if ((*itt)->getExprType() == EXPR_STRING)
+					{
+						mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
+						mainMethod += "\tldc " + boost::get< std::string >((*itt)->getValue())) + "\n";
+						mainMethod += "\tputfield ADTByteCode/strVal Ljava/lang/String; \n";
+
+
+					}
+					else
+					{
+						(*itt)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false);
+					}
+
+				}
+				
+
+				break;
+			}	
+		}
+
+		if (!constructorDefined)
+		{
+			if(DEBUG_MODE >= 1)
+			{
+				printf("Error: Constructor %s not defined\n", constructorID.c_str());
+			}
+		}
+	}
+	else
+	{
+		if(DEBUG_MODE >= 1)
+		{
+			printf("Error: Type %s not defined\n", typeID.c_str());
+		}
+	}
+
 	return EXPR_NEW_VAR; // Does this matter?
 }
 

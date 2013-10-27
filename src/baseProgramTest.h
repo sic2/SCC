@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <string>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
@@ -28,6 +29,8 @@ public:
 		value_TWO = boost::variant< int >(2);
 		value_THREE = boost::variant< int >(3);
 
+		value_STRING = boost::variant< std::string >("String");
+
 
 		op_add = boost::shared_ptr<OPERATOR> (new OPERATOR(OP_ADDITION));
 		op_sub = boost::shared_ptr<OPERATOR> (new OPERATOR(OP_SUBTRACTION));
@@ -46,6 +49,8 @@ public:
 		expr_ONE = boost::shared_ptr<EXPR> (new EXPR(EXPR_INT, value_ONE));
 		expr_TWO = boost::shared_ptr<EXPR> (new EXPR(EXPR_INT, value_TWO));
 		expr_THREE = boost::shared_ptr<EXPR> (new EXPR(EXPR_INT, value_THREE));
+
+		expr_STR = boost::shared_ptr<EXPR> (new EXPR(EXPR_STRING, value_STRING));
 
 
 		type_INT = boost::shared_ptr<TYPE> (new TYPE("int", noTypes));
@@ -74,6 +79,8 @@ protected:
 	boost::variant< int > value_TWO;
 	boost::variant< int > value_THREE;
 
+	boost::variant< std::string > value_STRING;
+
 	/*
 	* Operators
 	*/
@@ -97,6 +104,8 @@ protected:
 	boost::shared_ptr<EXPR> expr_TWO;
 	boost::shared_ptr<EXPR> expr_THREE;
 
+	boost::shared_ptr<EXPR> expr_STR;
+
 	/*
 	* Types
 	*/
@@ -113,5 +122,5 @@ protected:
 	boost::shared_ptr<ALT> alt_ZERO;
 	boost::shared_ptr<ALT> alt_ONE; 
 
-	std::vector<TYPE> noTypes;
+	std::vector< boost::shared_ptr<TYPE> > noTypes;
 };

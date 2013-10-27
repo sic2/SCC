@@ -12,8 +12,8 @@
 	invokespecial java/lang/Object/<init>()V
 	aload_0
 
-	iconst_2
-	putfield Jasminclass/testField I
+	;iconst_2
+	;putfield Jasminclass/testField I
 
 	return
 .end method
