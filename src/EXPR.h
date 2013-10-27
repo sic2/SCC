@@ -29,6 +29,7 @@ private:
 	* Utility functions
 	*/
 	std::string integerToString(int value);
+	std::string boolToString(bool value);
 	std::string getIStoreByteCode(JVMByteCodeGenerator* bytecodeGenerator);
 
 	AST::EXPRESSION_TYPE _typeExpr;

@@ -53,6 +53,7 @@ AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeG
 			// TODO
 			// [ DESIGN ASSUMPTION ]
 			// this will work only for primitive types
+			// XXX - maybe this is never used
 		}
 		break;
 	case EXPR_CASE:
@@ -143,15 +144,7 @@ AST::EXPRESSION_TYPE AST::EXPR::generateIntByteCode(JVMByteCodeGenerator* byteco
 AST::EXPRESSION_TYPE AST::EXPR::generateBoolByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
 	std::string& jasminProgram, std::string& mainMethod, bool onStack)
 {
-	if (boost::get< bool >(_uValue) == true)
-	{
-		mainMethod += "\ticonst_1\n";
-	} 
-	else
-	{
-		mainMethod += "\ticonst_0\n";
-	}
-
+	mainMethod += boolToString(boost::get< bool >(_uValue));
 	std::string storeBytecode = getIStoreByteCode(bytecodeGenerator);
 	mainMethod += storeBytecode + "\n";
 
@@ -281,6 +274,8 @@ AST::EXPRESSION_TYPE AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* byt
 				std::vector< boost::shared_ptr<EXPR> > exprs = boost::get< Expr_Group >(expr->getValue()).expressions;
 				for(std::vector< boost::shared_ptr<AST::EXPR> >::iterator itt = exprs.begin(); itt != exprs.end(); ++itt)
 				{
+					// TODO 
+					// update tag
 					if ((*itt)->getExprType() == EXPR_INT)
 					{
 						mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
@@ -290,19 +285,23 @@ AST::EXPRESSION_TYPE AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* byt
 					else if ((*itt)->getExprType() == EXPR_STRING)
 					{
 						mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
-						mainMethod += "\tldc " + boost::get< std::string >((*itt)->getValue())) + "\n";
+						mainMethod += "\tldc " + boost::get< std::string >((*itt)->getValue()) + "\n";
 						mainMethod += "\tputfield ADTByteCode/strVal Ljava/lang/String; \n";
-
-
+					}
+					else if ((*itt)->getExprType() == EXPR_BOOL)
+					{
+						mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
+						mainMethod += "\t" + boolToString(boost::get< bool >((*itt)->getValue())); // FIXME 
+						mainMethod += "\tputfield ADTByteCode/boolVal Z; \n";
 					}
 					else
 					{
+						// TODO
+						// initialise array of objs
 						(*itt)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false);
 					}
 
 				}
-				
-
 				break;
 			}	
 		}
@@ -339,4 +338,9 @@ std::string AST::EXPR::integerToString(int value)
 	std::ostringstream convert; 
 	convert << value;
 	return convert.str();
+}
+
+std::string AST::EXPR::boolToString(bool value)
+{
+	return value ? "\ticonst_1\n" : "\ticonst_0\n";
 }
