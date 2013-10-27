@@ -8,10 +8,9 @@
 * The code of the scc cannot be copied or reused in any 
 * circumstances, unless permission has been granted by the author.
 ***********************************************************/
-
 #include "PROGRAM.h"
 #include "JVMByteCodeGenerator.h"
-#include "basicProgramTests.h"
+// #include "basicProgramTests.h"
 #include "ADTProgramTests.h"
 
 using namespace AST;
@@ -29,13 +28,13 @@ int main(int argc, char** argv)
 	/**************
 	* TEST PROGRAMS
 	***************/
-	basicProgramTests test0;
-	JVMByteCodeGenerator byteCodeGen(test0.getTest2());
-	byteCodeGen.generateByteCode("XXX");
-
-	// ADTProgramTests test0;
-	// JVMByteCodeGenerator byteCodeGen(test0.getTest0());
+	// basicProgramTests test0;
+	// JVMByteCodeGenerator byteCodeGen(test0.getTest2());
 	// byteCodeGen.generateByteCode("XXX");
+
+	ADTProgramTests test0;
+	JVMByteCodeGenerator byteCodeGen(test0.getTest0());
+	byteCodeGen.generateByteCode("XXX");
 
 	return 0;
 }	

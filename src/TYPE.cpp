@@ -1,14 +1,13 @@
 #include "TYPE.h"
 
-AST::TYPE::TYPE(PRIMITIVE_TYPE primitiveType)
-{
-	_primitiveType = primitiveType;
-	_whichConstructor = TYPE_IS_PRIMITIVE;
-}
-
 AST::TYPE::TYPE(std::string ID, std::vector<TYPE> types)
 {
 	_id = ID;
-	_types = types;
-	_whichConstructor = TYPE_NOT_PRIMITIVE;
+	// int, bool and string are keywords, so ignore types
+	if (ID.compare("int") != 0 &&
+		ID.compare("bool") != 0 &&
+		ID.compare("string") != 0)
+	{
+		_types = types;
+	}
 }

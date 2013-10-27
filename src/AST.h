@@ -61,6 +61,11 @@ namespace AST
 	* Alternative
 	*/
 	class ALT;
+
+	/**
+	* Constructor
+	*/ 
+	class CONSTR;
 	
 	/**
 	* Program
@@ -164,18 +169,33 @@ namespace AST
 		std::vector< boost::shared_ptr<EXPR> > expressions;
 	};
 
-	class Expr_New_Var{
+	class Expr_Typedef{
 	public:
-		Expr_New_Var(std::string ID, boost::shared_ptr<TYPE> type, boost::shared_ptr<EXPR> expr)
+		Expr_Typedef(std::string ID, std::vector< boost::shared_ptr<CONSTR> > constructors)
 		{
 			this->ID = ID;
-			this->type = type;
+			this->constructors = constructors;
+		}
+
+		virtual ~Expr_Typedef() {}
+		std::string ID;
+		std::vector< boost::shared_ptr<CONSTR> > constructors;
+	};
+
+	class Expr_New_Var{
+	public:
+		Expr_New_Var(std::string ID, std::string typeID, std::string constructorID, boost::shared_ptr<EXPR> expr)
+		{
+			this->ID = ID;
+			this->typeID = typeID;
+			this->constructorID = constructorID;
 			this->expr = expr;
 		}
 
 		virtual ~Expr_New_Var() {}
 		std::string ID;
-		boost::shared_ptr<TYPE> type;
+		std::string typeID; // (i.e. Time)
+		std::string constructorID; // (i.e. Hour or Min)
 		boost::shared_ptr<EXPR> expr;
 	};
 
@@ -188,6 +208,7 @@ namespace AST
 							Expr_For_Loop, 
 							Expr_Bi_Op, 
 							Expr_Group,
+							Expr_Typedef, 
 							Expr_New_Var
 						> uValue; 
 }

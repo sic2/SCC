@@ -35,13 +35,13 @@ bool JVMByteCodeGenerator::generateByteCode(std::string outFileName)
 
 	if(DEBUG_MODE >= 1)
 	{
-		printf("JASMIN BYTECODE: \n\n%s\n\nEND JASMIN BYTECODE\n\n", jasminProgram.c_str());
+		// printf("JASMIN BYTECODE: \n\n%s\n\nEND JASMIN BYTECODE\n\n", jasminProgram.c_str());
 	}
 
-	std::string adtByteCode = ADTByteCode::getByteCode();
+	std::string adtByteCode = ADTByteCode::getByteCode(); // FIXME - if and only if needed
 	if(DEBUG_MODE >= 1)
 	{
-		printf("ADT BYTECODE: \n\n%s\n\nEND ADT BYTECODE\n", adtByteCode.c_str());
+		// printf("ADT BYTECODE: \n\n%s\n\nEND ADT BYTECODE\n", adtByteCode.c_str());
 	}
 
 	return false;
@@ -119,6 +119,11 @@ void JVMByteCodeGenerator::updateEnvironment(std::string* ID, AST::EXPRESSION_TY
 	{
 		_expressionsOnStack++;
 	}
+}
+
+void JVMByteCodeGenerator::addTypedef(std::string typeID, AST::Expr_Typedef typeDefinition)
+{
+	this->_typeDefinitions.insert(std::make_pair<std::string, AST::Expr_Typedef> (typeID, typeDefinition));
 }
 
 int JVMByteCodeGenerator::nextLabel()

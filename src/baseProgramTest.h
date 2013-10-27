@@ -10,6 +10,7 @@
 #include "EXPR.h"
 #include "PROGRAM.h"
 #include "TYPE.h"
+#include "CONSTR.h"
 
 using namespace AST; // XXX - possibly omit 
 
@@ -27,6 +28,7 @@ public:
 		value_TWO = boost::variant< int >(2);
 		value_THREE = boost::variant< int >(3);
 
+
 		op_add = boost::shared_ptr<OPERATOR> (new OPERATOR(OP_ADDITION));
 		op_sub = boost::shared_ptr<OPERATOR> (new OPERATOR(OP_SUBTRACTION));
 		op_mul = boost::shared_ptr<OPERATOR> (new OPERATOR(OP_MULTIPLICATION));
@@ -36,6 +38,7 @@ public:
 		op_or = boost::shared_ptr<OPERATOR> (new OPERATOR(OP_OR));
 		op_and = boost::shared_ptr<OPERATOR> (new OPERATOR(OP_AND));
 
+
 		expr_TRUE = boost::shared_ptr<EXPR> (new EXPR(EXPR_BOOL, value_TRUE));
 		expr_FALSE = boost::shared_ptr<EXPR> (new EXPR(EXPR_BOOL, value_FALSE));
 
@@ -44,9 +47,14 @@ public:
 		expr_TWO = boost::shared_ptr<EXPR> (new EXPR(EXPR_INT, value_TWO));
 		expr_THREE = boost::shared_ptr<EXPR> (new EXPR(EXPR_INT, value_THREE));
 
-		std::vector<TYPE> noTypes;
+
+		type_INT = boost::shared_ptr<TYPE> (new TYPE("int", noTypes));
+		type_BOOL = boost::shared_ptr<TYPE> (new TYPE("bool", noTypes));
+		type_STRING = boost::shared_ptr<TYPE> (new TYPE("string", noTypes));
+
 		type_ZERO = boost::shared_ptr<TYPE> (new TYPE("0", noTypes));
 		type_ONE = boost::shared_ptr<TYPE> (new TYPE("1", noTypes));
+
 
 		alt_ZERO = boost::shared_ptr<ALT> (new ALT(type_ZERO, expr_ONE)); 
 		alt_ONE = boost::shared_ptr<ALT> (new ALT(type_ONE, expr_ZERO)); 
@@ -92,6 +100,10 @@ protected:
 	/*
 	* Types
 	*/
+	boost::shared_ptr<TYPE> type_INT;
+	boost::shared_ptr<TYPE> type_BOOL; 
+	boost::shared_ptr<TYPE> type_STRING;
+
 	boost::shared_ptr<TYPE> type_ZERO;
 	boost::shared_ptr<TYPE> type_ONE; 
 
@@ -100,4 +112,6 @@ protected:
 	*/
 	boost::shared_ptr<ALT> alt_ZERO;
 	boost::shared_ptr<ALT> alt_ONE; 
+
+	std::vector<TYPE> noTypes;
 };

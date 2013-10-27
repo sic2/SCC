@@ -87,6 +87,8 @@ public:
 	*/
 	void updateEnvironment(std::string* ID, AST::EXPRESSION_TYPE exprType, bool onStack);
 
+	void addTypedef(std::string typeID, AST::Expr_Typedef typeDefinition);
+
 	/**
 	* Add a subroutine to the environment (subroutines table)
 	* IF and ONLY IF the subroutine does not exist already.
@@ -113,6 +115,7 @@ private:
 	/*
 	* Keep track of ids -> type
 	*/
+	std::map<std::string, AST::Expr_Typedef> _typeDefinitions;
 
 
 	/**

@@ -2,6 +2,7 @@
 #include "EXPR.h"
 #include "ALT.h"
 #include "TYPE.h"
+#include "CONSTR.h"
 
 #include "JVMByteCodeGenerator.h"
 
@@ -26,7 +27,8 @@ AST::EXPR::~EXPR()
 	}
 }
 
-AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack)
+AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
+						std::string& jasminProgram, std::string& mainMethod, bool onStack)
 {
 	EXPRESSION_TYPE retval = EXPR_UNDEFINED;
 	switch(_typeExpr)
@@ -73,12 +75,14 @@ AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeG
 		break;
 	case EXPR_TYPE_DEF:
 		{
-			// TODO
-			// Define a new class
+			// No bytecode is generated on typedef, but environment is updated
+			Expr_Typedef typeDefinition = boost::get< Expr_Typedef >(_uValue);
+			bytecodeGenerator->addTypedef(typeDefinition.ID, typeDefinition);
 		}
 		break;
 	case EXPR_NEW_VAR:
 		{
+			printf("hello hello\n");
 			// TODO
 			// create instance of given class
 			//retval = generateNewVarByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack);
@@ -114,7 +118,8 @@ std::string AST::EXPR::getIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, i
 	return retval + integerToString(Integer);
 }
 
-AST::EXPRESSION_TYPE AST::EXPR::generateIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack)
+AST::EXPRESSION_TYPE AST::EXPR::generateIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
+	std::string& jasminProgram, std::string& mainMethod, bool onStack)
 {	
 	std::string bytecode = getIntByteCode(bytecodeGenerator, boost::get< int >(_uValue));
 	bytecodeGenerator->formatJasminInstruction(bytecode);
@@ -128,7 +133,8 @@ AST::EXPRESSION_TYPE AST::EXPR::generateIntByteCode(JVMByteCodeGenerator* byteco
 	return EXPR_INT;
 }
 
-AST::EXPRESSION_TYPE AST::EXPR::generateBoolByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack)
+AST::EXPRESSION_TYPE AST::EXPR::generateBoolByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
+	std::string& jasminProgram, std::string& mainMethod, bool onStack)
 {
 	if (boost::get< bool >(_uValue) == true)
 	{
@@ -148,7 +154,8 @@ AST::EXPRESSION_TYPE AST::EXPR::generateBoolByteCode(JVMByteCodeGenerator* bytec
 	return EXPR_BOOL;
 }
 
-AST::EXPRESSION_TYPE AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack) 
+AST::EXPRESSION_TYPE AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
+	std::string& jasminProgram, std::string& mainMethod, bool onStack) 
 {
 
 	boost::shared_ptr<EXPR> expr = boost::get< Expr_Case >(_uValue).expr;
@@ -192,7 +199,8 @@ AST::EXPRESSION_TYPE AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytec
 // then make a call to this subroutine
 // and get the result
 // two variables
-AST::EXPRESSION_TYPE AST::EXPR::generateBiOPByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack)
+AST::EXPRESSION_TYPE AST::EXPR::generateBiOPByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
+	std::string& jasminProgram, std::string& mainMethod, bool onStack)
 {
 	int caseValue = bytecodeGenerator->getEnvironmentSize();
 	// Generate bytecode for operands
@@ -216,7 +224,8 @@ AST::EXPRESSION_TYPE AST::EXPR::generateBiOPByteCode(JVMByteCodeGenerator* bytec
 /*
 * REDO
 */
-AST::EXPRESSION_TYPE AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack)
+AST::EXPRESSION_TYPE AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
+	std::string& jasminProgram, std::string& mainMethod, bool onStack)
 {	
 	// TODO
 	return EXPR_NEW_VAR; // Does this matter?

@@ -13,7 +13,17 @@ public:
 		byteCode += ".class public ADTByteCode \n\n";
 
 		// Fields
-		byteCode += ".field public tag Ljava/lang/String; \n";
+		/*
+		* string typeTag (type Tag - i.e. Time)
+		* string constrTag (constructor Tag - i.e. Hour or Min)
+		* ADTByteCode[] (i.e. int or Age Addr)
+		* int value
+		* bool value
+		* string value
+		*/
+		byteCode += ".field public typeTag Ljava/lang/String; \n";
+		byteCode += ".field public constrTag Ljava/lang/String; \n";
+		// TODO
 
 		// Constructor
 		byteCode += "\n.method public <init>()V \n";
