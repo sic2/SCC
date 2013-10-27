@@ -166,14 +166,16 @@ namespace AST
 
 	class Expr_New_Var{
 	public:
-		Expr_New_Var(std::string ID, boost::shared_ptr<EXPR> expr)
+		Expr_New_Var(std::string ID, boost::shared_ptr<TYPE> type, boost::shared_ptr<EXPR> expr)
 		{
 			this->ID = ID;
+			this->type = type;
 			this->expr = expr;
 		}
 
 		virtual ~Expr_New_Var() {}
 		std::string ID;
+		boost::shared_ptr<TYPE> type;
 		boost::shared_ptr<EXPR> expr;
 	};
 

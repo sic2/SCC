@@ -21,9 +21,7 @@ public:
 	/*
 	* Getters
 	*/
-	inline AST::EXPRESSION_TYPE getExprType() { 
-		printf("this expr is %d \n", this->_typeExpr);
-		return this->_typeExpr; }
+	AST::EXPRESSION_TYPE getExprType() { return this->_typeExpr; }
 	AST::uValue getValue() { return this->_uValue; }
 
 private:

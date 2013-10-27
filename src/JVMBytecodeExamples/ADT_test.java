@@ -1,26 +1,31 @@
-public class ADT_test {
-
-	public class TestClass {
+class TestClass {
 		int testA;
-		int testB;
+		// int testB;
 
-		public TestClass(int a)
+		// String str;
+
+		public TestClass()
 		{
-			testA = a;
-			testB = 10;
-		}
+			testA = 4;
+			// testB = 10;
+			// str = "hello";
 		}	
 
-		public static boolean eq(int a, int b)
-	{
-		return a == b;
 	}
+
+public class ADT_test {
+
+	// public static boolean eq(int a, int b)
+	// {
+	// 	return a == b;
+	// }
 
 	public static void main(String[] vars)
 	{
-	   TestClass test = (new ADT_test()).new TestClass(10);
+	  TestClass testONE = new TestClass();
+	  TestClass testTWO = new TestClass();
 	   
-	   ADT_test.eq(test.testA, test.testB);
+	  //System.out.println(ADT_test.eq(test.testA, test.testB));
 	  
 	}
 }

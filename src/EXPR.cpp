@@ -8,8 +8,8 @@
 #include <sstream>
 #include <map>
 
-#define GET_Condition_FROM_ALT(iterator) (*((* iterator)->getCondition()))
-#define GET_EXPR_FROM_ALT(iterator) (*((* iterator)->getEXPR()))
+#define GET_Condition_FROM_ALT(iterator) ((* iterator)->getCondition())
+#define GET_EXPR_FROM_ALT(iterator) ((* iterator)->getEXPR())
 
 AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, AST::uValue value) 
 {
@@ -164,6 +164,10 @@ AST::EXPRESSION_TYPE AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytec
 			mainMethod += "Label_" + integerToString(bytecodeGenerator->currentLabel()) + std::string(":\n");
 		}
 
+		/*
+		* FIXME
+		* be able to compare first expression with types
+		* 
 		EXPRESSION_TYPE conditionType = GET_Condition_FROM_ALT(it)->getExprType(); 
 		if (conditionType == EXPR_INT)
 		{		
@@ -175,6 +179,7 @@ AST::EXPRESSION_TYPE AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytec
 			mainMethod += std::string("\t if_icmpne ") + label + std::string("\n");
 			caseExpr = GET_EXPR_FROM_ALT(it)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false);
 		}
+		*/
 	} // end for-loop for _alternatives vector
 	mainMethod += "Label_" + integerToString(bytecodeGenerator->currentLabel()) + std::string(":\n");
 

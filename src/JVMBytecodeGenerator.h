@@ -66,7 +66,7 @@ public:
 	/**
 	* @return size of the environment (i.e. symbols table)
 	*/
-	int getEnvironmentSize() { return _expressionsOnStack; /*this->_environment.size();*/ }
+	int getEnvironmentSize() { return _expressionsOnStack; }
 
 	/**
 	* Dynamically format an instruction into a jasmin instruction.
@@ -108,12 +108,19 @@ private:
 	void addFinalMainJasminCode(std::string& output);
 	void printLastStatement(std::string& output);
 
+
+	// TODO
+	/*
+	* Keep track of ids -> type
+	*/
+
+
 	/**
 	* The environment or symbol tables
 	* is used to map "identifiers to their types and locations"
 	* Appel A., Modern Compiler Implementation in C
 	*/
-	std::pair<std::string, AST::EXPRESSION_TYPE> _lastAddedExpression; // TODO - for what cases is string used? 
+	std::pair<std::string, AST::EXPRESSION_TYPE> _lastAddedExpression; 
 	int _expressionsOnStack;
 
 	/**

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdio.h>
 
 #include <boost/shared_ptr.hpp>
@@ -9,7 +11,7 @@
 #include "PROGRAM.h"
 #include "TYPE.h"
 
-using namespace AST; // XXX - possible omit 
+using namespace AST; // XXX - possibly omit 
 
 // Define a constructor used by all the testing classes on loading
 class baseProgramTest
@@ -36,11 +38,26 @@ public:
 
 		expr_TRUE = boost::shared_ptr<EXPR> (new EXPR(EXPR_BOOL, value_TRUE));
 		expr_FALSE = boost::shared_ptr<EXPR> (new EXPR(EXPR_BOOL, value_FALSE));
+
+		expr_ZERO = boost::shared_ptr<EXPR> (new EXPR(EXPR_INT, value_ZERO));
+		expr_ONE = boost::shared_ptr<EXPR> (new EXPR(EXPR_INT, value_ONE));
+		expr_TWO = boost::shared_ptr<EXPR> (new EXPR(EXPR_INT, value_TWO));
+		expr_THREE = boost::shared_ptr<EXPR> (new EXPR(EXPR_INT, value_THREE));
+
+		std::vector<TYPE> noTypes;
+		type_ZERO = boost::shared_ptr<TYPE> (new TYPE("0", noTypes));
+		type_ONE = boost::shared_ptr<TYPE> (new TYPE("1", noTypes));
+
+		alt_ZERO = boost::shared_ptr<ALT> (new ALT(type_ZERO, expr_ONE)); 
+		alt_ONE = boost::shared_ptr<ALT> (new ALT(type_ONE, expr_ZERO)); 
 	}
 
 	virtual ~baseProgramTest() {}
 
 protected:
+	/*
+	* Values
+	*/
 	boost::variant< bool > value_TRUE;
 	boost::variant< bool > value_FALSE;
 
@@ -49,6 +66,9 @@ protected:
 	boost::variant< int > value_TWO;
 	boost::variant< int > value_THREE;
 
+	/*
+	* Operators
+	*/
 	boost::shared_ptr<OPERATOR> op_add;
 	boost::shared_ptr<OPERATOR> op_sub;
 	boost::shared_ptr<OPERATOR> op_mul;
@@ -58,19 +78,26 @@ protected:
 	boost::shared_ptr<OPERATOR> op_or;
 	boost::shared_ptr<OPERATOR> op_and;
 
+	/*
+	* Expressions
+	*/
 	boost::shared_ptr<EXPR> expr_TRUE;
 	boost::shared_ptr<EXPR> expr_FALSE;
+
+	boost::shared_ptr<EXPR> expr_ZERO;
+	boost::shared_ptr<EXPR> expr_ONE;
+	boost::shared_ptr<EXPR> expr_TWO;
+	boost::shared_ptr<EXPR> expr_THREE;
+
+	/*
+	* Types
+	*/
+	boost::shared_ptr<TYPE> type_ZERO;
+	boost::shared_ptr<TYPE> type_ONE; 
+
+	/*
+	* Alternatives
+	*/
+	boost::shared_ptr<ALT> alt_ZERO;
+	boost::shared_ptr<ALT> alt_ONE; 
 };
-
-// boost::shared_ptr<EXPR> expr_0(new EXPR(EXPR_INT, value_0));
-// boost::shared_ptr<EXPR> expr_1(new EXPR(EXPR_INT, value_1));
-// boost::shared_ptr<EXPR> expr_2(new EXPR(EXPR_INT, value_2));
-
-
-// boost::shared_ptr<TYPE> type_0(new TYPE(TYPE_INT));
-// boost::shared_ptr<TYPE> type_1(new TYPE(TYPE_INT));
-
-// // Create alternatives one by one and add them to vector of alternatives
-// std::vector< boost::shared_ptr<ALT> > alternatives;
-// boost::shared_ptr<ALT> alt_0(new ALT(&expr_0, &expr_1)); 
-// boost::shared_ptr<ALT> alt_1(new ALT(&expr_1, &expr_0)); 

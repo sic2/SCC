@@ -5,6 +5,10 @@
 #define TYPE_IS_PRIMITIVE 0
 #define TYPE_NOT_PRIMITIVE 1
 
+/*
+* TODO
+* use union (i.e. variant) instead of having two constructors
+*/
 class AST::TYPE
 {
 public:
@@ -16,20 +20,20 @@ public:
 	/**
 	* @return empty string if no id is set.
 	*/
-	std::string getID();
+	std::string getID() { return _id; }
 
 	/**
-	* @return set of PRIMITIVE types
+	* @return PRIMITIVE type
 	*/
 	PRIMITIVE_TYPE getType() { return this->_primitiveType; }
 
 	/**
-	*
+	* @return vector of types
 	*/
 	std::vector<TYPE> getTypes() { return this->_types; }
 
 	/**
-	*
+	* @return true if this type is a primitive
 	*/
 	bool typeIsPrimitive() { return _whichConstructor == TYPE_IS_PRIMITIVE; }
 

@@ -1,4 +1,5 @@
 #include "JVMByteCodeGenerator.h"
+#include "ADTByteCode.h"
 
 #include "PROGRAM.h"
 
@@ -34,7 +35,13 @@ bool JVMByteCodeGenerator::generateByteCode(std::string outFileName)
 
 	if(DEBUG_MODE >= 1)
 	{
-		printf("JASMIN BYTECODE: \n\n%s\n\nEND JASMIN BYTECODE\n", jasminProgram.c_str());
+		printf("JASMIN BYTECODE: \n\n%s\n\nEND JASMIN BYTECODE\n\n", jasminProgram.c_str());
+	}
+
+	std::string adtByteCode = ADTByteCode::getByteCode();
+	if(DEBUG_MODE >= 1)
+	{
+		printf("ADT BYTECODE: \n\n%s\n\nEND ADT BYTECODE\n", adtByteCode.c_str());
 	}
 
 	return false;
@@ -48,12 +55,10 @@ void JVMByteCodeGenerator::formatJasminInstruction(std::string& instruction)
 
 void JVMByteCodeGenerator::printLastStatement(std::string& output)
 {
-	{
-		std::ostringstream convert; 
-		convert << (_expressionsOnStack - 1); 
-		output += "\tiload_" + convert.str() + "\n";
-	}
-
+	std::ostringstream convert; 
+	convert << (_expressionsOnStack - 1); 
+	output += "\tiload_" + convert.str() + "\n";
+	
 	switch(_lastAddedExpression.second)
 	{
 		case AST::EXPR_INT:
@@ -109,7 +114,6 @@ bool JVMByteCodeGenerator::addSubroutine(std::string subroutine)
 
 void JVMByteCodeGenerator::updateEnvironment(std::string* ID, AST::EXPRESSION_TYPE exprType, bool onStack)
 {
-	printf("updating env with id %s expr type %d and onstack %d\n", ID->c_str(), exprType, onStack);
 	_lastAddedExpression = std::make_pair<std::string, AST::EXPRESSION_TYPE> (*ID, exprType);
 	if (onStack)
 	{

@@ -2,17 +2,7 @@
 
 boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest0()
 {
-	boost::shared_ptr<OPERATOR> op_add(new OPERATOR(OP_ADDITION));
-
-	int int10 = 10;
-	boost::variant< int > value_0(int10);
-	int int2 = 2;
-	boost::variant< int > value_1(int2);
-
-	boost::shared_ptr<EXPR> expr_0(new EXPR(EXPR_INT, value_0));
-	boost::shared_ptr<EXPR> expr_1(new EXPR(EXPR_INT, value_1));
-
-	Expr_Bi_Op exprBiOp(expr_0, op_add, expr_1);
+	Expr_Bi_Op exprBiOp(expr_ZERO, op_add, expr_ONE);
 	boost::variant< Expr_Bi_Op > value_3(exprBiOp);
 
 	boost::shared_ptr<AST::EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_3));
@@ -21,14 +11,28 @@ boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest0()
 	return program_0;
 }
 
+// FIXME - test is broken
 boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest1()
 {
-	// TODO
+	std::vector< boost::shared_ptr<ALT> > alternatives;
+	alternatives.push_back(alt_ZERO);
+	alternatives.push_back(alt_ONE);
+
+	Expr_Case exprCase(expr_ONE, alternatives);
+	boost::variant< Expr_Case > value_3(exprCase);
+
+	boost::shared_ptr<AST::EXPR> mainExpr(new EXPR(EXPR_CASE, value_3));
+	boost::shared_ptr<AST::PROGRAM> program_1(new PROGRAM(mainExpr));
+
+	return program_1;
 }
 
 boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest2()
 {
-	// TODO
+	boost::shared_ptr<AST::EXPR> mainExpr(new EXPR(EXPR_INT, value_ONE));
+	boost::shared_ptr<AST::PROGRAM> program_2(new PROGRAM(mainExpr));
+
+	return program_2;
 }
 
 /******************
@@ -158,11 +162,3 @@ boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest2()
 // 					expr1: &expr_FALSE
 // 					}
 // 				};
-
-// boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_13));
- //boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_INT, value_2));
-// boost::shared_ptr<EXPR> mainExpr(new EXPR(EXPR_CASE, value_4));
-
-
-	// alternatives.push_back(alt_0);
-	// alternatives.push_back(alt_1);

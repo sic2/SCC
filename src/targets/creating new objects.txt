@@ -1,20 +1,38 @@
-; CREATING NEW OBJECT
-new simple$<NEW CLASS>
-dup
-new simple
-dup
-invokespecial <init>()V
-dup
-invokevirtual java/lang/Object.getClass()Ljava/lang/Class;
-pop 
+http://web.mit.edu/javadev/packages/jasmin/doc/
 
-; PASS ARGUMENTS
-invokespecial simple$<NEW CLASS>.<init>(Lsimple;I)V ; I represent the param
+Create a separate .j file for class <NEW CLASS>
+
+
+; FIELDS
+.field public testA I
+.field public testB I
+
+; CONSTRUCTOR
+public TestClass(int);
+Code:
+0: aload_0
+1: invokespecial  #1; //Method java/lang/Object."<init>":()V
+4: aload_0
+5: iload_1
+6: putfield #2; //Field testA:I
+9: aload_0
+10: bipush   10
+12: putfield #3; //Field testB:I
+15: return
+
+
+From main class:
+
+; CREATING NEW OBJECT
+new <NEW CLASS>
+dup
+bipush ; PASS ARGUMENT
+invokespecial <NEW CLASS>.<init>(I)V
 astore_1 ; storing object
 
 ; GETTING FIELDS 
 aload_1 ; loading object
-getfield simple$<NEW CLASS>.<FIELD>:I ; I represent the field type
+getfield <NEW CLASS>.<FIELD>:I ; I represent the field type
 
 ; UPDATING FIELDS
 aload_1
@@ -28,3 +46,8 @@ aload_1
 getfield simple$<NEW CLASS>.<FIELD_1>:I ; I represent the field type
 invokestatic function(II)Z
 pop
+
+
+
+
+
