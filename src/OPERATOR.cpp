@@ -109,7 +109,6 @@ AST::EXPRESSION_TYPE AST::OPERATOR::generateByteCode(JVMByteCodeGenerator* bytec
 
 std::string AST::OPERATOR::getSubroutineParams(AST::EXPRESSION_TYPE op0Type, AST::EXPRESSION_TYPE op1Type)
 {
-	printf("op type is %d \n", op0Type);
 	std::string retval = "(";
 	if (op0Type == EXPR_INT)
 	{
@@ -198,21 +197,21 @@ std::string AST::OPERATOR::getSubroutineReturning()
 std::string AST::OPERATOR::getTrivialMathSubroutine()
 {
 	std::string retval;
-	retval += "\t iload_0 \n";
-	retval += "\t iload_1 \n";
+	retval += "\t iload 0 \n";
+	retval += "\t iload 1 \n";
 	switch(this->_op)
 	{
 		case AST::OP_ADDITION:
-			retval = "\t iadd";
+			retval += "\t iadd";
 			break;
 		case AST::OP_SUBTRACTION:
-			retval = "\t isub";
+			retval += "\t isub";
 			break;
 		case AST::OP_MULTIPLICATION:
-			retval = "\t imul";
+			retval += "\t imul";
 			break;
 		case AST::OP_DIVISION:
-			retval = "\t idiv";
+			retval += "\t idiv";
 			break;
 		case AST::OP_EQUALITY:
 		case AST::OP_LESS:
@@ -229,8 +228,8 @@ std::string AST::OPERATOR::getTrivialMathSubroutine()
 std::string AST::OPERATOR::getTrivialCmpSubroutine()
 {
 	std::string retval;
-	retval += "\t iload_0 \n";
-	retval += "\t iload_1 \n";
+	retval += "\t iload 0 \n";
+	retval += "\t iload 1 \n";
 	if (this->_op == AST::OP_EQUALITY)
 	{
 		retval += "\t if_icmpne Label_NT \n";
@@ -253,9 +252,9 @@ std::string AST::OPERATOR::getTrivialLogicSubroutine()
 	std::string retval;
 	if (this->_op == AST::OP_OR)
 	{
-		retval += "\t iload_0 \n";
+		retval += "\t iload 0 \n";
 		retval += "\t ifne Label_NT \n";
-		retval += "\t iload_1 \n";
+		retval += "\t iload 1 \n";
 		retval += "\t ifeq Label_T \n";
 		retval += " Label_NT:\n";
 		retval += "\t iconst_1 \n";
@@ -266,9 +265,9 @@ std::string AST::OPERATOR::getTrivialLogicSubroutine()
 	}
 	else
 	{
-		retval += "\t iload_0 \n";
+		retval += "\t iload 0 \n";
 		retval += "\t ifeq Label_T \n";
-		retval += "\t iload_1 \n";
+		retval += "\t iload 1 \n";
 		retval += "\t ifeq Label_T \n";
 		retval += "\t iconst_1 \n";
 		retval += "\t goto Label_R \n";

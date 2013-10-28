@@ -31,7 +31,7 @@ public:
 		byteCode += "\n.method public <init>()V \n";
 		byteCode += ".limit stack 5 \n";
 		byteCode += ".limit locals 10 \n";
-		byteCode += "\t aload_0 \n";
+		byteCode += "\t aload 0 \n";
 		byteCode += "\t invokespecial java/lang/Object/<init>()V \n";
 		byteCode += "\t return \n";
 		byteCode += ".end method \n";

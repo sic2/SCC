@@ -45,9 +45,22 @@
 #define INVOKE_PRINTLN_BOOL "invokevirtual java/io/PrintStream/println(Z)V"
 #define SUBROUTINE ".method public static "
 
-/*
-* Subroutines names
-*/
+class Expression_Info
+{
+public:
+	inline Expression_Info(AST::EXPRESSION_TYPE type, std::string ID, int locationInStack)
+	{
+		this->type = type;
+		this->ID = ID;
+		this->locationInStack = locationInStack;
+	}
+
+	virtual ~Expression_Info() {}
+
+	AST::EXPRESSION_TYPE type;
+	std::string ID;
+	int locationInStack;
+};
 
 class JVMByteCodeGenerator
 {
@@ -85,7 +98,7 @@ public:
 	* @param ID of expression
 	* @param expression type
 	* @param onStack is true if the variable is added in the stack. Then the environment is updated.
-	*				if false, then the environment is not updated, but the variable _lastAddedExpression
+	*				if false, then the environment is not updated, but the variable _lastExpression
 	*				is updated anyway. 
 	*				In fact, there are cases when an integer value expression is executed, but not added in the stack
 	*				but we may still want to keep track of it, in case this must be printed.
@@ -122,6 +135,8 @@ public:
 	*/
 	void addNewGenericObject(std::string str, int labelIndex);
 
+	Expression_Info* getLastExpression() { return this->_lastExpression; }
+
 private:
 	boost::shared_ptr<AST::PROGRAM> _program;
 
@@ -139,15 +154,17 @@ private:
 	* Keep track of created objects and registers
 	* used to store instances
 	*/
-	std::map<std::string, int> _objects;
+	std::map<std::string, int> _objects; // XXX - Unused yet
 
 	/**
 	* The environment or symbol tables
 	* is used to map "identifiers to their types and locations"
 	* Appel A., Modern Compiler Implementation in C
 	*/
-	std::pair<std::string, AST::EXPRESSION_TYPE> _lastAddedExpression; 
+	// std::pair<std::string, AST::EXPRESSION_TYPE> _lastAddedExpression; 
 	int _expressionsOnStack;
+
+	Expression_Info* _lastExpression;
 
 	/**
 	* Set containing the subroutines names of all subroutines 

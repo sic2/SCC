@@ -10,8 +10,8 @@
 ***********************************************************/
 
 #include "JVMByteCodeGenerator.h"
-// #include "basicProgramTests.h"
-#include "ADTProgramTests.h"
+ #include "basicProgramTests.h"
+//#include "ADTProgramTests.h"
 
 // A 2-steps process is used:
 // - Encode the program in AST
@@ -33,13 +33,13 @@ int main(int argc, char** argv)
 	/**************
 	* TEST PROGRAMS
 	***************/
-	// basicProgramTests test0;
-	// JVMByteCodeGenerator byteCodeGen(test0.getTest2());
-	// byteCodeGen.generateByteCode("XXX");
-
-	ADTProgramTests test0;
+	basicProgramTests test0;
 	JVMByteCodeGenerator byteCodeGen;
-	byteCodeGen.generateByteCode(test0.getTest1(), "XXX");
+	byteCodeGen.generateByteCode(test0.getTest3(), "XXX");
+
+	// ADTProgramTests test0;
+	// JVMByteCodeGenerator byteCodeGen;
+	// byteCodeGen.generateByteCode(test0.getTest1(), "XXX");
 
 	return 0;
 }	

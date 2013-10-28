@@ -35,6 +35,21 @@ boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest2()
 	return program_2;
 }
 
+boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest3()
+{
+	Expr_Bi_Op exprBiOp(expr_ZERO, op_add, expr_ONE);
+	boost::variant< Expr_Bi_Op > value_3(exprBiOp);
+	boost::shared_ptr<AST::EXPR> subExpr(new EXPR(EXPR_BI_OP, value_3));
+	
+	Expr_Bi_Op secondExprBiOp(subExpr, op_mul, expr_TWO);
+	boost::variant< Expr_Bi_Op > value_4(secondExprBiOp);
+	
+	boost::shared_ptr<AST::EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_4));
+	boost::shared_ptr<AST::PROGRAM> program_0(new PROGRAM(mainExpr));
+	
+	return program_0;
+}
+
 /******************
 * Some previous examples
 *******************/

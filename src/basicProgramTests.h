@@ -11,4 +11,5 @@ public:
 	boost::shared_ptr<AST::PROGRAM> getTest0();
 	boost::shared_ptr<AST::PROGRAM> getTest1();
 	boost::shared_ptr<AST::PROGRAM> getTest2();
+	boost::shared_ptr<AST::PROGRAM> getTest3();
 };

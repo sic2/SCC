@@ -11,6 +11,7 @@
 JVMByteCodeGenerator::JVMByteCodeGenerator()
 {
 	cleanup();
+	_lastExpression = new Expression_Info(AST::EXPR_UNDEFINED, std::string(" "), 0);
 }
 
 void JVMByteCodeGenerator::cleanup()
@@ -70,9 +71,9 @@ void JVMByteCodeGenerator::printLastStatement(std::string& output)
 {
 	std::ostringstream convert; 
 	convert << (_expressionsOnStack - 1); 
-	output += "\tiload_" + convert.str() + "\n";
+	output += "\tiload " + convert.str() + "\n";
 	
-	switch(_lastAddedExpression.second)
+	switch(_lastExpression->type)
 	{
 		case AST::EXPR_INT:
 			JASMIN_INSTR(output, INVOKE_PRINTLN_INT);
@@ -80,8 +81,11 @@ void JVMByteCodeGenerator::printLastStatement(std::string& output)
 		case AST::EXPR_BOOL:
 			JASMIN_INSTR(output, INVOKE_PRINTLN_BOOL);
 			break;
+		case AST::EXPR_STRING:
+			printf("cannot print string yet\n");
+			break;
 		default:
-			printf("Printing last statement - type NOT SUPPORTED\n");
+			printf("Printing last statement - type %d NOT SUPPORTED\n", _lastExpression->type);
 			break;
 	} // end switch
 }
@@ -94,7 +98,7 @@ void JVMByteCodeGenerator::addInitialJasminCode(std::string& output)
 	JASMIN_DIRECTIVE_progr(output, ".class public ", PROGRAM_NAME); // XXX - simple is the name of the program and must be saved as simple.j
 	JASMIN_DIRECTIVE(output, ".super java/lang/Object");
 	JASMIN_DIRECTIVE(output, ".method public <init>()V");
-	JASMIN_INSTR(output, "aload_0");
+	JASMIN_INSTR(output, "aload 0");
 	JASMIN_INSTR(output, INVOKE_SPECIAL_INT);
 	JASMIN_INSTR(output, "return");
 	JASMIN_DIRECTIVE(output, ".end method");
@@ -127,11 +131,17 @@ bool JVMByteCodeGenerator::addSubroutine(std::string subroutine)
 
 void JVMByteCodeGenerator::updateEnvironment(std::string* ID, AST::EXPRESSION_TYPE exprType, bool onStack)
 {
-	_lastAddedExpression = std::make_pair<std::string, AST::EXPRESSION_TYPE> (*ID, exprType);
+	_lastExpression->type = exprType;
+	_lastExpression->ID = *ID;
+	
+	// _lastAddedExpression = std::make_pair<std::string, AST::EXPRESSION_TYPE> (*ID, exprType);
 	if (onStack)
 	{
+		printf("increase expressions on stack\n");
+		_lastExpression->locationInStack = _expressionsOnStack;
 		_expressionsOnStack++;
 	}
+	
 }
 
 void JVMByteCodeGenerator::addTypedef(std::string typeID, AST::Expr_Typedef typeDefinition)

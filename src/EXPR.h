@@ -26,7 +26,7 @@ public:
 	* @param onStack Set to true the first time
 	* @return
 	*/
-	EXPRESSION_TYPE generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, 
+	void generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, 
 									std::string& mainMethod, bool onStack, void* context);
 
 	/*
@@ -53,18 +53,18 @@ private:
 	/*
 	* Bytecode generators
 	*/
-	EXPRESSION_TYPE generateIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
-	EXPRESSION_TYPE generateBoolByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
-	EXPRESSION_TYPE generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
-	EXPRESSION_TYPE generateBiOPByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
-	EXPRESSION_TYPE generateConstructByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);	
-	EXPRESSION_TYPE generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
+	void generateIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
+	void generateBoolByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
+	void generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
+	void generateBiOPByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
+	void generateConstructByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);	
+	void generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
 
-	int newGenericObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod,
-	std::string ID, std::string typeID);
-	void loadIntToObject(std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int labelIndex);
-	void loadBoolToObject(std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int labelIndex);
-	void loadStrToObject(std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int labelIndex);
-	void loadObjectToObject(std::string& mainMethod, int labelIndex, int arrayIndex, int object);
+	int newGenericObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, std::string ID, std::string typeID);
 	void updateTags(std::string& mainMethod, int labelIndex, std::string typeID, std::string constructorID);
+
+	void loadIntToObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int labelIndex, int arrayIndex, int object, void* context);
+	void loadBoolToObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int labelIndex, int arrayIndex, int object, void* context);
+	void loadStrToObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int labelIndex, int arrayIndex, int object, void* context);
+	void loadObjectToObject(std::string& mainMethod, int labelIndex, int arrayIndex, int object);
 };
