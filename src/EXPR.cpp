@@ -51,9 +51,8 @@ AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeG
 	case EXPR_VAR_CONSTR:
 		{
 			// TODO
-			// [ DESIGN ASSUMPTION ]
-			// this will work only for primitive types
-			// XXX - maybe this is never used
+			// create object knowing constructor and etc
+			retval = generateConstructByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, stackPos);
 		}
 		break;
 	case EXPR_CASE:
@@ -144,7 +143,7 @@ AST::EXPRESSION_TYPE AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytec
 	int dummy;
 	boost::shared_ptr<EXPR> expr = boost::get< Expr_Case >(_uValue).expr;
 	expr->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true, &dummy); 	
- 	int caseValue = bytecodeGenerator->getEnvironmentSize(); 
+ 	// int caseValue = bytecodeGenerator->getEnvironmentSize(); 
 
  	EXPRESSION_TYPE caseExpr;
 	std::vector< boost::shared_ptr<ALT> > alternatives = boost::get< Expr_Case >(_uValue).alternatives;
@@ -207,72 +206,15 @@ AST::EXPRESSION_TYPE AST::EXPR::generateBiOPByteCode(JVMByteCodeGenerator* bytec
 	return exprType; 
 }
 
-
-int AST::EXPR::newGenericObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod,
-	std::string ID, std::string typeID)
-{
-	mainMethod += "\n\tnew ADTByteCode ; create new generic object for type " + typeID + "\n";
-	mainMethod += "\tdup \n";
-	mainMethod += "\tinvokespecial ADTByteCode.<init>()V \n";
-	int labelIndex = bytecodeGenerator->nextLabel();
-	// *stackPos = labelIndex; FIXME
-	mainMethod += "\tastore_" + integerToString(labelIndex) + std::string("\n");
-	// Update environment
-	bytecodeGenerator->addNewGenericObject(ID, labelIndex);
-
-	
-	// Initialise array of objs
-	mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
-	mainMethod += "\tbipush 10 \n"; // FIXME - do not assume size of array to be 10
-	mainMethod += "\tanewarray ADTByteCode\n";
-	mainMethod += "\tputfield ADTByteCode/objs [LADTByteCode;\n"; 
-	return labelIndex;
-}
-
-void AST::EXPR::loadIntToObject(std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int labelIndex)
-{
-	mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
-	mainMethod += "\t" + getIntByteCode(boost::get< int >(expr->getValue())) + "\n";
-	mainMethod += "\tputfield ADTByteCode/intVal I \n";	
-}
-
-void AST::EXPR::loadBoolToObject(std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int labelIndex)
-{
-	mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
-	mainMethod += "\t" + boolToString(boost::get< bool >(expr->getValue()));
-	mainMethod += "\tputfield ADTByteCode/boolVal Z; \n";
-}
-
-void AST::EXPR::loadStrToObject(std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int labelIndex)
-{
-	mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
-	mainMethod += "\tldc \"" + boost::get< std::string >(expr->getValue()) + "\"\n";
-	mainMethod += "\tputfield ADTByteCode/strVal Ljava/lang/String; \n";
-}
-
-void AST::EXPR::loadObjectToObject(std::string& mainMethod, int labelIndex, int arrayIndex, int object)
-{
-	mainMethod += "; LOAD OBJ " + integerToString(object) + std::string(" to array of objs in ") + 
-					integerToString(labelIndex) +  " in position " + integerToString(arrayIndex) + "\n";			
-	mainMethod += "aload_" + integerToString(labelIndex) + std::string("\n");
-	mainMethod += "getfield ADTByteCode/objs [LADTByteCode; \n";
-	mainMethod += getIntByteCode(arrayIndex) + "\n";
-	mainMethod += "aload_" + integerToString(object) + std::string("\n");
-	mainMethod += "aastore\n";
-}
-
-void AST::EXPR::updateTags(std::string& mainMethod, int labelIndex, std::string typeID, std::string constructorID)
-{
-	mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
-	mainMethod += "\tldc \"" + typeID + "\"\n";
-	mainMethod += "\tputfield ADTByteCode/typeTag Ljava/lang/String; \n";
-
-	mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
-	mainMethod += "\tldc \"" + constructorID + "\"\n";
-	mainMethod += "\tputfield ADTByteCode/constrTag Ljava/lang/String; \n";
-}
-
-// TODO - refactor
+// TODO :
+// new var creates a new variables which is assigned whatever is on the RHS
+// for instance kevin :: Person = Person Age 21 Address 0 "String"
+// creates a new instance kevin of type person, but
+// the person itself is created by EXPR_VAR_CONSTR
+// this way it is possible to have expressions like:
+// 		ages :: int = kevin.age * 2
+//
+// refactor
 // in submethods
 AST::EXPRESSION_TYPE AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
 	std::string& jasminProgram, std::string& mainMethod, bool onStack, int* stackPos)
@@ -357,6 +299,77 @@ AST::EXPRESSION_TYPE AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* byt
 	}
 
 	return EXPR_NEW_VAR; // Does this matter?
+}
+
+AST::EXPRESSION_TYPE AST::EXPR::generateConstructByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
+	std::string& jasminProgram, std::string& mainMethod, bool onStack, int* stackPos)
+{
+	// TODO
+	return EXPR_VAR_CONSTR;
+}
+
+int AST::EXPR::newGenericObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod,
+	std::string ID, std::string typeID)
+{
+	mainMethod += "\n\tnew ADTByteCode ; create new generic object for type " + typeID + "\n";
+	mainMethod += "\tdup \n";
+	mainMethod += "\tinvokespecial ADTByteCode.<init>()V \n";
+	int labelIndex = bytecodeGenerator->nextLabel();
+	// *stackPos = labelIndex; FIXME
+	mainMethod += "\tastore_" + integerToString(labelIndex) + std::string("\n");
+	// Update environment
+	bytecodeGenerator->addNewGenericObject(ID, labelIndex);
+
+	
+	// Initialise array of objs
+	mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
+	mainMethod += "\tbipush 10 \n"; // FIXME - do not assume size of array to be 10
+	mainMethod += "\tanewarray ADTByteCode\n";
+	mainMethod += "\tputfield ADTByteCode/objs [LADTByteCode;\n"; 
+	return labelIndex;
+}
+
+void AST::EXPR::loadIntToObject(std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int labelIndex)
+{
+	mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
+	mainMethod += "\t" + getIntByteCode(boost::get< int >(expr->getValue())) + "\n";
+	mainMethod += "\tputfield ADTByteCode/intVal I \n";	
+}
+
+void AST::EXPR::loadBoolToObject(std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int labelIndex)
+{
+	mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
+	mainMethod += "\t" + boolToString(boost::get< bool >(expr->getValue()));
+	mainMethod += "\tputfield ADTByteCode/boolVal Z; \n";
+}
+
+void AST::EXPR::loadStrToObject(std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int labelIndex)
+{
+	mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
+	mainMethod += "\tldc \"" + boost::get< std::string >(expr->getValue()) + "\"\n";
+	mainMethod += "\tputfield ADTByteCode/strVal Ljava/lang/String; \n";
+}
+
+void AST::EXPR::loadObjectToObject(std::string& mainMethod, int labelIndex, int arrayIndex, int object)
+{
+	mainMethod += "; LOAD OBJ " + integerToString(object) + std::string(" to array of objs in ") + 
+					integerToString(labelIndex) +  " in position " + integerToString(arrayIndex) + "\n";			
+	mainMethod += "aload_" + integerToString(labelIndex) + std::string("\n");
+	mainMethod += "getfield ADTByteCode/objs [LADTByteCode; \n";
+	mainMethod += getIntByteCode(arrayIndex) + "\n";
+	mainMethod += "aload_" + integerToString(object) + std::string("\n");
+	mainMethod += "aastore\n";
+}
+
+void AST::EXPR::updateTags(std::string& mainMethod, int labelIndex, std::string typeID, std::string constructorID)
+{
+	mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
+	mainMethod += "\tldc \"" + typeID + "\"\n";
+	mainMethod += "\tputfield ADTByteCode/typeTag Ljava/lang/String; \n";
+
+	mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
+	mainMethod += "\tldc \"" + constructorID + "\"\n";
+	mainMethod += "\tputfield ADTByteCode/constrTag Ljava/lang/String; \n";
 }
 
 /*

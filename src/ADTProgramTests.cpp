@@ -33,6 +33,13 @@ boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest0()
 	return program_0;
 }
 
+/*
+type Age = Age int; 
+type Address = Addr int string; 
+type Person = Person Age Address; 
+kevin :: Person = Person { Age 21 } { Address 1 "..." };
+kevin 
+*/
 boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest1()
 {
 	std::vector< boost::shared_ptr<AST::EXPR> > expressions;
@@ -84,7 +91,7 @@ boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest1()
 
 	// AGE
 	std::vector< boost::shared_ptr<AST::EXPR> > ageParams;
-	ageParams.push_back(expr_TWO); // Age = 2 // TODO - change to > 18
+	ageParams.push_back(expr_21); // Age = 21
 	Expr_Group groupParamsAge(ageParams);
 	boost::variant< Expr_Group > value_groupParamsAge(groupParamsAge);
 	boost::shared_ptr<AST::EXPR> parametersAge(new EXPR(EXPR_GROUP, value_groupParamsAge));
@@ -111,7 +118,7 @@ boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest1()
 	Expr_Group groupParams(personParams);
 	boost::variant< Expr_Group > value_groupParams(groupParams);
 	boost::shared_ptr<AST::EXPR> parameters(new EXPR(EXPR_GROUP, value_groupParams));
-	Expr_New_Var exprNewVar("kevin", "Person", "Person", parameters); // kevin Person :: Person (Age 2) (Address 10 "street")
+	Expr_New_Var exprNewVar("kevin", "Person", "Person", parameters); // kevin Person :: Person (Age 21) (Address 0 "String")
 	boost::variant< Expr_New_Var > newVar(exprNewVar);
 	boost::shared_ptr<AST::EXPR> newVarExpr(new EXPR(EXPR_NEW_VAR, newVar));
 	expressions.push_back(newVarExpr);

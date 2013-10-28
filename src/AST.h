@@ -177,7 +177,7 @@ namespace AST
 		{
 			this->ID = ID;
 			this->typeID = typeID;
-			this->constructorID = constructorID;
+			this->constructorID = constructorID; // FIXME - constructorID should be store in expr 
 			this->expr = expr;
 		}
 

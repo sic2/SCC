@@ -28,6 +28,7 @@ public:
 		value_ONE = boost::variant< int >(1);
 		value_TWO = boost::variant< int >(2);
 		value_THREE = boost::variant< int >(3);
+		value_21 = boost::variant< int >(21);
 
 		value_STRING = boost::variant< std::string >("String");
 
@@ -49,6 +50,7 @@ public:
 		expr_ONE = boost::shared_ptr<EXPR> (new EXPR(EXPR_INT, value_ONE));
 		expr_TWO = boost::shared_ptr<EXPR> (new EXPR(EXPR_INT, value_TWO));
 		expr_THREE = boost::shared_ptr<EXPR> (new EXPR(EXPR_INT, value_THREE));
+		expr_21 = boost::shared_ptr<EXPR> (new EXPR(EXPR_INT, value_21));
 
 		expr_STR = boost::shared_ptr<EXPR> (new EXPR(EXPR_STRING, value_STRING));
 
@@ -78,6 +80,7 @@ protected:
 	boost::variant< int > value_ONE;
 	boost::variant< int > value_TWO;
 	boost::variant< int > value_THREE;
+	boost::variant< int > value_21;
 
 	boost::variant< std::string > value_STRING;
 
@@ -103,6 +106,7 @@ protected:
 	boost::shared_ptr<EXPR> expr_ONE;
 	boost::shared_ptr<EXPR> expr_TWO;
 	boost::shared_ptr<EXPR> expr_THREE;
+	boost::shared_ptr<EXPR> expr_21;
 
 	boost::shared_ptr<EXPR> expr_STR;
 
