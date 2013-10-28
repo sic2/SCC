@@ -8,15 +8,11 @@
 * The code of the scc cannot be copied or reused in any 
 * circumstances, unless permission has been granted by the author.
 ***********************************************************/
-#include "PROGRAM.h"
+
 #include "JVMByteCodeGenerator.h"
 // #include "basicProgramTests.h"
 #include "ADTProgramTests.h"
 
-using namespace AST;
-
-// Test programs are encoded and evaluated 
-// in the main method.
 // A 2-steps process is used:
 // - Encode the program in AST
 // - Generate JVM bytecode from the AST
@@ -24,7 +20,16 @@ using namespace AST;
 int main(int argc, char** argv)
 {
 	// TODO - get params from argc and argv
+	/*
+	if (argc < 2) // No arguments given, then return with error
+	{
+		printf("[ ERROR ] :: Please provide a file name for the program to generate\n");
+		return 1;
+	}
 
+	std::string fileName = argv[1];
+
+	*/
 	/**************
 	* TEST PROGRAMS
 	***************/
@@ -33,8 +38,8 @@ int main(int argc, char** argv)
 	// byteCodeGen.generateByteCode("XXX");
 
 	ADTProgramTests test0;
-	JVMByteCodeGenerator byteCodeGen(test0.getTest1());
-	byteCodeGen.generateByteCode("XXX");
+	JVMByteCodeGenerator byteCodeGen;
+	byteCodeGen.generateByteCode(test0.getTest1(), "XXX");
 
 	return 0;
 }	

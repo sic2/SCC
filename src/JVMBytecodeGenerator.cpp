@@ -8,19 +8,27 @@
 // MACROS
 #define JASMIN_DIRECTIVE_progr(stream, x, progr_Name) stream += x progr_Name NEW_LINE
 
-JVMByteCodeGenerator::JVMByteCodeGenerator(boost::shared_ptr<AST::PROGRAM> program)
+JVMByteCodeGenerator::JVMByteCodeGenerator()
 {
-	_program = program;
+	cleanup();
+}
+
+void JVMByteCodeGenerator::cleanup()
+{
 	_numberLabels = -1;
 	_expressionsOnStack = 0;
 	_genericClassForADTsEnabled = false;
+
+	// TODO - cleanup other data structures
 }
 
 // Resources on jasmin:
 // http://www.ceng.metu.edu.tr/courses/ceng444/link/f3jasmintutorial.html 
 // http://jasmin.sourceforge.net/
-bool JVMByteCodeGenerator::generateByteCode(std::string outFileName) 
-{
+bool JVMByteCodeGenerator::generateByteCode(boost::shared_ptr<AST::PROGRAM> program, std::string outFileName) 
+{	
+	this->_program = program;
+
 	std::string jasminProgram;
 	std::string mainMethod;
 	addInitialJasminCode(jasminProgram);

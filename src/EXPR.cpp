@@ -28,7 +28,7 @@ AST::EXPR::~EXPR()
 }
 
 AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
-						std::string& jasminProgram, std::string& mainMethod, bool onStack)
+						std::string& jasminProgram, std::string& mainMethod, bool onStack, int* stackPos)
 {
 	EXPRESSION_TYPE retval = _typeExpr;
 	switch(_typeExpr)
@@ -77,7 +77,7 @@ AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeG
 			std::vector< boost::shared_ptr<EXPR> > expressions = boost::get< Expr_Group >(_uValue).expressions;
 			for(std::vector< boost::shared_ptr<EXPR> >::iterator it = expressions.begin(); it != expressions.end(); ++it) 
 			{
-    			(*it)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack);
+    			(*it)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, stackPos);
 			}
 		}
 		break;
@@ -92,7 +92,7 @@ AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeG
 		{
 			// create instance of given type, assuming this was previously defined
 			// with typedef
-			retval = generateNewVarByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack);
+			retval = generateNewVarByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, stackPos);
 			bytecodeGenerator->addGenericClassForADTs();
 		}
 		break;
@@ -110,22 +110,6 @@ AST::EXPRESSION_TYPE AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeG
 /******************
 * Private methods
 *******************/
-
-std::string AST::EXPR::getIntByteCode(int Integer)
-{
-	std::string retval = "iconst_";
-	if (Integer == -1)
-	{
-		return "iconst_m1";
-	}
-	else if (Integer < -1 || Integer > 5)
-	{
-		retval = "bipush ";
-	}
-
-	return retval + integerToString(Integer);
-}
-
 AST::EXPRESSION_TYPE AST::EXPR::generateIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
 	std::string& jasminProgram, std::string& mainMethod, bool onStack)
 {	
@@ -157,9 +141,9 @@ AST::EXPRESSION_TYPE AST::EXPR::generateBoolByteCode(JVMByteCodeGenerator* bytec
 AST::EXPRESSION_TYPE AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
 	std::string& jasminProgram, std::string& mainMethod, bool onStack) 
 {
-
+	int dummy;
 	boost::shared_ptr<EXPR> expr = boost::get< Expr_Case >(_uValue).expr;
-	expr->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true); 	
+	expr->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true, &dummy); 	
  	int caseValue = bytecodeGenerator->getEnvironmentSize(); 
 
  	EXPRESSION_TYPE caseExpr;
@@ -201,16 +185,18 @@ AST::EXPRESSION_TYPE AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytec
 // two variables
 AST::EXPRESSION_TYPE AST::EXPR::generateBiOPByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
 	std::string& jasminProgram, std::string& mainMethod, bool onStack)
-{
+{	
+	int dummy;
+
 	int caseValue = bytecodeGenerator->getEnvironmentSize();
 	// Generate bytecode for operands
 
 	boost::shared_ptr<EXPR> operand_0 = boost::get< Expr_Bi_Op >(_uValue).expr;
-	EXPRESSION_TYPE op0Type = operand_0->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true); // Push to stack, so that next operand can be pushed too
+	EXPRESSION_TYPE op0Type = operand_0->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true, &dummy); // Push to stack, so that next operand can be pushed too
 	mainMethod += std::string("\tiload_") + integerToString(caseValue) + std::string("\n"); // FIXME - assume integer
 
 	boost::shared_ptr<EXPR> operand_1 = boost::get< Expr_Bi_Op >(_uValue).expr1;
-	EXPRESSION_TYPE op1Type = operand_1->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false); // can be overwritten, so do not update environment stack
+	EXPRESSION_TYPE op1Type = operand_1->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false, &dummy); // can be overwritten, so do not update environment stack
 	mainMethod += std::string("\tiload_") + integerToString(caseValue + 1) + std::string("\n"); // FIXME - assume integer
 
 	EXPRESSION_TYPE exprType =  (boost::get< Expr_Bi_Op >(_uValue).op)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, op0Type, op1Type);
@@ -221,9 +207,75 @@ AST::EXPRESSION_TYPE AST::EXPR::generateBiOPByteCode(JVMByteCodeGenerator* bytec
 	return exprType; 
 }
 
+
+int AST::EXPR::newGenericObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod,
+	std::string ID, std::string typeID)
+{
+	mainMethod += "\n\tnew ADTByteCode ; create new generic object for type " + typeID + "\n";
+	mainMethod += "\tdup \n";
+	mainMethod += "\tinvokespecial ADTByteCode.<init>()V \n";
+	int labelIndex = bytecodeGenerator->nextLabel();
+	// *stackPos = labelIndex; FIXME
+	mainMethod += "\tastore_" + integerToString(labelIndex) + std::string("\n");
+	// Update environment
+	bytecodeGenerator->addNewGenericObject(ID, labelIndex);
+
+	
+	// Initialise array of objs
+	mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
+	mainMethod += "\tbipush 10 \n"; // FIXME - do not assume size of array to be 10
+	mainMethod += "\tanewarray ADTByteCode\n";
+	mainMethod += "\tputfield ADTByteCode/objs [LADTByteCode;\n"; 
+	return labelIndex;
+}
+
+void AST::EXPR::loadIntToObject(std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int labelIndex)
+{
+	mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
+	mainMethod += "\t" + getIntByteCode(boost::get< int >(expr->getValue())) + "\n";
+	mainMethod += "\tputfield ADTByteCode/intVal I \n";	
+}
+
+void AST::EXPR::loadBoolToObject(std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int labelIndex)
+{
+	mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
+	mainMethod += "\t" + boolToString(boost::get< bool >(expr->getValue()));
+	mainMethod += "\tputfield ADTByteCode/boolVal Z; \n";
+}
+
+void AST::EXPR::loadStrToObject(std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int labelIndex)
+{
+	mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
+	mainMethod += "\tldc \"" + boost::get< std::string >(expr->getValue()) + "\"\n";
+	mainMethod += "\tputfield ADTByteCode/strVal Ljava/lang/String; \n";
+}
+
+void AST::EXPR::loadObjectToObject(std::string& mainMethod, int labelIndex, int arrayIndex, int object)
+{
+	mainMethod += "; LOAD OBJ " + integerToString(object) + std::string(" to array of objs in ") + 
+					integerToString(labelIndex) +  " in position " + integerToString(arrayIndex) + "\n";			
+	mainMethod += "aload_" + integerToString(labelIndex) + std::string("\n");
+	mainMethod += "getfield ADTByteCode/objs [LADTByteCode; \n";
+	mainMethod += getIntByteCode(arrayIndex) + "\n";
+	mainMethod += "aload_" + integerToString(object) + std::string("\n");
+	mainMethod += "aastore\n";
+}
+
+void AST::EXPR::updateTags(std::string& mainMethod, int labelIndex, std::string typeID, std::string constructorID)
+{
+	mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
+	mainMethod += "\tldc \"" + typeID + "\"\n";
+	mainMethod += "\tputfield ADTByteCode/typeTag Ljava/lang/String; \n";
+
+	mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
+	mainMethod += "\tldc \"" + constructorID + "\"\n";
+	mainMethod += "\tputfield ADTByteCode/constrTag Ljava/lang/String; \n";
+}
+
 // TODO - refactor
+// in submethods
 AST::EXPRESSION_TYPE AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
-	std::string& jasminProgram, std::string& mainMethod, bool onStack)
+	std::string& jasminProgram, std::string& mainMethod, bool onStack, int* stackPos)
 {	
 	std::string ID = boost::get< Expr_New_Var >(_uValue).ID;
 	std::string typeID = boost::get< Expr_New_Var >(_uValue).typeID;
@@ -241,85 +293,67 @@ AST::EXPRESSION_TYPE AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* byt
 		{	
 			if ((*it)->getID().compare(constructorID) == 0)
 			{
-				// TODO 
 				/*
 				* Traverse tree defined by expr and constructor from leaves to root
 				* for each node instantiate a new generic object
-				* the object contains:
-				* 	- typeTag = typeID
-				*	- constrTag = constructorID
-				* 	- genericObjects[] = sub types
-				*	- values (if any)
+				*	
+				* Start by creating a new object for this type_id and constructor_id
+				* store object at register X
+				* if type is not primitive, 
+				* 		then create new generic obj, to be stored at register X + 1
+				* 		and add to array field in object X
+				* otherwise 
+				* 		set field in current object X
 				*/
 
 				constructorDefined = true;
 				std::vector< boost::shared_ptr<AST::TYPE> > types = (*it)->getTypes();
+				int labelIndex = newGenericObject(bytecodeGenerator, mainMethod, ID, typeID);
+				*stackPos = labelIndex;
 
-				// Start by creating a new object for this type_id and constructor_id
-				// store object at register X
-				// if type is not primitive, 
-				// 		then create new generic obj, to be stored at register X + 1
-				// 		and add to array field in object X
-				// otherwise 
-				// 		set field in current object X
-				mainMethod += "\n\tnew ADTByteCode ; create new generic object for type " + typeID + "\n";
-				mainMethod += "\tdup \n";
-				mainMethod += "\tinvokespecial ADTByteCode.<init>()V \n";
-				int labelIndex = bytecodeGenerator->nextLabel();
-				mainMethod += "\tastore_" + integerToString(labelIndex) + std::string("\n");
-				// Update environment
-				bytecodeGenerator->addNewGenericObject(ID, labelIndex);
+				// Update the tags fields for this object
+				updateTags(mainMethod, labelIndex, typeID, constructorID);
 
-				
+				int arrayIndex = 0;
 				std::vector< boost::shared_ptr<EXPR> > exprs = boost::get< Expr_Group >(expr->getValue()).expressions;
 				for(std::vector< boost::shared_ptr<AST::EXPR> >::iterator itt = exprs.begin(); itt != exprs.end(); ++itt)
 				{
-					// TODO 
-					// update tag
-					if ((*itt)->getExprType() == EXPR_INT)
+					AST::EXPRESSION_TYPE exprType = (*itt)->getExprType();
+					switch(exprType)
 					{
-						mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
-						mainMethod += "\t" + getIntByteCode(boost::get< int >((*itt)->getValue())) + "\n";
-						mainMethod += "putfield ADTByteCode/intVal I \n";
-					}
-					else if ((*itt)->getExprType() == EXPR_STRING)
-					{
-						mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
-						mainMethod += "\tldc " + boost::get< std::string >((*itt)->getValue()) + "\n";
-						mainMethod += "\tputfield ADTByteCode/strVal Ljava/lang/String; \n";
-					}
-					else if ((*itt)->getExprType() == EXPR_BOOL)
-					{
-						mainMethod += "\taload_" + integerToString(labelIndex) + std::string("\n");
-						mainMethod += "\t" + boolToString(boost::get< bool >((*itt)->getValue())); // FIXME 
-						mainMethod += "\tputfield ADTByteCode/boolVal Z; \n";
-					}
-					else
-					{
-						// TODO
-						// initialise array of objs
-						(*itt)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false);
-					}
-
+						case EXPR_INT:
+							loadIntToObject(mainMethod, (*itt), labelIndex);
+							break;
+						case EXPR_BOOL:
+							loadBoolToObject(mainMethod, (*itt), labelIndex);
+							break;
+						case EXPR_STRING:
+							loadStrToObject(mainMethod, (*itt), labelIndex);
+							break;
+						case EXPR_NEW_VAR:
+							int pos;
+							(*itt)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false, &pos);
+							
+							loadObjectToObject(mainMethod, labelIndex, arrayIndex, pos);
+							arrayIndex++;
+							break;
+						default:
+							printf("Error: expression type %d not expected\n", exprType);
+							break;
+					} // End switch
 				}
 				break;
 			}	
 		}
 
-		if (!constructorDefined)
+		if (!constructorDefined && DEBUG_MODE >= 1)
 		{
-			if(DEBUG_MODE >= 1)
-			{
-				printf("Error: Constructor %s not defined\n", constructorID.c_str());
-			}
+			printf("Error: Constructor %s not defined\n", constructorID.c_str());
 		}
 	}
-	else
+	else if (DEBUG_MODE >= 1)
 	{
-		if(DEBUG_MODE >= 1)
-		{
-			printf("Error: Type %s not defined\n", typeID.c_str());
-		}
+		printf("Error: Type %s not defined\n", typeID.c_str());
 	}
 
 	return EXPR_NEW_VAR; // Does this matter?
@@ -343,4 +377,19 @@ std::string AST::EXPR::integerToString(int value)
 std::string AST::EXPR::boolToString(bool value)
 {
 	return value ? "\ticonst_1\n" : "\ticonst_0\n";
+}
+
+std::string AST::EXPR::getIntByteCode(int Integer)
+{
+	std::string retval = "iconst_";
+	if (Integer == -1)
+	{
+		return "iconst_m1";
+	}
+	else if (Integer < -1 || Integer > 5)
+	{
+		retval = "bipush ";
+	}
+
+	return retval + integerToString(Integer);
 }

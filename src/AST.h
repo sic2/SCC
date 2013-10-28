@@ -25,17 +25,6 @@ namespace AST
 		OP_AND,
 		OP_RANGE
 	} OP;
-
-	/*
-	 * Types
-	 */
-	typedef enum PRIMITIVE_TYPE
-	{
-		TYPE_INT,
-		TYPE_BOOL,
-		TYPE_STRING
-	} PRIMITIVE_TYPE;
-
 	
 	/***********************
 	***** CLASSES DEFS *****
@@ -199,6 +188,12 @@ namespace AST
 		boost::shared_ptr<EXPR> expr;
 	};
 
+	/*
+	* boost::variant allows the construction of 
+	* an union data structure containing object with constructor.
+	* While in a normal union only pointers to the objects can be passed,
+	* therefore losing the utility of smart_ptrs
+	*/
 	typedef boost::variant< 
 							int, 
 							bool,

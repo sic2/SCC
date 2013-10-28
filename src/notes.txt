@@ -27,8 +27,10 @@ new var
 	var_ID :: type_ID = constr_ID [constraints]
 
 	example:
-	SIMO :: Person = Age 22
+	Simo :: Person = Person Age 22
 
 	in java:
 
-	Person SIMO = new Person(Age, 22);
+	Person Simo = new Person(Age, 22);
+
+

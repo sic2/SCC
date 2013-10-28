@@ -52,8 +52,13 @@
 class JVMByteCodeGenerator
 {
 public:
-	JVMByteCodeGenerator(boost::shared_ptr<AST::PROGRAM> program);
+	JVMByteCodeGenerator();
 	virtual ~JVMByteCodeGenerator() {}
+
+	/**
+	* METHOD NOT FINISHED
+	*/
+	void cleanup();
 
 	/**
 	* Generates JVM bytecode and output to file
@@ -61,7 +66,7 @@ public:
 	* @return 	True if bytecode was generate successfully.
 	*			False otherwise.
 	*/
-	bool generateByteCode(std::string outFileName);
+	bool generateByteCode(boost::shared_ptr<AST::PROGRAM> program, std::string outFileName);
 
 	/**
 	* @return size of the environment (i.e. symbols table)
@@ -129,6 +134,7 @@ private:
 	* Keep track of ids -> type
 	*/
 	std::map<std::string, AST::Expr_Typedef> _typeDefinitions;
+
 	/*
 	* Keep track of created objects and registers
 	* used to store instances

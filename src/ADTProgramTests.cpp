@@ -84,7 +84,7 @@ boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest1()
 
 	// AGE
 	std::vector< boost::shared_ptr<AST::EXPR> > ageParams;
-	ageParams.push_back(expr_TWO);
+	ageParams.push_back(expr_TWO); // Age = 2 // TODO - change to > 18
 	Expr_Group groupParamsAge(ageParams);
 	boost::variant< Expr_Group > value_groupParamsAge(groupParamsAge);
 	boost::shared_ptr<AST::EXPR> parametersAge(new EXPR(EXPR_GROUP, value_groupParamsAge));
@@ -98,7 +98,7 @@ boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest1()
 	std::vector< boost::shared_ptr<AST::EXPR> > addrParams;
 	addrParams.push_back(expr_ZERO);
 	addrParams.push_back(expr_STR);
-	Expr_Group groupParamsAddr(addrParams);
+	Expr_Group groupParamsAddr(addrParams); // Address = 0 "String"
 	boost::variant< Expr_Group > value_groupParamsAddr(groupParamsAddr);
 	boost::shared_ptr<AST::EXPR> parametersAddr(new EXPR(EXPR_GROUP, value_groupParamsAddr));
 
