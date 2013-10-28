@@ -173,18 +173,16 @@ namespace AST
 
 	class Expr_New_Var{
 	public:
-		Expr_New_Var(std::string ID, std::string typeID, std::string constructorID, boost::shared_ptr<EXPR> expr)
+		Expr_New_Var(std::string ID, std::string typeID, boost::shared_ptr<EXPR> expr)
 		{
 			this->ID = ID;
 			this->typeID = typeID;
-			this->constructorID = constructorID; // FIXME - constructorID should be store in expr 
 			this->expr = expr;
 		}
 
 		virtual ~Expr_New_Var() {}
 		std::string ID;
 		std::string typeID; // (i.e. Time)
-		std::string constructorID; // (i.e. Hour or Min)
 		boost::shared_ptr<EXPR> expr;
 	};
 

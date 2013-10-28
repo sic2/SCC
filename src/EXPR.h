@@ -1,7 +1,16 @@
 #pragma once
 
 #include "AST.h"
+
 #include "JVMByteCodeGenerator.h"
+
+typedef struct stateContext
+{
+	std::string typeID;
+	std::string ID;
+	int stackLocation;
+	bool onStack;
+} stateContext; 
 
 class AST::EXPR
 {
@@ -18,7 +27,7 @@ public:
 	* @return
 	*/
 	EXPRESSION_TYPE generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, 
-									std::string& mainMethod, bool onStack, int* stackPos);
+									std::string& mainMethod, bool onStack, void* context);
 
 	/*
 	* Getters
@@ -44,12 +53,12 @@ private:
 	/*
 	* Bytecode generators
 	*/
-	EXPRESSION_TYPE generateIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack);
-	EXPRESSION_TYPE generateBoolByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack);
-	EXPRESSION_TYPE generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack);
-	EXPRESSION_TYPE generateBiOPByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack);
-	EXPRESSION_TYPE generateConstructByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, int* stackPos);	
-	EXPRESSION_TYPE generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, int* stackPos);
+	EXPRESSION_TYPE generateIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
+	EXPRESSION_TYPE generateBoolByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
+	EXPRESSION_TYPE generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
+	EXPRESSION_TYPE generateBiOPByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
+	EXPRESSION_TYPE generateConstructByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);	
+	EXPRESSION_TYPE generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
 
 	int newGenericObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod,
 	std::string ID, std::string typeID);

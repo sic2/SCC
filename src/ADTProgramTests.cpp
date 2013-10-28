@@ -1,5 +1,6 @@
 #include "ADTProgramTests.h"
 
+
 boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest0()
 {
 	std::vector< boost::shared_ptr<AST::EXPR> > expressions;
@@ -20,7 +21,14 @@ boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest0()
 	expressions.push_back(typeDefExpr);
 
 	// Creating a new variable of type Time
-	Expr_New_Var exprNewVar("t", "Time", "Min", expr_ZERO); // t Time :: Min 0;
+	std::vector< boost::shared_ptr<AST::EXPR> > values;
+	values.push_back(expr_ZERO);
+	Expr_Var_Constr min("Min", values); // Min 0
+	boost::variant< Expr_Var_Constr > value_min(min);
+	boost::shared_ptr<AST::EXPR> minExpr(new EXPR(EXPR_VAR_CONSTR, value_min));
+
+
+	Expr_New_Var exprNewVar("t", "Time", minExpr); // t Time :: Min 0
 	boost::variant< Expr_New_Var > newVar(exprNewVar);
 	boost::shared_ptr<AST::EXPR> newVarExpr(new EXPR(EXPR_NEW_VAR, newVar));
 	expressions.push_back(newVarExpr);
@@ -33,6 +41,7 @@ boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest0()
 	return program_0;
 }
 
+
 /*
 type Age = Age int; 
 type Address = Addr int string; 
@@ -40,6 +49,7 @@ type Person = Person Age Address;
 kevin :: Person = Person { Age 21 } { Address 1 "..." };
 kevin 
 */
+
 boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest1()
 {
 	std::vector< boost::shared_ptr<AST::EXPR> > expressions;
@@ -92,11 +102,11 @@ boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest1()
 	// AGE
 	std::vector< boost::shared_ptr<AST::EXPR> > ageParams;
 	ageParams.push_back(expr_21); // Age = 21
-	Expr_Group groupParamsAge(ageParams);
-	boost::variant< Expr_Group > value_groupParamsAge(groupParamsAge);
-	boost::shared_ptr<AST::EXPR> parametersAge(new EXPR(EXPR_GROUP, value_groupParamsAge));
+	Expr_Var_Constr age("Age", ageParams);
+	boost::variant< Expr_Var_Constr > value_age(age);
+	boost::shared_ptr<AST::EXPR> ageExpr(new EXPR(EXPR_VAR_CONSTR, value_age));
 
-	Expr_New_Var ageNewVar("Age", "Age", "Age", parametersAge);
+	Expr_New_Var ageNewVar("Age", "Age", ageExpr);
 	boost::variant< Expr_New_Var > value_ageVar(ageNewVar);
 	boost::shared_ptr<AST::EXPR> ageVarExpr(new EXPR(EXPR_NEW_VAR, value_ageVar));
 	personParams.push_back(ageVarExpr);
@@ -105,20 +115,21 @@ boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest1()
 	std::vector< boost::shared_ptr<AST::EXPR> > addrParams;
 	addrParams.push_back(expr_ZERO);
 	addrParams.push_back(expr_STR);
-	Expr_Group groupParamsAddr(addrParams); // Address = 0 "String"
-	boost::variant< Expr_Group > value_groupParamsAddr(groupParamsAddr);
-	boost::shared_ptr<AST::EXPR> parametersAddr(new EXPR(EXPR_GROUP, value_groupParamsAddr));
+	Expr_Var_Constr address("Address", addrParams); // Address = 0 "String"
+	boost::variant< Expr_Var_Constr > value_address(address);
+	boost::shared_ptr<AST::EXPR> parametersAddr(new EXPR(EXPR_VAR_CONSTR, value_address));
 
-	Expr_New_Var addrNewVar("Address", "Address", "Address", parametersAddr);
+	Expr_New_Var addrNewVar("Address", "Address", parametersAddr);
 	boost::variant< Expr_New_Var > value_addrVar(addrNewVar);
 	boost::shared_ptr<AST::EXPR> addrVarExpr(new EXPR(EXPR_NEW_VAR, value_addrVar));
 	personParams.push_back(addrVarExpr);
 
 	// PERSON
-	Expr_Group groupParams(personParams);
-	boost::variant< Expr_Group > value_groupParams(groupParams);
-	boost::shared_ptr<AST::EXPR> parameters(new EXPR(EXPR_GROUP, value_groupParams));
-	Expr_New_Var exprNewVar("kevin", "Person", "Person", parameters); // kevin Person :: Person (Age 21) (Address 0 "String")
+	Expr_Var_Constr ppParams("Person", personParams);
+	boost::variant< Expr_Var_Constr > value_person(ppParams);
+	boost::shared_ptr<AST::EXPR> parameters(new EXPR(EXPR_VAR_CONSTR, value_person));
+	
+	Expr_New_Var exprNewVar("kevin", "Person", parameters); // kevin Person :: Person (Age 21) (Address 0 "String")
 	boost::variant< Expr_New_Var > newVar(exprNewVar);
 	boost::shared_ptr<AST::EXPR> newVarExpr(new EXPR(EXPR_NEW_VAR, newVar));
 	expressions.push_back(newVarExpr);
@@ -130,6 +141,7 @@ boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest1()
 
 	return program_0;
 }
+
 
 // boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest2()
 // {
