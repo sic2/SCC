@@ -1,6 +1,5 @@
 #include "JVMByteCodeGenerator.h"
 #include "ADTByteCode.h"
-
 #include "PROGRAM.h"
 
 #include <sstream>
@@ -23,9 +22,6 @@ void JVMByteCodeGenerator::cleanup()
 	// TODO - cleanup other data structures
 }
 
-// Resources on jasmin:
-// http://www.ceng.metu.edu.tr/courses/ceng444/link/f3jasmintutorial.html 
-// http://jasmin.sourceforge.net/
 bool JVMByteCodeGenerator::generateByteCode(boost::shared_ptr<AST::PROGRAM> program, std::string outFileName) 
 {	
 	this->_program = program;
@@ -65,7 +61,6 @@ void JVMByteCodeGenerator::formatJasminInstruction(std::string& instruction)
 {
 	instruction = TAB + instruction + NEW_LINE;
 }
-
 
 void JVMByteCodeGenerator::printLastStatement(std::string& output)
 {
@@ -120,7 +115,6 @@ void JVMByteCodeGenerator::addFinalMainJasminCode(std::string& output)
 
 bool JVMByteCodeGenerator::addSubroutine(std::string subroutine)
 {
-
 	const bool is_in = _subRoutines.find(subroutine) != _subRoutines.end();
 	if (!is_in)
 	{
@@ -133,15 +127,12 @@ void JVMByteCodeGenerator::updateEnvironment(std::string* ID, AST::EXPRESSION_TY
 {
 	_lastExpression->type = exprType;
 	_lastExpression->ID = *ID;
-	
-	// _lastAddedExpression = std::make_pair<std::string, AST::EXPRESSION_TYPE> (*ID, exprType);
 	if (onStack)
 	{
 		printf("increase expressions on stack\n");
 		_lastExpression->locationInStack = _expressionsOnStack;
 		_expressionsOnStack++;
 	}
-	
 }
 
 void JVMByteCodeGenerator::addTypedef(std::string typeID, AST::Expr_Typedef typeDefinition)

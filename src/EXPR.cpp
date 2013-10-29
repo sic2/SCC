@@ -23,15 +23,9 @@ void AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator,
 {
 	switch(_typeExpr)
 	{
-	case EXPR_INT:
-		{
-			generateIntByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, context);
-		}
+	case EXPR_INT: generateIntByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, context);
 		break;
-	case EXPR_BOOL:
-		{
-			generateBoolByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, context);
-		}
+	case EXPR_BOOL: generateBoolByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, context);
 		break;
 	case EXPR_STRING:
 		{
@@ -44,20 +38,14 @@ void AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator,
 			bytecodeGenerator->addGenericClassForADTs();
 		}
 		break;
-	case EXPR_CASE:
-		{
-			generateCaseByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, context);
-		}
+	case EXPR_CASE: generateCaseByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, context);
 		break;
 	case EXPR_FOR_LOOP:
 		{
 			// TODO
 		}
 		break;
-	case EXPR_BI_OP:
-		{
-			generateBiOPByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, context);
-		}
+	case EXPR_BI_OP: generateBiOPByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, context);
 		break;
 	case EXPR_GROUP:
 		{
@@ -76,16 +64,11 @@ void AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator,
 		}
 		break;
 	case EXPR_NEW_VAR:
-		{
 			// create instance of given type, assuming this was previously defined with typedef
 			generateNewVarByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, context);
-		}
 		break;
 	default:
-		if(DEBUG_MODE >= 1)
-		{
-	  		printf("Error on getting Jasmin Bytecode from an EXPR\n");
-	  	}
+		if(DEBUG_MODE >= 1) printf("Error on getting Jasmin Bytecode from an EXPR\n");
 	  break;
 	} // end switch
 }

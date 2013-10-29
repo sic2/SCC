@@ -4,6 +4,10 @@
 
 #include "JVMByteCodeGenerator.h"
 
+/*
+* The state context is used to pass 
+* information through EXPRs that are executed recursevely. 
+*/
 typedef struct stateContext
 {
 	std::string typeID;
@@ -30,12 +34,21 @@ public:
 									std::string& mainMethod, bool onStack, void* context);
 
 	/*
-	* Getters
+	* Fields Getters
 	*/
 	AST::EXPRESSION_TYPE getExprType() { return this->_typeExpr; }
 	AST::uValue getValue() { return this->_uValue; }
 
 private:
+	/*
+	* EXPR Fields
+	*/
+	AST::EXPRESSION_TYPE _typeExpr;
+	AST::uValue _uValue; 
+
+	/* --------- *
+	 * FUNCTIONS *
+	 * --------- */
 	/*
 	* Utility functions
 	*/
@@ -44,12 +57,6 @@ private:
 	std::string getIStoreByteCode(JVMByteCodeGenerator* bytecodeGenerator);
 	std::string getIntByteCode(int Integer);
 	std::string AST::EXPR::getStrCmpByteCode();
-
-	/*
-	* Fields
-	*/
-	AST::EXPRESSION_TYPE _typeExpr;
-	AST::uValue _uValue; 
 
 	/*
 	* Bytecode generators
@@ -61,6 +68,9 @@ private:
 	void generateConstructByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);	
 	void generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
 
+	/*
+	* The following functions set fields for a given object
+	*/
 	int newGenericObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, std::string ID, std::string typeID);
 	void updateTags(std::string& mainMethod, int labelIndex, std::string typeID, std::string constructorID);
 

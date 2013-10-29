@@ -1,9 +1,10 @@
 #pragma once 
 
+// Std C++ Header files
 #include <string>
 #include <vector>
 #include <stdio.h>
-
+// Boost header files
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
 
@@ -30,7 +31,6 @@ namespace AST
 	***** CLASSES DEFS *****
 	** FW - DECLARATIONS ***
 	************************/
-
 	class OPERATOR;
 	class TYPE;
 	class EXPR;

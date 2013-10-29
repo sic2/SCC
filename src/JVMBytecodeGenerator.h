@@ -45,6 +45,10 @@
 #define INVOKE_PRINTLN_BOOL "invokevirtual java/io/PrintStream/println(Z)V"
 #define SUBROUTINE ".method public static "
 
+/**
+* This class is used to keep track of a current state
+* of a given executed instruction.
+*/
 class Expression_Info
 {
 public:
@@ -105,6 +109,9 @@ public:
 	*/
 	void updateEnvironment(std::string* ID, AST::EXPRESSION_TYPE exprType, bool onStack);
 
+	/*
+	* Typedef getters and setters for the environment
+	*/
 	void addTypedef(std::string typeID, AST::Expr_Typedef typeDefinition);
 
 	bool typeIsDefined(std::string typeID);
@@ -131,10 +138,13 @@ public:
 	void addGenericClassForADTs() { this->_genericClassForADTsEnabled = true; }
 
 	/**
-	* TODO
+	* Adds a reference to a generic object to the environment
 	*/
 	void addNewGenericObject(std::string str, int labelIndex);
 
+	/*
+	* Return the last scheduled expression
+	*/
 	Expression_Info* getLastExpression() { return this->_lastExpression; }
 
 private:
@@ -145,6 +155,12 @@ private:
 	void addFinalMainJasminCode(std::string& output);
 	void printLastStatement(std::string& output);
 
+	/**
+	* The environment or symbol tables
+	* is used to map "identifiers to their types and locations"
+	* Appel A., Modern Compiler Implementation in C
+	*/
+
 	/*
 	* Keep track of ids -> type
 	*/
@@ -154,16 +170,9 @@ private:
 	* Keep track of created objects and registers
 	* used to store instances
 	*/
-	std::map<std::string, int> _objects; // XXX - Unused yet
+	std::map<std::string, int> _objects; // XXX - updated but never used
 
-	/**
-	* The environment or symbol tables
-	* is used to map "identifiers to their types and locations"
-	* Appel A., Modern Compiler Implementation in C
-	*/
-	// std::pair<std::string, AST::EXPRESSION_TYPE> _lastAddedExpression; 
 	int _expressionsOnStack;
-
 	Expression_Info* _lastExpression;
 
 	/**
