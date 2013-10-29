@@ -11,14 +11,23 @@ boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest0()
 	return program_0;
 }
 
-// FIXME - test is broken
+/*
+case 1
+	0 -> 1 (alt_zero)
+	1 -> 0 (alt_one)
+*/
 boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest1()
 {
+	std::vector< boost::shared_ptr<AST::EXPR> > values;
+	Expr_Var_Constr one("1", values);
+	boost::variant< Expr_Var_Constr > value_one(one);
+	boost::shared_ptr<AST::EXPR> oneExpr(new EXPR(EXPR_VAR_CONSTR, value_one));
+
 	std::vector< boost::shared_ptr<ALT> > alternatives;
 	alternatives.push_back(alt_ZERO);
 	alternatives.push_back(alt_ONE);
 
-	Expr_Case exprCase(expr_ONE, alternatives);
+	Expr_Case exprCase(oneExpr, alternatives);
 	boost::variant< Expr_Case > value_3(exprCase);
 
 	boost::shared_ptr<AST::EXPR> mainExpr(new EXPR(EXPR_CASE, value_3));

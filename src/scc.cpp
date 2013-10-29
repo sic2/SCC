@@ -35,7 +35,7 @@ int main(int argc, char** argv)
 	***************/
 	basicProgramTests test0;
 	JVMByteCodeGenerator byteCodeGen;
-	byteCodeGen.generateByteCode(test0.getTest3(), "XXX");
+	byteCodeGen.generateByteCode(test0.getTest1(), "XXX");
 
 	// ADTProgramTests test0;
 	// JVMByteCodeGenerator byteCodeGen;

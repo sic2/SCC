@@ -49,7 +49,6 @@ type Person = Person Age Address;
 kevin :: Person = Person { Age 21 } { Address 1 "..." };
 kevin 
 */
-
 boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest1()
 {
 	std::vector< boost::shared_ptr<AST::EXPR> > expressions;

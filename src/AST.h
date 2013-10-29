@@ -31,38 +31,11 @@ namespace AST
 	** FW - DECLARATIONS ***
 	************************/
 
-	/**
-	* Operator
-	*/
 	class OPERATOR;
-
-	/**
-	* Type
-	*/
 	class TYPE;
-
-	/**
-	* Expression
-	*/
 	class EXPR;
-
-	/**
-	* Alternative
-	*/
 	class ALT;
-
-	/**
-	* Constructor
-	*/ 
 	class CONSTR;
-	
-	/**
-	* Program
-	* This class defines the root of the AST.
-	* Each program defined in the Case language 
-	* consists of one #AST::PROGRAM .
-	* Each PROGRAM consists of one and only one #AST::EXPR
-	*/
 	class PROGRAM;
 
 	/*
@@ -87,9 +60,6 @@ namespace AST
 	* The following classes contain public fields on purpose
 	* since the aim is to use these more like structs 
 	* even if in C++ structs == classes
-	*
-	* TODO
-	* possible to use references? 
 	*******************************************************/
 	class Expr_Var_Constr{
 	public:

@@ -17,7 +17,7 @@ class AST::EXPR
 public:
 
 	EXPR(AST::EXPRESSION_TYPE typeExpr, AST::uValue value);
-	virtual ~EXPR();
+	virtual ~EXPR() {}
 
 	/**
 	* @param
@@ -43,6 +43,7 @@ private:
 	std::string boolToString(bool value);
 	std::string getIStoreByteCode(JVMByteCodeGenerator* bytecodeGenerator);
 	std::string getIntByteCode(int Integer);
+	std::string AST::EXPR::getStrCmpByteCode();
 
 	/*
 	* Fields

@@ -18,19 +18,9 @@ AST::EXPR::EXPR(AST::EXPRESSION_TYPE typeExpr, AST::uValue value)
 	_uValue = value;
 }
 
-// Destructor
-AST::EXPR::~EXPR() 
-{	
-	if(DEBUG_MODE >= 2)
-	{
-		printf("Removing expression of typeExpr %d \n", _typeExpr);
-	}
-}
-
 void AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
 						std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context)
 {
-	//boost::shared_ptr< Expression_Info > retval;
 	switch(_typeExpr)
 	{
 	case EXPR_INT:
@@ -50,7 +40,6 @@ void AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator,
 		break;
 	case EXPR_VAR_CONSTR:
 		{
-			// create object knowing constructor and etc
 			generateConstructByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, context);
 			bytecodeGenerator->addGenericClassForADTs();
 		}
@@ -72,7 +61,6 @@ void AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator,
 		break;
 	case EXPR_GROUP:
 		{
-			// Iterate over all expressions
 			std::vector< boost::shared_ptr<EXPR> > expressions = boost::get< Expr_Group >(_uValue).expressions;
 			for(std::vector< boost::shared_ptr<EXPR> >::iterator it = expressions.begin(); it != expressions.end(); ++it) 
 			{
@@ -89,8 +77,7 @@ void AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator,
 		break;
 	case EXPR_NEW_VAR:
 		{
-			// create instance of given type, assuming this was previously defined
-			// with typedef
+			// create instance of given type, assuming this was previously defined with typedef
 			generateNewVarByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, context);
 		}
 		break;
@@ -101,8 +88,6 @@ void AST::EXPR::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator,
 	  	}
 	  break;
 	} // end switch
-
-	//return retval;
 }
 
 /******************
@@ -137,17 +122,42 @@ void AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator,
 	std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context) 
 {
 	boost::shared_ptr<EXPR> expr = boost::get< Expr_Case >(_uValue).expr;
-	expr->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true, context); 	
+	EXPRESSION_TYPE type = expr->getExprType();
+
+	std::string ID;
+	switch(type)
+	{
+		case EXPR_VAR_CONSTR:
+			ID = boost::get< Expr_Var_Constr >(expr->getValue()).ID;
+			printf("id is %s\n", ID.c_str());
+
+			/*
+			TODO: 
+			Check environment, if nothing than just do a string comparison
+			Otherwise, do a constructor pattern matching
+			*/
+
+			break;
+		break;
+		default:	
+			printf("Error: case does not support the type %d\n", type);
+		break;
+	} // end switch
+
+
+
+	// OLD CODE
+	// expr->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true, context); 	
  	// int caseValue = bytecodeGenerator->getEnvironmentSize(); 
 
- 	EXPRESSION_TYPE caseExpr;
-	std::vector< boost::shared_ptr<ALT> > alternatives = boost::get< Expr_Case >(_uValue).alternatives;
-	for(std::vector< boost::shared_ptr<AST::ALT> >::iterator it = alternatives.begin(); it != alternatives.end(); ++it) 
-	{
-		if (it != alternatives.begin())
-		{
-			mainMethod += "Label_" + integerToString(bytecodeGenerator->currentLabel()) + std::string(":\n");
-		}
+ // 	EXPRESSION_TYPE caseExpr;
+	// std::vector< boost::shared_ptr<ALT> > alternatives = boost::get< Expr_Case >(_uValue).alternatives;
+	// for(std::vector< boost::shared_ptr<AST::ALT> >::iterator it = alternatives.begin(); it != alternatives.end(); ++it) 
+	// {
+		// if (it != alternatives.begin())
+		// {
+		// 	mainMethod += "Label_" + integerToString(bytecodeGenerator->currentLabel()) + std::string(":\n");
+		// }
 
 		/*
 		* FIXME
@@ -165,11 +175,11 @@ void AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator,
 			caseExpr = GET_EXPR_FROM_ALT(it)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false);
 		}
 		*/
-	} // end for-loop for _alternatives vector
-	mainMethod += "Label_" + integerToString(bytecodeGenerator->currentLabel()) + std::string(":\n");
+	// } // end for-loop for _alternatives vector
+	// mainMethod += "Label_" + integerToString(bytecodeGenerator->currentLabel()) + std::string(":\n");
 
-	std::string ID = "";
-	bytecodeGenerator->updateEnvironment(&ID, caseExpr, true);
+	// std::string ID = "";
+	// bytecodeGenerator->updateEnvironment(&ID, caseExpr, true);
 }
 
 // Generate appropriate subroutine if not there already
@@ -217,23 +227,14 @@ void AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator,
 	{
 		((stateContext*)context)->typeID = typeID;
 		((stateContext*)context)->ID = ID;
-		
-		int loc = ((stateContext*)context)->stackLocation;
-
+		//int loc = ((stateContext*)context)->stackLocation;
 		expr->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, context);
-
-		/*
-		* TODO
-		* After evaluating the expression map
-		* the result of it to a register and update the environment
-		*/	
-		printf("stack loc %d\n", loc);
+		bytecodeGenerator->updateEnvironment(&ID, EXPR_NEW_VAR, true);
 	}
 	else if (DEBUG_MODE >= 1)
 	{
 		printf("Error: Type %s not defined\n", typeID.c_str());
 	}
-
 }
 
 /*
@@ -270,7 +271,6 @@ void AST::EXPR::generateConstructByteCode(JVMByteCodeGenerator* bytecodeGenerato
 	{
 		int labelIndex = newGenericObject(bytecodeGenerator, mainMethod, objID, typeID);
 		((stateContext*)context)->stackLocation = labelIndex;
-
 		// Update the tags fields for this object
 		updateTags(mainMethod, labelIndex, typeID, constructorID);
 
@@ -285,13 +285,16 @@ void AST::EXPR::generateConstructByteCode(JVMByteCodeGenerator* bytecodeGenerato
 			switch(exprType)
 			{
 				case EXPR_INT:
-					loadIntToObject(bytecodeGenerator, mainMethod, (*it), labelIndex, arrayIndex, ((stateContext*)context)->stackLocation, context);
+					loadIntToObject(bytecodeGenerator, mainMethod, (*it), labelIndex, arrayIndex, 
+						((stateContext*)context)->stackLocation, context);
 					break;
 				case EXPR_BOOL:
-					loadBoolToObject(bytecodeGenerator, mainMethod, (*it), labelIndex, arrayIndex, ((stateContext*)context)->stackLocation, context);
+					loadBoolToObject(bytecodeGenerator, mainMethod, (*it), labelIndex, arrayIndex, 
+						((stateContext*)context)->stackLocation, context);
 					break;
 				case EXPR_STRING:
-					loadStrToObject(bytecodeGenerator, mainMethod, (*it), labelIndex, arrayIndex, ((stateContext*)context)->stackLocation, context);
+					loadStrToObject(bytecodeGenerator, mainMethod, (*it), labelIndex, arrayIndex, 
+						((stateContext*)context)->stackLocation, context);
 					break;
 				case EXPR_NEW_VAR:
 					(*it)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false, context);
@@ -308,9 +311,7 @@ void AST::EXPR::generateConstructByteCode(JVMByteCodeGenerator* bytecodeGenerato
 	{
 		printf("Error: Constructor type %s not defined\n", constructorID.c_str());
 	}
-
 }
-
 
 /************************
 * ADT Utility functions *
@@ -323,8 +324,7 @@ int AST::EXPR::newGenericObject(JVMByteCodeGenerator* bytecodeGenerator, std::st
 	mainMethod += "\tinvokespecial ADTByteCode.<init>()V \n";
 	int labelIndex = bytecodeGenerator->nextLabel();
 	mainMethod += "\tastore_" + integerToString(labelIndex) + std::string("\n");
-	// Update environment
-	bytecodeGenerator->addNewGenericObject(ID, labelIndex);
+	bytecodeGenerator->addNewGenericObject(ID, labelIndex); // Update environment
 
 	// Initialise array of objs
 	mainMethod += "\taload " + integerToString(labelIndex) + std::string("\n");
@@ -349,9 +349,7 @@ void AST::EXPR::loadIntToObject(JVMByteCodeGenerator* bytecodeGenerator, std::st
 
 void AST::EXPR::loadBoolToObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int labelIndex, int arrayIndex, int object, void* context)
 {
-	// TODO
-
-
+	// TODO -- create object
 	mainMethod += "\taload " + integerToString(labelIndex) + std::string("\n");
 	mainMethod += "\t" + boolToString(boost::get< bool >(expr->getValue()));
 	mainMethod += "\tputfield ADTByteCode/boolVal Z; \n";
@@ -427,4 +425,16 @@ std::string AST::EXPR::getIntByteCode(int Integer)
 	}
 
 	return retval + integerToString(Integer);
+}
+
+std::string AST::EXPR::getStrCmpByteCode()
+{
+	// TODO
+	/*
+ 20:	aload_0
+   21:	aload_1
+   22:	invokevirtual	#4; //Method java/lang/String.equals:(Ljava/lang/Object;)Z
+   25:	ifeq	31
+	*/
+	return std::string(" ");
 }
