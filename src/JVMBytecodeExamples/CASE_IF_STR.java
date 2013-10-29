@@ -3,7 +3,7 @@ public class CASE_IF_STR {
 	{
 		String a = "test";
 		String b = "test2";
-		if (a.equals(b))
+		if (!"test10".equals(b))
 		{
 			b = "test3";
 		}

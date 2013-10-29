@@ -2,7 +2,33 @@
 
 Student: 100003610
 
-# TODO
+# Case Language
+
+	<program> ::= <expr> "."
+
+	<expr> ::= <int>
+			| <bool> 
+			| <string> 
+			| <id> <expr>* 
+			| “case” <expr> “of” <alts> 
+			| “for” <id> "in" <expr> “do” <expr> 
+			| <expr> <op> <expr> 
+			| “{” <expr> “;” ... ";" <expr> “}” 
+			| <typedef> | <id> "::" <type> "=" <expr>
+
+
+	<alts> ::= <alt> "|" ... "|" <alt> 
+	<alt> ::= <type>+ "->" <expr>
+
+	<op> ::= “+” | “*” | “-” | “div”| “<”| “==” | ".." | "or" | "and"
+
+	<typedef> ::= "type" <id> <args> "=" <constr> <constrs> 
+	<constrs> ::= ( "|" <constr> ) * 
+	<constr> ::= <id> <type>*
+
+	<type> ::= "int" | "bool" | "string" | "(" <id> <type>* ")"
+
+## Language decisions
 
 # Requirements 
 
