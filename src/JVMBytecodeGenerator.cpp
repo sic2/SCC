@@ -66,21 +66,22 @@ void JVMByteCodeGenerator::printLastStatement(std::string& output)
 {
 	std::ostringstream convert; 
 	convert << (_expressionsOnStack - 1); 
-	output += "\tiload " + convert.str() + "\n";
 	
 	switch(_lastExpression->type)
 	{
 		case AST::EXPR_INT:
+			output += "\tiload " + convert.str() + "\n"; 
 			JASMIN_INSTR(output, INVOKE_PRINTLN_INT);
 			break;
 		case AST::EXPR_BOOL:
+			output += "\tiload " + convert.str() + "\n"; 
 			JASMIN_INSTR(output, INVOKE_PRINTLN_BOOL);
 			break;
 		case AST::EXPR_STRING:
 			printf("cannot print string yet\n");
 			break;
 		default:
-			printf("Printing last statement - type %d NOT SUPPORTED\n", _lastExpression->type);
+			printf("ERROR: Printing last statement - type %d NOT SUPPORTED\n", _lastExpression->type);
 			break;
 	} // end switch
 }
@@ -106,6 +107,7 @@ void JVMByteCodeGenerator::addInitialMainJasminCode(std::string& output)
 	JASMIN_STACK(output, 5);
 	JASMIN_LOCALS(output, 100);
 	JASMIN_INSTR(output, "getstatic java/lang/System/out Ljava/io/PrintStream;");
+
 }
 void JVMByteCodeGenerator::addFinalMainJasminCode(std::string& output)
 {
@@ -129,7 +131,6 @@ void JVMByteCodeGenerator::updateEnvironment(std::string* ID, AST::EXPRESSION_TY
 	_lastExpression->ID = *ID;
 	if (onStack)
 	{
-		printf("increase expressions on stack\n");
 		_lastExpression->locationInStack = _expressionsOnStack;
 		_expressionsOnStack++;
 	}
@@ -150,9 +151,20 @@ AST::Expr_Typedef JVMByteCodeGenerator::getTypeDef(std::string typeID)
 	return _typeDefinitions.find(typeID)->second;
 }
 
-void JVMByteCodeGenerator::addNewGenericObject(std::string str, int labelIndex)
+bool JVMByteCodeGenerator::objIsDefined(std::string ID)
 {
-	this->_objects.insert(std::make_pair<std::string, int>(str, labelIndex));
+	return _objects.find(ID) != _objects.end();
+}
+
+std::pair<std::string, int> JVMByteCodeGenerator::getObj(std::string ID)
+{
+	return _objects.find(ID)->second;
+}
+
+void JVMByteCodeGenerator::addNewGenericObject(std::string str, int labelIndex, std::string typeID)
+{
+	_objects.insert(std::make_pair<std::string, std::pair<std::string, int> >
+					(str, std::make_pair<std::string, int>(typeID, labelIndex)));
 }
 
 int JVMByteCodeGenerator::nextLabel()

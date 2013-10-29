@@ -107,7 +107,7 @@ public:
 	*				In fact, there are cases when an integer value expression is executed, but not added in the stack
 	*				but we may still want to keep track of it, in case this must be printed.
 	*/
-	void updateEnvironment(std::string* ID, AST::EXPRESSION_TYPE exprType, bool onStack);
+	void updateEnvironment(std::string* ID, AST::EXPRESSION_TYPE exprType, bool onStack); // TODO - typeid too !!???!
 
 	/*
 	* Typedef getters and setters for the environment
@@ -140,7 +140,11 @@ public:
 	/**
 	* Adds a reference to a generic object to the environment
 	*/
-	void addNewGenericObject(std::string str, int labelIndex);
+	void addNewGenericObject(std::string str, int labelIndex, std::string typeID);
+
+	bool objIsDefined(std::string ID);
+
+	std::pair<std::string, int> getObj(std::string ID);
 
 	/*
 	* Return the last scheduled expression
@@ -170,7 +174,7 @@ private:
 	* Keep track of created objects and registers
 	* used to store instances
 	*/
-	std::map<std::string, int> _objects; // XXX - updated but never used
+	std::map<std::string, std::pair<std::string, int> > _objects;
 
 	int _expressionsOnStack;
 	Expression_Info* _lastExpression;

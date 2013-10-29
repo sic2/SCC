@@ -4,7 +4,7 @@
 
 #include "JVMByteCodeGenerator.h"
 
-/*
+/**
 * The state context is used to pass 
 * information through EXPRs that are executed recursevely. 
 */
@@ -13,9 +13,12 @@ typedef struct stateContext
 	std::string typeID;
 	std::string ID;
 	int stackLocation;
-	bool onStack;
+	bool onStack; // FIXME - unused
 } stateContext; 
 
+/**
+*
+*/
 class AST::EXPR
 {
 public:
@@ -55,8 +58,9 @@ private:
 	std::string integerToString(int value);
 	std::string boolToString(bool value);
 	std::string getIStoreByteCode(JVMByteCodeGenerator* bytecodeGenerator);
+	std::string getAStoreByteCode(JVMByteCodeGenerator* bytecodeGenerator);
 	std::string getIntByteCode(int Integer);
-	std::string AST::EXPR::getStrCmpByteCode();
+	std::string getStrCmpByteCode();
 
 	/*
 	* Bytecode generators
@@ -68,10 +72,17 @@ private:
 	void generateConstructByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);	
 	void generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
 
-
+	/*
+	* Pattern matching subroutines
+	*/
 	void stringPatternMatching(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod,
 	 			bool onStack, void* context, std::string condition, std::vector< boost::shared_ptr<ALT> > alternatives);
+	void objectPatternMatching(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod,
+	 			bool onStack, void* context, std::string condition, std::vector< boost::shared_ptr<ALT> > alternatives);
 
+	/*
+	* Bi-Operations subroutine
+	*/
 	AST::EXPRESSION_TYPE evaluateBiOpOperands(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, 
 		bool onStack, void* context, boost::shared_ptr<EXPR> operand);
 

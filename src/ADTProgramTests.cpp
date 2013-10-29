@@ -231,6 +231,32 @@ boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest2()
 	boost::shared_ptr<AST::EXPR> newVarExpr(new EXPR(EXPR_NEW_VAR, newVar));
 	expressions.push_back(newVarExpr);
 
+	// Case statement
+	/*
+	case Kevin of
+		Person agek addr -> agek
+	*/
+	std::vector< boost::shared_ptr<AST::EXPR> > values;
+	Expr_Var_Constr kevin("kevin", values);
+	boost::variant< Expr_Var_Constr > value_kevin(kevin);
+	boost::shared_ptr<AST::EXPR> kevinExpr(new EXPR(EXPR_VAR_CONSTR, value_kevin));
+
+	// Alternatives
+	std::vector< boost::shared_ptr<TYPE> > personTypeParams;
+	// TODO - add more params
+	boost::shared_ptr<TYPE> type_Person(new TYPE("Person", personTypeParams));
+	boost::shared_ptr<ALT> alt_Person(new ALT(type_Person, expr_ONE)); 
+
+	std::vector< boost::shared_ptr<ALT> > alternatives;
+	alternatives.push_back(alt_Person);
+
+	// Stitch case condition and alternatives together
+	Expr_Case exprCase(kevinExpr, alternatives);
+	boost::variant< Expr_Case > value_3(exprCase);
+
+	boost::shared_ptr<AST::EXPR> caseExpr(new EXPR(EXPR_CASE, value_3));
+	expressions.push_back(caseExpr);
+
 	Expr_Group exprGroup(expressions);
 	boost::variant< Expr_Group > value_group(exprGroup);
 	boost::shared_ptr<AST::EXPR> mainExpr(new EXPR(EXPR_GROUP, value_group));

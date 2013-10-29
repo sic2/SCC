@@ -100,7 +100,7 @@ void AST::EXPR::generateBoolByteCode(JVMByteCodeGenerator* bytecodeGenerator,
 	std::string storeBytecode = getIStoreByteCode(bytecodeGenerator);
 	mainMethod += storeBytecode + "\n";
 
-	std::string ID = "";
+	std::string ID = "";  // ID not relevant
 	bytecodeGenerator->updateEnvironment(&ID, EXPR_BOOL, onStack);
 }
 
@@ -111,25 +111,26 @@ void AST::EXPR::generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator,
 	std::vector< boost::shared_ptr<ALT> > alternatives = boost::get< Expr_Case >(_uValue).alternatives;
 
 	EXPRESSION_TYPE type = expr->getExprType();
-
 	std::string ID;
 	switch (type)
 	{
 		case EXPR_VAR_CONSTR:
-			ID = boost::get< Expr_Var_Constr >(expr->getValue()).ID;
+		{
 			/*
 			Check environment, if nothing than just do a string comparison
 			Otherwise, do a constructor pattern matching
 			*/
-			if (!bytecodeGenerator->typeIsDefined(ID))
+			ID = boost::get< Expr_Var_Constr >(expr->getValue()).ID;
+			if (!bytecodeGenerator->objIsDefined(ID))
 			{
 				stringPatternMatching(bytecodeGenerator, jasminProgram, mainMethod, onStack, context, ID, alternatives);
 			}
 			else
 			{	
-				printf("type is defined\n");
+				objectPatternMatching(bytecodeGenerator, jasminProgram, mainMethod, onStack, context, ID, alternatives);
 			}
 			break;
+		}
 		break;
 		default:	
 			printf("Error: case does not support the type %d\n", type);
@@ -174,7 +175,6 @@ void AST::EXPR::generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator,
 	{
 		((stateContext*)context)->typeID = typeID;
 		((stateContext*)context)->ID = ID;
-		//int loc = ((stateContext*)context)->stackLocation;
 		expr->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, context);
 		bytecodeGenerator->updateEnvironment(&ID, EXPR_NEW_VAR, true);
 	}
@@ -260,15 +260,13 @@ void AST::EXPR::generateConstructByteCode(JVMByteCodeGenerator* bytecodeGenerato
 	}
 }
 
-/*
-* TODO
-*/
 void AST::EXPR::stringPatternMatching(JVMByteCodeGenerator* bytecodeGenerator, 
 	std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context,
 	std::string condition, std::vector< boost::shared_ptr<ALT> > alternatives)
 {
 	// Initialise register for cases
-	int caseValue = bytecodeGenerator->getLastExpression()->locationInStack;
+	//int caseValue = bytecodeGenerator->getLastExpression()->locationInStack;
+	int caseValue = bytecodeGenerator->getEnvironmentSize();
 	mainMethod += "\t " + getIntByteCode(caseValue) + "\n";
 	mainMethod += "\t istore " + integerToString(caseValue) + "\n";
 
@@ -293,11 +291,79 @@ void AST::EXPR::stringPatternMatching(JVMByteCodeGenerator* bytecodeGenerator,
 	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true); // FIXME - make this work for anything
 }
 
+void AST::EXPR::objectPatternMatching(JVMByteCodeGenerator* bytecodeGenerator, 
+	std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context,
+	std::string condition, std::vector< boost::shared_ptr<ALT> > alternatives)
+{
+	// Initialise register for cases -- FIXME not sure about this
+	//int caseValue = bytecodeGenerator->getLastExpression()->locationInStack;
+	int caseValue = bytecodeGenerator->getEnvironmentSize();
+	//mainMethod += "\t " + getIntByteCode(caseValue) + "\n";
+	//mainMethod += "\t istore " + integerToString(caseValue) + "\n"; // FIXME - last expression not updated correctly
+
+	// TODO
+	mainMethod += ";CASE STATEMENT START \n";
+	
+	int conditionStackLocation = bytecodeGenerator->getObj(condition).second;
+	for (std::vector< boost::shared_ptr<AST::ALT> >::iterator it = alternatives.begin(); it != alternatives.end(); ++it)
+	{
+		if (it != alternatives.begin())
+		{
+			mainMethod += "Label_" + integerToString(bytecodeGenerator->currentLabel()) + std::string(":\n");
+		}
+		
+		mainMethod += "aload " + integerToString(conditionStackLocation) + "\n";
+		mainMethod += "getfield ADTByteCode/constrTag Ljava/lang/String; \n";
+		mainMethod += "\t ldc \"" + GET_Condition_FROM_ALT(it)->getID() + std::string("\"\n");
+		mainMethod += "\t invokevirtual java/lang/String.equals(Ljava/lang/Object;)Z \n";
+		
+		std::string label = "Label_" + integerToString(bytecodeGenerator->nextLabel());
+		mainMethod += "\t ifeq " + label + std::string("\n"); 
+		GET_EXPR_FROM_ALT(it)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false, context);
+	}
+	mainMethod += "Label_" + integerToString(bytecodeGenerator->currentLabel()) + std::string(":\n");
+	
+	std::string ID = "";
+	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true); // FIXME - make this work for anything
+	
+	/*
+	std::string objTypeID = bytecodeGenerator->getObj(condition).first;
+	//printf("obj %s is of type %s in location %d\n", condition.c_str(), obj.first.c_str(), obj.second);
+
+	for (std::vector< boost::shared_ptr<AST::ALT> >::iterator it = alternatives.begin(); it != alternatives.end(); ++it)
+	{
+		if (it != alternatives.begin())
+		{
+			mainMethod += "Label_" + integerToString(bytecodeGenerator->currentLabel()) + std::string(":\n");
+		}
+
+		mainMethod += "\t ldc \"" + objTypeID + std::string("\"\n");
+		mainMethod += "\t ldc \"" + GET_Condition_FROM_ALT(it)->getID() + std::string("\"\n");
+		mainMethod += "\t invokevirtual java/lang/String.equals(Ljava/lang/Object;)Z \n";
+
+		std::string label = "Label_" + integerToString(bytecodeGenerator->nextLabel());
+		mainMethod += "\t ifeq " + label + std::string("\n"); 
+		GET_EXPR_FROM_ALT(it)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false, context);
+	}
+	mainMethod += "Label_" + integerToString(bytecodeGenerator->currentLabel()) + std::string(":\n");
+
+	std::string ID = "";
+	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true); // FIXME - make this work for anything
+	 */
+	mainMethod += ";CASE STATEMENT END \n";
+
+	/*
+	compare obj constructor with alternatives first ID
+	if matching, then make other IDs in alternatives the params as defined in typedef
+	*/
+}
+
 AST::EXPRESSION_TYPE AST::EXPR::evaluateBiOpOperands(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context, boost::shared_ptr<EXPR> operand)
 {
-	operand->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, context); // Push to stack, so that next operand can be pushed too
+	operand->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, context);
 	EXPRESSION_TYPE opType = bytecodeGenerator->getLastExpression()->type;
-	int stackLocation = bytecodeGenerator->getLastExpression()->locationInStack;
+	//int stackLocation = bytecodeGenerator->getLastExpression()->locationInStack;
+	int stackLocation = bytecodeGenerator->getEnvironmentSize() - 1;
 	mainMethod += std::string("\tiload ") + integerToString(stackLocation) + std::string("\n"); // FIXME - assume integer
 	return opType;
 }
@@ -311,9 +377,12 @@ int AST::EXPR::newGenericObject(JVMByteCodeGenerator* bytecodeGenerator, std::st
 	mainMethod += "\n\tnew ADTByteCode ; create new generic object for type " + typeID + "\n";
 	mainMethod += "\tdup \n";
 	mainMethod += "\tinvokespecial ADTByteCode.<init>()V \n";
-	int labelIndex = bytecodeGenerator->nextLabel();
-	mainMethod += "\tastore_" + integerToString(labelIndex) + std::string("\n");
-	bytecodeGenerator->addNewGenericObject(ID, labelIndex); // Update environment
+	int labelIndex = bytecodeGenerator->getEnvironmentSize();
+	mainMethod += getAStoreByteCode(bytecodeGenerator) + std::string("\n");
+
+	// Update environment
+	bytecodeGenerator->addNewGenericObject(ID, labelIndex, typeID); 
+	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true); // FIXME - make this work for anything
 
 	// Initialise array of objs
 	mainMethod += "\taload " + integerToString(labelIndex) + std::string("\n");
@@ -390,6 +459,12 @@ std::string AST::EXPR::getIStoreByteCode(JVMByteCodeGenerator* bytecodeGenerator
 {
 	return "\tistore " + integerToString(bytecodeGenerator->getEnvironmentSize());
 }
+
+std::string AST::EXPR::getAStoreByteCode(JVMByteCodeGenerator* bytecodeGenerator)
+{
+	return "\tastore " + integerToString(bytecodeGenerator->getEnvironmentSize());
+}
+
 
 std::string AST::EXPR::integerToString(int value)
 {

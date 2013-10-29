@@ -1,7 +1,7 @@
 class TestClass {
 		int integer;
 		boolean bool;
-		String str;
+		String str = "hello";
 		TestClass[] classes;
 		// int testB;
 
@@ -28,7 +28,10 @@ public class ADT_test {
 	{
 	  TestClass testONE = new TestClass();
 	  //testONE.integer = 10;
-	  // testONE.str = "hello";
+	 String t;
+	 t = testONE.str;
+	 // System.out.printf(testONE.str);
+	  /*
 	 TestClass testTWO = new TestClass();
 	 testTWO.integer = 10;
 
@@ -37,7 +40,7 @@ public class ADT_test {
 	 testONE.classes[0] = testTWO;
 
 	 int test = testONE.classes[0].integer;
-
+*/
 	// testTWO.classes[0] = testONE;
 
 	   
