@@ -76,15 +76,17 @@ namespace AST
 
 	class Expr_Case{
 	public:
-		Expr_Case(boost::shared_ptr<EXPR> expr, std::vector< boost::shared_ptr<ALT> > alternatives)
+		Expr_Case(boost::shared_ptr<EXPR> expr, std::vector< boost::shared_ptr<ALT> > alternatives, EXPRESSION_TYPE returnType)
 		{
 			this->expr = expr;
 			this->alternatives = alternatives;
+			this->returnType = returnType;
 		}
 
 		virtual ~Expr_Case() {}
 		boost::shared_ptr<EXPR> expr;
 		std::vector< boost::shared_ptr<ALT> > alternatives;
+		EXPRESSION_TYPE returnType;
 	};
 
 	class Expr_For_Loop{

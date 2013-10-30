@@ -12,7 +12,7 @@ class TestClass {
 			//testA = 4;
 			// testB = 10;
 			// str = "hello";
-			//classes = new TestClass[10];
+			classes = new TestClass[10];
 		}	
 
 	}
@@ -26,25 +26,14 @@ public class ADT_test {
 
 	public static void main(String[] vars)
 	{
-	  TestClass testONE = new TestClass();
-	  //testONE.integer = 10;
-	 String t;
-	 t = testONE.str;
-	 // System.out.printf(testONE.str);
-	  /*
-	 TestClass testTWO = new TestClass();
-	 testTWO.integer = 10;
+		TestClass testONE = new TestClass();
+		testONE.integer = 10;
+		TestClass testTWO = new TestClass();
+		TestClass testTHREE = new TestClass();
 
-	 testONE.classes = new TestClass[10];
+		testTWO.classes[0] = testONE;
+		testTHREE.classes[0] = testTWO;
 
-	 testONE.classes[0] = testTWO;
-
-	 int test = testONE.classes[0].integer;
-*/
-	// testTWO.classes[0] = testONE;
-
-	   
-	  //System.out.println(ADT_test.eq(test.testA, test.testB));
-	  
+	   	System.out.println(testTHREE.classes[0].classes[0].integer);
 	}
 }

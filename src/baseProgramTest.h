@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <string>
+#include <cstdarg>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
@@ -65,6 +66,113 @@ public:
 
 		alt_ZERO = boost::shared_ptr<ALT> (new ALT(type_ZERO, expr_ONE)); 
 		alt_ONE = boost::shared_ptr<ALT> (new ALT(type_ONE, expr_ZERO)); 
+	}
+
+	/*
+  	* WRAPPERS 
+	*/
+
+	inline boost::shared_ptr<AST::EXPR> getBiOpExpr(boost::shared_ptr<AST::EXPR> operand0, OP op, boost::shared_ptr<AST::EXPR> operand1)
+	{
+		boost::shared_ptr<OPERATOR> retval;
+		switch(op)
+		{
+		case AST::OP_ADDITION: retval = op_add;
+			break;
+		case AST::OP_SUBTRACTION: retval = op_sub;
+			break;
+		case AST::OP_MULTIPLICATION: retval = op_mul;
+			break;
+		case AST::OP_DIVISION: retval = op_div;
+			break;
+		case AST::OP_EQUALITY: retval = op_eq;
+			break;
+		case AST::OP_LESS: retval = op_less_than;
+			break;
+		case AST::OP_OR: retval = op_or;
+			break;
+		case AST::OP_AND: retval = op_and;
+			break;
+		case AST::OP_RANGE:
+		default:
+			printf("Error: operation not supported\n");
+		break;
+		} // end switch
+
+		Expr_Bi_Op exprBiOp(operand0, retval, operand1);
+		boost::variant< Expr_Bi_Op > val(exprBiOp);
+
+		boost::shared_ptr<AST::EXPR> expr(new EXPR(EXPR_BI_OP, val));
+		return expr;
+	}
+
+	inline boost::shared_ptr<AST::EXPR> getCaseExpr(AST::EXPRESSION_TYPE type, std::string condition, const char *fmt, ...)
+	{
+		std::vector< boost::shared_ptr<AST::EXPR> > values;
+		Expr_Var_Constr cond(condition, values);
+		boost::variant< Expr_Var_Constr > value_cond(cond);
+		boost::shared_ptr<AST::EXPR> condExpr(new EXPR(EXPR_VAR_CONSTR, value_cond));
+
+		std::vector< boost::shared_ptr<ALT> > alternatives;
+		va_list args;
+	    va_start(args, fmt);
+		    while (*fmt != '\0') 
+		    {
+		        if (*fmt == 'a') 
+		        {
+		        	boost::shared_ptr<ALT>* alternative = va_arg(args, boost::shared_ptr<ALT>*);
+		            alternatives.push_back(*alternative); 
+		        }
+		        ++fmt;
+		    }
+	    va_end(args);
+
+		Expr_Case exprCase(condExpr, alternatives, type);
+		boost::variant< Expr_Case > val(exprCase);
+
+		boost::shared_ptr<AST::EXPR> expr(new EXPR(EXPR_CASE, val));
+		return expr;
+	}
+
+	inline boost::shared_ptr<AST::EXPR> getTypedefExpr(std::string typeID, const char *fmt, ...)
+	{
+		std::vector< boost::shared_ptr<AST::CONSTR> > constructors;
+
+		va_list args;
+	    va_start(args, fmt);
+		    while (*fmt != '\0') 
+		    {
+		    	printf("%c\n", *fmt);
+		    	int noTypes = 0;
+		        if (*fmt == 'c') // read constructor
+		        {
+		        	char* cnstrID = va_arg(args, char*);
+		        	std::string constructorID = std::string(cnstrID);
+		        	++fmt;
+		        	printf("%c\n", *fmt);
+		        	noTypes = 0;
+		        	std::vector< boost::shared_ptr<AST::TYPE> > types;
+		        	while (*fmt == 't') // read types associated with constructor
+		        	{
+		        		printf("hello eee\n");
+		        		boost::shared_ptr<AST::TYPE>* type = va_arg(args, boost::shared_ptr<AST::TYPE>*);
+		        		types.push_back(*type);
+		        		noTypes++;
+		        		++fmt;
+		        		printf("hello boom\n");
+		        	}
+		        	boost::shared_ptr<AST::CONSTR> constructor(new CONSTR(constructorID, types));
+		        	constructors.push_back(constructor);
+		        	printf("hello boom boom\n");
+		        }
+		        
+		    }
+	    va_end(args);
+
+		Expr_Typedef typedefinition(typeID, constructors); // i.e. type Time = Hour int | Min int
+		boost::variant< Expr_Typedef > value_typedef(typedefinition);
+		boost::shared_ptr<AST::EXPR> typeDefExpr(new EXPR(EXPR_TYPE_DEF, value_typedef));
+		return typeDefExpr;
 	}
 
 	virtual ~baseProgramTest() {}

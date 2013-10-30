@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 	
 	ADTProgramTests test0;
 	JVMByteCodeGenerator byteCodeGen;
-	byteCodeGen.generateByteCode(test0.getTest2(), "XXX");
+	byteCodeGen.generateByteCode(test0.getTest1(), "XXX");
 
 	return 0;
 }	

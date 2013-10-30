@@ -2,7 +2,7 @@
 .class public ADTByteCode
 .super java/lang/Object
 
-.field public typeTag Ljava/lang/String;
+.field public noObjs I
 .field public constrTag Ljava/lang/String;
 .field public objs [LADTByteCode;
 .field public intVal I

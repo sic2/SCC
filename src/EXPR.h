@@ -79,6 +79,8 @@ private:
 	 			bool onStack, void* context, std::string condition, std::vector< boost::shared_ptr<ALT> > alternatives);
 	void objectPatternMatching(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod,
 	 			bool onStack, void* context, std::string condition, std::vector< boost::shared_ptr<ALT> > alternatives);
+	void mapParams(std::vector< boost::shared_ptr<AST::TYPE> > params, int conditionStackLocation, 
+		AST::Expr_Typedef conditionTypeID, std::string conditionConstructID);
 
 	/*
 	* Bi-Operations subroutine
@@ -89,8 +91,8 @@ private:
 	/*
 	* The following functions set fields for a given object
 	*/
-	int newGenericObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, std::string ID, std::string typeID);
-	void updateTags(std::string& mainMethod, int labelIndex, std::string typeID, std::string constructorID);
+	int newGenericObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, std::string ID, std::string typeID, int noObjs);
+	void updateTag(std::string& mainMethod, int labelIndex, std::string constructorID);
 
 	int createPrimitiveObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, void* context, std::string label);
 

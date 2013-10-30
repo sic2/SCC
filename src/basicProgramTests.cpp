@@ -2,13 +2,9 @@
 
 boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest0()
 {
-	Expr_Bi_Op exprBiOp(expr_ZERO, op_add, expr_ONE);
-	boost::variant< Expr_Bi_Op > value_3(exprBiOp);
-
-	boost::shared_ptr<AST::EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_3));
-	boost::shared_ptr<AST::PROGRAM> program_0(new PROGRAM(mainExpr));
-
-	return program_0;
+	boost::shared_ptr<AST::EXPR> mainExpr = getBiOpExpr(expr_ZERO, AST::OP_ADDITION, expr_ONE);
+	boost::shared_ptr<AST::PROGRAM> program(new PROGRAM(mainExpr));
+	return program;
 }
 
 /*
@@ -18,22 +14,10 @@ case 1
 */
 boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest1()
 {
-	std::vector< boost::shared_ptr<AST::EXPR> > values;
-	Expr_Var_Constr one("1", values);
-	boost::variant< Expr_Var_Constr > value_one(one);
-	boost::shared_ptr<AST::EXPR> oneExpr(new EXPR(EXPR_VAR_CONSTR, value_one));
+	boost::shared_ptr<AST::EXPR> mainExpr = getCaseExpr(AST::EXPR_INT, "1", "aa", &alt_ZERO, &alt_ONE);
+	boost::shared_ptr<AST::PROGRAM> program(new PROGRAM(mainExpr));
 
-	std::vector< boost::shared_ptr<ALT> > alternatives;
-	alternatives.push_back(alt_ZERO);
-	alternatives.push_back(alt_ONE);
-
-	Expr_Case exprCase(oneExpr, alternatives);
-	boost::variant< Expr_Case > value_3(exprCase);
-
-	boost::shared_ptr<AST::EXPR> mainExpr(new EXPR(EXPR_CASE, value_3));
-	boost::shared_ptr<AST::PROGRAM> program_1(new PROGRAM(mainExpr));
-
-	return program_1;
+	return program;
 }
 
 boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest2()
@@ -46,15 +30,10 @@ boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest2()
 
 boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest3()
 {
-	Expr_Bi_Op exprBiOp(expr_ZERO, op_add, expr_ONE);
-	boost::variant< Expr_Bi_Op > value_3(exprBiOp);
-	boost::shared_ptr<AST::EXPR> subExpr(new EXPR(EXPR_BI_OP, value_3));
+	boost::shared_ptr<AST::EXPR> addition = getBiOpExpr(expr_ZERO, AST::OP_ADDITION, expr_ONE);
+	boost::shared_ptr<AST::EXPR> multiplication = getBiOpExpr(addition, AST::OP_MULTIPLICATION, expr_TWO);
 	
-	Expr_Bi_Op secondExprBiOp(subExpr, op_mul, expr_TWO);
-	boost::variant< Expr_Bi_Op > value_4(secondExprBiOp);
-	
-	boost::shared_ptr<AST::EXPR> mainExpr(new EXPR(EXPR_BI_OP, value_4));
-	boost::shared_ptr<AST::PROGRAM> program_0(new PROGRAM(mainExpr));
+	boost::shared_ptr<AST::PROGRAM> program_0(new PROGRAM(multiplication));
 	
 	return program_0;
 }

@@ -20,7 +20,7 @@ public:
 		* bool value
 		* string value
 		*/
-		byteCode += ".field public typeTag Ljava/lang/String; \n";
+		byteCode += ".field public noObjs I \n";
 		byteCode += ".field public constrTag Ljava/lang/String; \n";
 		byteCode += ".field public objs [LADTByteCode; \n";
 		byteCode += ".field public intVal I \n";

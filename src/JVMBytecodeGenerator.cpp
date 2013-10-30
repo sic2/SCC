@@ -107,7 +107,6 @@ void JVMByteCodeGenerator::addInitialMainJasminCode(std::string& output)
 	JASMIN_STACK(output, 5);
 	JASMIN_LOCALS(output, 100);
 	JASMIN_INSTR(output, "getstatic java/lang/System/out Ljava/io/PrintStream;");
-
 }
 void JVMByteCodeGenerator::addFinalMainJasminCode(std::string& output)
 {
