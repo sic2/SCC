@@ -16,7 +16,7 @@ public:
 		* string typeTag (type Tag - i.e. Time)
 		* string constrTag (constructor Tag - i.e. Hour or Min)
 		* ADTByteCode[] (i.e. int or Age Addr)
-		* int value   // FIXME - use arrays
+		* int value
 		* bool value
 		* string value
 		*/

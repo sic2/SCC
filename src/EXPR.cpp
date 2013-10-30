@@ -291,7 +291,7 @@ void AST::EXPR::stringPatternMatching(JVMByteCodeGenerator* bytecodeGenerator,
 		mainMethod += "goto def \n";
 	}
 	mainMethod += "Label_" + Helper::instance().integerToString(bytecodeGenerator->currentLabel()) + std::string(":\n");
-	mainMethod += "iconst_m1 \n"; // FIXME - assume integers
+	mainMethod += "iconst_m1 \n"; // FIXME - assume integers - MAYBE PRINT ERROR MEX
 	mainMethod += "def: \n";
 
 	std::string ID = "";
@@ -303,25 +303,6 @@ void AST::EXPR::objectPatternMatching(JVMByteCodeGenerator* bytecodeGenerator,
 	std::string condition, std::vector< boost::shared_ptr<ALT> > alternatives)
 {
 	mainMethod += ";CASE STATEMENT START \n";
-	
-	// Initialise return register
-	int caseValue = bytecodeGenerator->getEnvironmentSize();
-	EXPRESSION_TYPE returnType = boost::get< Expr_Case >(_uValue).returnType;
-	switch (returnType)
-	{
-		case EXPR_INT:
-		case EXPR_BOOL:
-			mainMethod += "iconst_0\n";
-			mainMethod += "\t istore " + Helper::instance().integerToString(caseValue) + "\n";
-			break;
-		case EXPR_STRING:
-			mainMethod += "ldc \" \"\n";
-			mainMethod += "\t astore " + Helper::instance().integerToString(caseValue) + "\n";
-			break;
-		default:
-			printf("Error: Return type for case expression not valid\n");
-			break;
-	} // End switch
 
 	int conditionStackLocation = bytecodeGenerator->getObj(condition).second;
 	AST::Expr_Typedef conditionTypeDef = bytecodeGenerator->getTypeDef(bytecodeGenerator->getObj(condition).first); 
@@ -344,27 +325,22 @@ void AST::EXPR::objectPatternMatching(JVMByteCodeGenerator* bytecodeGenerator,
 		mapParams(GET_Condition_FROM_ALT(it)->getTypes(), conditionStackLocation, conditionTypeDef, GET_Condition_FROM_ALT(it)->getID());
 
 		GET_EXPR_FROM_ALT(it)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false, context);
+		
+		mainMethod += "goto def \n";
 	}
 	mainMethod += "Label_" + Helper::instance().integerToString(bytecodeGenerator->currentLabel()) + std::string(":\n");
+	mainMethod += "iconst_m1 \n"; // FIXME - assume integers - MAYBE PRINT ERROR MEX
+	mainMethod += "def: \n";
 	
-	std::string ID = "";
-	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true); // FIXME - make this work for anything
-
-
 	mainMethod += ";CASE STATEMENT END \n";
-	/*
-	compare obj constructor with alternatives first ID
-	if matching, then make other IDs in alternatives the params as defined in typedef
-	*/
 }
 
 void AST::EXPR::mapParams(std::vector< boost::shared_ptr<AST::TYPE> > params, int conditionStackLocation,
 						  AST::Expr_Typedef conditionTypeDef, std::string conditionConstructID)
 {
 
-	std::vector< boost::shared_ptr<CONSTR> > constructors = conditionTypeDef.constructors;
-
-	if (constructors.size() == params.size())
+	int noDefinedParams = conditionTypeDef.constructors[0]->getTypes().size();
+	if (noDefinedParams == params.size())
 	{
 		int paramIndex = 0;
 		for (std::vector< boost::shared_ptr<AST::TYPE> >::iterator it = params.begin(); it != params.end(); ++it)
@@ -383,7 +359,7 @@ AST::EXPRESSION_TYPE AST::EXPR::evaluateBiOpOperands(JVMByteCodeGenerator* bytec
 {
 	operand->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, context);
 	EXPRESSION_TYPE opType = bytecodeGenerator->getLastExpression()->type;
-	int stackLocation = bytecodeGenerator->getEnvironmentSize() - 1;
+	int stackLocation = bytecodeGenerator->getEnvironmentSize() - 1; // REMOVEME
 	//mainMethod += std::string("\tiload ") + integerToString(stackLocation) + std::string("\n"); // FIXME - assume integer
 	return opType;
 }
@@ -462,8 +438,6 @@ void AST::EXPR::loadObjectToObject(std::string& mainMethod, int labelIndex, int 
 	mainMethod += "aastore\n";
 }
 
-// FIXME
-// maybe typeTag is not needed
 void AST::EXPR::updateTag(std::string& mainMethod, int labelIndex, std::string constructorID)
 {
 	mainMethod += "; Set constructorID tag\n";

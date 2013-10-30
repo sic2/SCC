@@ -24,7 +24,7 @@ namespace AST
 		OP_LESS,
 		OP_OR,
 		OP_AND,
-		OP_RANGE
+		OP_RANGE // Not implemented
 	} OP;
 	
 	/***********************

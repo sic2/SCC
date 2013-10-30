@@ -170,7 +170,6 @@ public:
 		        }
 		    }
 	    va_end(args);
-
 		Expr_Typedef typedefinition(typeID, constructors); // i.e. type Time = Hour int | Min int
 		boost::variant< Expr_Typedef > value_typedef(typedefinition);
 		boost::shared_ptr<AST::EXPR> typeDefExpr(new EXPR(EXPR_TYPE_DEF, value_typedef));

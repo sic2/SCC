@@ -1,7 +1,5 @@
 #include "ADTProgramTests.h"
 
-#include <boost/current_function.hpp>
-
 boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest0()
 {
 	std::vector< boost::shared_ptr<AST::EXPR> > expressions;
@@ -30,8 +28,6 @@ case kevin of
 */
 boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest1()
 {
-	
-	printf("func name %s\n", __PRETTY_FUNCTION__);
 	std::vector< boost::shared_ptr<AST::EXPR> > expressions;
 
 	// Typedefs for Age and Address
