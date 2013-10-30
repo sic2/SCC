@@ -26,7 +26,7 @@ From main class:
 ; CREATING NEW OBJECT
 new <NEW CLASS>
 dup
-bipush ; PASS ARGUMENT
+bipush X; PASS ARGUMENT
 invokespecial <NEW CLASS>.<init>(I)V
 astore_1 ; storing object
 
@@ -48,6 +48,26 @@ invokestatic function(II)Z
 pop
 
 
+
+COMPARISON METHOD
+
+public boolean compare(TestClass);
+  Code:
+   0: aload_0
+   1: getfield #6; //Field integer:I
+   4: aload_1
+   5: getfield #6; //Field integer:I
+   8: if_icmpne   27
+   11:   aload_0
+   12:   getfield #3; //Field str:Ljava/lang/String;
+   15:   aload_1
+   16:   getfield #3; //Field str:Ljava/lang/String;
+   19:   invokevirtual  #7; //Method java/lang/String.equals:(Ljava/lang/Object;)Z
+   22:   ifeq  27
+   25:   iconst_1
+   26:   ireturn
+   27:   iconst_0
+   28:   ireturn
 
 
 

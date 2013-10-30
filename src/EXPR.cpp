@@ -267,12 +267,7 @@ void AST::EXPR::stringPatternMatching(JVMByteCodeGenerator* bytecodeGenerator,
 	std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context,
 	std::string condition, std::vector< boost::shared_ptr<ALT> > alternatives)
 {
-	// Initialise register for cases
-	//int caseValue = bytecodeGenerator->getLastExpression()->locationInStack;
 	int caseValue = bytecodeGenerator->getEnvironmentSize();
-	//mainMethod += "\t " + getIntByteCode(caseValue) + "\n";
-	//mainMethod += "\t istore " + integerToString(caseValue) + "\n";
-
 	for (std::vector< boost::shared_ptr<AST::ALT> >::iterator it = alternatives.begin(); it != alternatives.end(); ++it)
 	{
 		if (it != alternatives.begin())
@@ -298,6 +293,40 @@ void AST::EXPR::stringPatternMatching(JVMByteCodeGenerator* bytecodeGenerator,
 	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true); // FIXME - make this work for anything
 }
 
+void AST::EXPR::createTmpObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, std::string& ID, int labelIndex,
+								AST::Expr_Typedef conditionTypeDef, int noParams)
+{
+	// Create object for alternative.
+	// This will allow object assignments and comparisons
+	// FIXME - have separate subroutine
+	mainMethod += ";Start Create ALT obj \n";
+	
+	mainMethod += "\n\tnew ADTByteCode \n";
+	mainMethod += "\tdup \n";
+	mainMethod += "\tinvokespecial ADTByteCode.<init>()V \n";
+	mainMethod += getAStoreByteCode(bytecodeGenerator) + std::string("\n");
+	
+	// Update environment
+	bytecodeGenerator->addNewTmpObject(ID, labelIndex, conditionTypeDef.ID); 
+	bytecodeGenerator->updateEnvironment(&ID, EXPR_NEW_VAR, true);
+	
+	// Update field about size of objects array
+	mainMethod += "\taload " + Helper::instance().integerToString(labelIndex) + std::string("\n");
+	mainMethod += "\t" + getIntByteCode(noParams) + "\n"; 
+	mainMethod += "\tputfield ADTByteCode/noObjs I \n";	
+	
+	// Initialise array of objs
+	mainMethod += "\taload " + Helper::instance().integerToString(labelIndex) + std::string("\n");
+	mainMethod += "\tbipush " + Helper::instance().integerToString(noParams) + "\n";
+	mainMethod += "\tanewarray ADTByteCode\n";
+	mainMethod += "\tputfield ADTByteCode/objs [LADTByteCode;\n"; 
+	
+	updateTag(mainMethod, labelIndex, ID);
+	
+	mainMethod += ";End Create ALT obj \n";
+	
+}
+
 void AST::EXPR::objectPatternMatching(JVMByteCodeGenerator* bytecodeGenerator, 
 	std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context,
 	std::string condition, std::vector< boost::shared_ptr<ALT> > alternatives)
@@ -313,14 +342,52 @@ void AST::EXPR::objectPatternMatching(JVMByteCodeGenerator* bytecodeGenerator,
 			mainMethod += "Label_" + Helper::instance().integerToString(bytecodeGenerator->currentLabel()) + std::string(":\n");
 		}
 		
+		// Create object for alternative.
+		// This will allow object assignments and comparisons
+		// FIXME - have separate subroutine
+		int labelIndex = bytecodeGenerator->getEnvironmentSize();
+		std::string ID = GET_Condition_FROM_ALT(it)->getID();
+		
+		createTmpObject(bytecodeGenerator, mainMethod, ID, labelIndex, conditionTypeDef, GET_Condition_FROM_ALT(it)->getTypes().size());
+		/*
+		mainMethod += ";Start Create ALT obj \n";
+		
+		mainMethod += "\n\tnew ADTByteCode \n";
+		mainMethod += "\tdup \n";
+		mainMethod += "\tinvokespecial ADTByteCode.<init>()V \n";
+		
+		mainMethod += getAStoreByteCode(bytecodeGenerator) + std::string("\n");
+		
+		// Update environment
+		std::string ID = GET_Condition_FROM_ALT(it)->getID();
+		bytecodeGenerator->addNewTmpObject(ID, labelIndex, conditionTypeDef.ID); 
+		bytecodeGenerator->updateEnvironment(&ID, EXPR_NEW_VAR, true);
+		
+		// Update field about size of objects array
+		mainMethod += "\taload " + Helper::instance().integerToString(labelIndex) + std::string("\n");
+		mainMethod += "\t" + getIntByteCode(GET_Condition_FROM_ALT(it)->getTypes().size()) + "\n";
+		mainMethod += "\tputfield ADTByteCode/noObjs I \n";	
+		
+		// Initialise array of objs
+		mainMethod += "\taload " + Helper::instance().integerToString(labelIndex) + std::string("\n");
+		mainMethod += "\tbipush " + Helper::instance().integerToString(GET_Condition_FROM_ALT(it)->getTypes().size()) + "\n";
+		mainMethod += "\tanewarray ADTByteCode\n";
+		mainMethod += "\tputfield ADTByteCode/objs [LADTByteCode;\n"; 
+		
+		updateTag(mainMethod, labelIndex, ID);
+		
+		mainMethod += ";End Create ALT obj \n";
+		 */
+		
 		mainMethod += "aload " + Helper::instance().integerToString(conditionStackLocation) + "\n";
-		mainMethod += "getfield ADTByteCode/constrTag Ljava/lang/String; \n";
-		mainMethod += "\t ldc \"" + GET_Condition_FROM_ALT(it)->getID() + std::string("\"\n");
-		mainMethod += "\t invokevirtual java/lang/String.equals(Ljava/lang/Object;)Z \n";
+		mainMethod += "aload " + Helper::instance().integerToString(labelIndex) + "\n";
+		mainMethod += "invokevirtual ADTByteCode.COMPARE(LADTByteCode;)Z \n";
+		
 		
 		std::string label = "Label_" + Helper::instance().integerToString(bytecodeGenerator->nextLabel());
 		mainMethod += "\t ifeq " + label + std::string("\n"); 
-
+		
+		// XXX - needed? 
 		// Map each param for this case to stored value defined by condition
 		mapParams(GET_Condition_FROM_ALT(it)->getTypes(), conditionStackLocation, conditionTypeDef, GET_Condition_FROM_ALT(it)->getID());
 
@@ -359,8 +426,6 @@ AST::EXPRESSION_TYPE AST::EXPR::evaluateBiOpOperands(JVMByteCodeGenerator* bytec
 {
 	operand->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, onStack, context);
 	EXPRESSION_TYPE opType = bytecodeGenerator->getLastExpression()->type;
-	int stackLocation = bytecodeGenerator->getEnvironmentSize() - 1; // REMOVEME
-	//mainMethod += std::string("\tiload ") + integerToString(stackLocation) + std::string("\n"); // FIXME - assume integer
 	return opType;
 }
 
@@ -477,16 +542,4 @@ std::string AST::EXPR::getIntByteCode(int Integer)
 	}
 
 	return retval + Helper::instance().integerToString(Integer);
-}
-
-std::string AST::EXPR::getStrCmpByteCode()
-{
-	// TODO
-	/*
- 20:	aload_0
-   21:	aload_1
-   22:	invokevirtual	#4; //Method java/lang/String.equals:(Ljava/lang/Object;)Z
-   25:	ifeq	31
-	*/
-	return std::string(" ");
 }

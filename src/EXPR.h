@@ -67,7 +67,6 @@ private:
 	std::string getIStoreByteCode(JVMByteCodeGenerator* bytecodeGenerator);
 	std::string getAStoreByteCode(JVMByteCodeGenerator* bytecodeGenerator);
 	std::string getIntByteCode(int Integer);
-	std::string getStrCmpByteCode();
 
 	/*
 	* Bytecode generators
@@ -88,6 +87,8 @@ private:
 	 			bool onStack, void* context, std::string condition, std::vector< boost::shared_ptr<ALT> > alternatives);
 	void mapParams(std::vector< boost::shared_ptr<AST::TYPE> > params, int conditionStackLocation, 
 		AST::Expr_Typedef conditionTypeID, std::string conditionConstructID);
+	void createTmpObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, std::string& ID, int labelIndex,
+									AST::Expr_Typedef conditionTypeDef, int noParams);
 
 	/*
 	* Bi-Operations subroutine

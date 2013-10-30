@@ -99,11 +99,15 @@ void JVMByteCodeGenerator::addInitialJasminCode(std::string& output)
 {
 	JASMIN_DIRECTIVE_progr(output, ".class public ", PROGRAM_NAME); // XXX - simple is the name of the program and must be saved as simple.j
 	JASMIN_DIRECTIVE(output, ".super java/lang/Object");
+	// Environment field
+	JASMIN_DIRECTIVE(output, ".field public ENV I");
+	
 	JASMIN_DIRECTIVE(output, ".method public <init>()V");
 	JASMIN_INSTR(output, "aload 0");
 	JASMIN_INSTR(output, INVOKE_SPECIAL_INT);
 	JASMIN_INSTR(output, "return");
 	JASMIN_DIRECTIVE(output, ".end method");
+	
 	output += "\n";
 }
 
@@ -169,6 +173,18 @@ std::pair<std::string, int> JVMByteCodeGenerator::getObj(std::string ID)
 void JVMByteCodeGenerator::addNewGenericObject(std::string str, int labelIndex, std::string typeID)
 {
 	_objects.insert(std::make_pair<std::string, std::pair<std::string, int> >
+					(str, std::make_pair<std::string, int>(typeID, labelIndex)));
+}
+
+
+std::pair<std::string, int> JVMByteCodeGenerator::getTmpObj(std::string ID)
+{
+	return _tmpObjects.find(ID)->second;
+}
+
+void JVMByteCodeGenerator::addNewTmpObject(std::string str, int labelIndex, std::string typeID)
+{
+	_tmpObjects.insert(std::make_pair<std::string, std::pair<std::string, int> >
 					(str, std::make_pair<std::string, int>(typeID, labelIndex)));
 }
 

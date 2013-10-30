@@ -145,6 +145,9 @@ public:
 	bool objIsDefined(std::string ID);
 
 	std::pair<std::string, int> getObj(std::string ID);
+	
+	void addNewTmpObject(std::string str, int labelIndex, std::string typeID);
+	std::pair<std::string, int> getTmpObj(std::string ID);
 
 	/*
 	* Return the last scheduled expression
@@ -175,6 +178,7 @@ private:
 	* used to store instances
 	*/
 	std::map<std::string, std::pair<std::string, int> > _objects;
+	std::map<std::string, std::pair<std::string, int> > _tmpObjects; // FIXME -  NEVER cleaned 
 
 	int _expressionsOnStack;
 	Expression_Info* _lastExpression;

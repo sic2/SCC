@@ -15,6 +15,15 @@ class TestClass {
 			classes = new TestClass[10];
 		}	
 
+		public boolean compare(TestClass obj)
+		{	
+			if (integer == obj.integer)
+				if (str.equals(obj.str))
+					return true;
+			
+			return false;
+		}
+
 	}
 
 public class ADT_test {
@@ -29,11 +38,9 @@ public class ADT_test {
 		TestClass testONE = new TestClass();
 		testONE.integer = 10;
 		TestClass testTWO = new TestClass();
-		TestClass testTHREE = new TestClass();
+		testTWO.integer = 5;
+		System.out.println(testTWO.compare(testONE));
 
-		testTWO.classes[0] = testONE;
-		testTHREE.classes[0] = testTWO;
-
-	   	System.out.println(testTHREE.classes[0].classes[0].integer);
+		System.out.println("hello");
 	}
 }
