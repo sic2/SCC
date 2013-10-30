@@ -33,22 +33,18 @@ boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest1()
 
 	// Typedefs for Age and Address
 	boost::shared_ptr<AST::EXPR> ageTypeDefExpr = getTypedefExpr("Age", "ct", "Age", &type_INT);
-	expressions.push_back(ageTypeDefExpr);
 	boost::shared_ptr<AST::EXPR> addrTypeDefExpr = getTypedefExpr("Address", "ctt", "Address", &type_INT, &type_STRING);
-	expressions.push_back(addrTypeDefExpr);
 
 	// Typedef for Person
 	std::vector< boost::shared_ptr<AST::TYPE> > noTypes;
 	boost::shared_ptr<TYPE> type_Age(new TYPE("Age", noTypes));
 	boost::shared_ptr<TYPE> type_Address(new TYPE("Address", noTypes));
 	boost::shared_ptr<AST::EXPR> personTypeDefExpr = getTypedefExpr("Person", "ctt", "Person", &type_Age, &type_Address);
-	expressions.push_back(personTypeDefExpr);
 
 	// Creating a new variable of type Person
 	boost::shared_ptr<AST::EXPR> ageExpr = getNewVarExpr("Age", "Age", "Age", "e", &expr_21);
 	boost::shared_ptr<AST::EXPR> addrExpr = getNewVarExpr("Address", "Address", "Address", "ee", &expr_ZERO, &expr_STR);
 	boost::shared_ptr<AST::EXPR> personExpr = getNewVarExpr("kevin", "Person", "Person", "ee", &ageExpr, &addrExpr);
-	expressions.push_back(personExpr);
 
 	// Case statement
 	/*
@@ -65,12 +61,9 @@ boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest1()
 	boost::shared_ptr<ALT> alt_Person(new ALT(type_Person, expr_ONE)); 
 
 	boost::shared_ptr<AST::EXPR> caseExpr = getCaseExpr(AST::EXPR_INT, "kevin", "a", &alt_Person);
-	expressions.push_back(caseExpr);
 
-	Expr_Group exprGroup(expressions);
-	boost::variant< Expr_Group > value_group(exprGroup);
-	boost::shared_ptr<AST::EXPR> mainExpr(new EXPR(EXPR_GROUP, value_group));
-	boost::shared_ptr<AST::PROGRAM> program_0(new PROGRAM(mainExpr));
+	boost::shared_ptr<AST::EXPR> groupExpr = getGroupExpr("eeeee", &ageTypeDefExpr, &addrTypeDefExpr, &personTypeDefExpr, &personExpr, &caseExpr);
+	boost::shared_ptr<AST::PROGRAM> program_0(new PROGRAM(groupExpr));
 
 	return program_0;
 }

@@ -103,8 +103,8 @@ public:
 
 		Expr_Bi_Op exprBiOp(operand0, retval, operand1);
 		boost::variant< Expr_Bi_Op > val(exprBiOp);
-
 		boost::shared_ptr<AST::EXPR> expr(new EXPR(EXPR_BI_OP, val));
+		
 		return expr;
 	}
 
@@ -135,8 +135,8 @@ public:
 
 		Expr_Case exprCase(condExpr, alternatives, type);
 		boost::variant< Expr_Case > val(exprCase);
-
 		boost::shared_ptr<AST::EXPR> expr(new EXPR(EXPR_CASE, val));
+
 		return expr;
 	}
 
@@ -174,6 +174,7 @@ public:
 		Expr_Typedef typedefinition(typeID, constructors); // i.e. type Time = Hour int | Min int
 		boost::variant< Expr_Typedef > value_typedef(typedefinition);
 		boost::shared_ptr<AST::EXPR> typeDefExpr(new EXPR(EXPR_TYPE_DEF, value_typedef));
+
 		return typeDefExpr;
 	}
 
@@ -207,6 +208,30 @@ public:
 		boost::shared_ptr<AST::EXPR> constrVarExpr(new EXPR(EXPR_NEW_VAR, value_constrVar));
 
 		return constrVarExpr;
+	}
+
+	inline boost::shared_ptr<AST::EXPR> getGroupExpr(const char *fmt, ...)
+	{
+		std::vector< boost::shared_ptr<AST::EXPR> > expressions;
+
+		va_list args;
+	    va_start(args, fmt);
+		    while (*fmt != '\0') 
+		    {
+		        if (*fmt == 'e') 
+		        {
+		        	boost::shared_ptr<AST::EXPR>* expr = va_arg(args, boost::shared_ptr<AST::EXPR>*);
+		            expressions.push_back(*expr); 
+		        }
+		        ++fmt;
+		    }
+	    va_end(args);
+
+	    Expr_Group exprGroup(expressions);
+		boost::variant< Expr_Group > value_group(exprGroup);
+		boost::shared_ptr<AST::EXPR> groupExpr(new EXPR(EXPR_GROUP, value_group));
+
+		return groupExpr;
 	}
 
 protected:

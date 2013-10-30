@@ -22,14 +22,12 @@ int main(int argc, char** argv)
 	/**************
 	* TEST PROGRAMS
 	***************/
-	// basicProgramTests test0;
-	// JVMByteCodeGenerator byteCodeGen;
-	// byteCodeGen.generateByteCode(test0.getTest3(), "XXX"); // FIXME - use filename for creating source file
-
-	
-	ADTProgramTests test0;
+	basicProgramTests test0;
 	JVMByteCodeGenerator byteCodeGen;
-	byteCodeGen.generateByteCode(test0.getTest1(), "XXX");
-
+	byteCodeGen.generateByteCode(test0.getTest0(), "XXX"); // FIXME - use filename for creating source file
+	
+	// ADTProgramTests test0;
+	// JVMByteCodeGenerator byteCodeGen;
+	// byteCodeGen.generateByteCode(test0.getTest1(), "XXX");
 	return 0;
 }	
