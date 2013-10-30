@@ -32,8 +32,10 @@ Student: 100003610
 
 # Requirements 
 
-Tested Targets: i686-apple-darwin10
-Tested with:
+Tested Targets: 
+	i686-apple-darwin10
+
+Other:
 
 	Boost 1.54
 	Location assumed: ~/usr/include/boost/
