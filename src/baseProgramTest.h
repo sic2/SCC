@@ -32,6 +32,7 @@ public:
 		value_21 = boost::variant< int >(21);
 
 		value_STRING = boost::variant< std::string >("String");
+		value_x_STR = boost::variant< std::string >("x");
 
 
 		op_add = boost::shared_ptr<OPERATOR> (new OPERATOR(OP_ADDITION));
@@ -42,6 +43,7 @@ public:
 		op_less_than = boost::shared_ptr<OPERATOR> (new OPERATOR(OP_LESS));
 		op_or = boost::shared_ptr<OPERATOR> (new OPERATOR(OP_OR));
 		op_and = boost::shared_ptr<OPERATOR> (new OPERATOR(OP_AND));
+		op_range = boost::shared_ptr<OPERATOR> (new OPERATOR(OP_RANGE)); 
 
 
 		expr_TRUE = boost::shared_ptr<EXPR> (new EXPR(EXPR_BOOL, value_TRUE));
@@ -54,7 +56,7 @@ public:
 		expr_21 = boost::shared_ptr<EXPR> (new EXPR(EXPR_INT, value_21));
 
 		expr_STR = boost::shared_ptr<EXPR> (new EXPR(EXPR_STRING, value_STRING));
-
+		expr_x_STR = boost::shared_ptr<EXPR> (new EXPR(EXPR_STRING, value_x_STR));
 
 		type_INT = boost::shared_ptr<TYPE> (new TYPE("int", noTypes));
 		type_BOOL = boost::shared_ptr<TYPE> (new TYPE("bool", noTypes));
@@ -95,7 +97,8 @@ public:
 			break;
 		case AST::OP_AND: retval = op_and;
 			break;
-		case AST::OP_RANGE:
+		case AST::OP_RANGE: retval = op_range;
+			break;
 		default:
 			printf("Error: operation not supported\n");
 		break;
@@ -232,6 +235,17 @@ public:
 
 		return groupExpr;
 	}
+	
+	inline boost::shared_ptr<AST::EXPR> getAssignmentExpr(std::string ID, boost::shared_ptr<AST::EXPR> expr)
+	{
+		std::vector< boost::shared_ptr<AST::EXPR> > values;
+		values.push_back(expr);
+		Expr_Var_Constr var(ID, values);
+		boost::variant< Expr_Var_Constr > value(var);
+		boost::shared_ptr<AST::EXPR> assignmentExpr(new EXPR(EXPR_VAR_CONSTR, value));
+		
+		return assignmentExpr;
+	}
 
 protected:
 	/*
@@ -247,6 +261,7 @@ protected:
 	boost::variant< int > value_21;
 
 	boost::variant< std::string > value_STRING;
+	boost::variant< std::string > value_x_STR;
 
 	/*
 	* Operators
@@ -259,6 +274,7 @@ protected:
 	boost::shared_ptr<OPERATOR> op_less_than;
 	boost::shared_ptr<OPERATOR> op_or;
 	boost::shared_ptr<OPERATOR> op_and;
+	boost::shared_ptr<OPERATOR> op_range;
 
 	/*
 	* Expressions
@@ -273,6 +289,7 @@ protected:
 	boost::shared_ptr<EXPR> expr_21;
 
 	boost::shared_ptr<EXPR> expr_STR;
+	boost::shared_ptr<EXPR> expr_x_STR;
 
 	/*
 	* Types

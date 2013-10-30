@@ -14,10 +14,15 @@ typedef struct stateContext
 	std::string ID;
 	int stackLocation;
 	bool onStack; // FIXME - unused
+	bool forceLoad;
 } stateContext; 
 
 /**
-* TODO
+ * This class represent an EXPR.
+ * An EXPR, in the Case language, can assume various forms.
+ * A Case program is an EXPR. 
+ * Being an EXPR the main entity of a program, all the translation
+ * from the AST to the JVM bytecode is done within this class. 
 */
 class AST::EXPR
 {
@@ -63,21 +68,23 @@ private:
 	/*
 	* Utility functions
 	*/
-	std::string boolToString(bool value);
-	std::string getIStoreByteCode(JVMByteCodeGenerator* bytecodeGenerator);
-	std::string getAStoreByteCode(JVMByteCodeGenerator* bytecodeGenerator);
-	std::string getIntByteCode(int Integer);
+	std::string boolToString(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, bool value);
+	std::string getIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, int Integer);
+	std::string stringToByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, std::string str);
+	std::string getAStoreByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod);
 
 	/*
 	* Bytecode generators
 	*/
 	void generateIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
 	void generateBoolByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
+	void generateStringByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
 	void generateCaseByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
 	void generateBiOPByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
 	void generateConstructByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);	
 	void generateNewVarByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
-
+	void generateForByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context);
+	
 	/*
 	* Pattern matching subroutines
 	*/
@@ -100,12 +107,12 @@ private:
 	* The following functions set fields for a given object
 	*/
 	int newGenericObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, std::string ID, std::string typeID, int noObjs);
-	void updateTag(std::string& mainMethod, int labelIndex, std::string constructorID);
+	void updateTag(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, int labelIndex, std::string constructorID);
 
 	int createPrimitiveObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, void* context, std::string label);
 
 	void loadIntToObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int arrayIndex, int object, void* context);
 	void loadBoolToObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int arrayIndex, int object, void* context);
 	void loadStrToObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, boost::shared_ptr<AST::EXPR> expr, int arrayIndex, int object, void* context);
-	void loadObjectToObject(std::string& mainMethod, int labelIndex, int arrayIndex, int object);
+	void loadObjectToObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, int labelIndex, int arrayIndex, int object);
 };

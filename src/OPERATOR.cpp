@@ -23,7 +23,7 @@ AST::EXPRESSION_TYPE AST::OPERATOR::generateByteCode(JVMByteCodeGenerator* bytec
 	std::string& mainMethod, AST::EXPRESSION_TYPE op0Type, AST::EXPRESSION_TYPE op1Type)
 {
 	EXPRESSION_TYPE retval = EXPR_UNDEFINED;
-	std::string callerByteCode = std::string(PROGRAM_NAME) + ".";
+	std::string callerByteCode = bytecodeGenerator->getProgramName() + ".";
 	std::string calleeByteCode;
 
 	std::string returnValue;

@@ -27,11 +27,13 @@ void JVMByteCodeGenerator::cleanup()
 	_typeDefinitions.clear();
 	_objects.clear();
 	_subRoutines.clear();
+	_tmpObjects.clear();
 }
 
-bool JVMByteCodeGenerator::generateByteCode(boost::shared_ptr<AST::PROGRAM> program, std::string outFileName) 
+void JVMByteCodeGenerator::generateByteCode(boost::shared_ptr<AST::PROGRAM> program, std::string outFileName) 
 {	
 	this->_program = program;
+	this->_outFileName = outFileName;
 
 	std::string jasminProgram;
 	std::string mainMethod;
@@ -60,7 +62,6 @@ bool JVMByteCodeGenerator::generateByteCode(boost::shared_ptr<AST::PROGRAM> prog
 	
 	outFileName = TARGETS + outFileName + ".j";
 	Helper::instance().saveToFile(outFileName, jasminProgram);
-	return false; // FIXME
 }
 
 void JVMByteCodeGenerator::formatJasminInstruction(std::string& instruction)
@@ -70,26 +71,68 @@ void JVMByteCodeGenerator::formatJasminInstruction(std::string& instruction)
 
 void JVMByteCodeGenerator::printLastStatement(std::string& output)
 {
-	std::ostringstream convert; 
-	convert << (_expressionsOnStack - 1); 
-	
 	switch(_lastExpression->type)
 	{
 		case AST::EXPR_INT:
-			//output += "\tiload " + convert.str() + "\n"; 
 			JASMIN_INSTR(output, INVOKE_PRINTLN_INT);
 			break;
 		case AST::EXPR_BOOL:
-			//output += "\tiload " + convert.str() + "\n"; 
 			JASMIN_INSTR(output, INVOKE_PRINTLN_BOOL);
 			break;
 		case AST::EXPR_STRING:
-			printf("cannot print string yet\n");
+			JASMIN_INSTR(output, INVOKE_PRINTLN_STR);
 			break;
 		default:
 			printf("ERROR: Printing last statement - type %d NOT SUPPORTED\n", _lastExpression->type);
 			break;
 	} // end switch
+	
+	/*
+	 [ NOTE ] The code below is an alternative solution that
+	 was tried to print the last statement.
+	 This solution works by keeping track of the type of the data
+	 on top of the stack and then dynamically choose what method 
+	 to use for printing. 
+	 However, I did not manage to get this working, but this will be left
+	 here for reference.
+	 **************************************************************
+	 
+	 output += "getstatic " + _outFileName + "/ENV I \n";
+	 output += "iconst_0 \n";
+	 output += "if_icmpne NT_1 \n";
+	 output += "dup \n";
+	 JASMIN_INSTR(output, "getstatic java/lang/System/out Ljava/io/PrintStream;");
+	 output += "swap \n";
+	 output += std::string(INVOKE_PRINTLN_INT) + "\n";
+	 
+	 output += "NT_1: \n";
+	 output += "getstatic " + _outFileName + "/ENV I \n";
+	 output += "iconst_1 \n";
+	 output += "if_icmpne NT_2 \n";
+	 output += "dup \n";
+	 JASMIN_INSTR(output, "getstatic java/lang/System/out Ljava/io/PrintStream;");
+	 output += "swap \n";
+	 output += std::string(INVOKE_PRINTLN_BOOL) + "\n";
+	 
+	 output += "NT_2: \n";
+	 output += "getstatic " + _outFileName + "/ENV I \n";
+	 output += "iconst_2 \n";
+	 output += "if_icmpne NT_3 \n";
+	 output += "dup \n";
+	 JASMIN_INSTR(output, "getstatic java/lang/System/out Ljava/io/PrintStream;");
+	 output += "swap \n";
+	 output += std::string(INVOKE_PRINTLN_STR) + "\n";
+	 
+	 output += "NT_3: \n";
+	 output += "getstatic " + _outFileName + "/ENV I \n";
+	 output += "iconst_3 \n";
+	 output += "if_icmpne NT_4 \n";
+	 output += "dup \n";
+	 JASMIN_INSTR(output, "getstatic java/lang/System/out Ljava/io/PrintStream;");
+	 output += "swap \n";
+	 output += std::string(INVOKE_PRINTLN_INT) + "\n";
+	 output += "NT_4: \n";
+	 */
 }
 
 /**
@@ -97,10 +140,11 @@ void JVMByteCodeGenerator::printLastStatement(std::string& output)
 */
 void JVMByteCodeGenerator::addInitialJasminCode(std::string& output)
 {
-	JASMIN_DIRECTIVE_progr(output, ".class public ", PROGRAM_NAME); // XXX - simple is the name of the program and must be saved as simple.j
+	output += ".class public " + _outFileName + "\n";
 	JASMIN_DIRECTIVE(output, ".super java/lang/Object");
 	// Environment field
-	JASMIN_DIRECTIVE(output, ".field public ENV I");
+	// Keep track of the type of the last element on stack
+	JASMIN_DIRECTIVE(output, ".field static public ENV I"); 
 	
 	JASMIN_DIRECTIVE(output, ".method public <init>()V");
 	JASMIN_INSTR(output, "aload 0");
@@ -111,10 +155,38 @@ void JVMByteCodeGenerator::addInitialJasminCode(std::string& output)
 	output += "\n";
 }
 
+std::string JVMByteCodeGenerator::getIntByteCode(int Integer)
+{
+	std::string retval = "iconst_";
+	if (Integer == -1)
+	{
+		return "iconst_m1";
+	}
+	else if (Integer < -1 || Integer > 5)
+	{
+		retval = "bipush ";
+	}
+	
+	return retval + Helper::instance().integerToString(Integer);
+}
+
+void JVMByteCodeGenerator::updateProgramEnv(std::string& output, int type)
+{
+	/*
+	 [ NOTE ] The following bytecode is disabled since I was not able
+	 to keep track of the environment within the program.
+	 However, I am leaving it for reference.
+	 
+	output += "; update ENV \n";
+	output += getIntByteCode(type) + "\n";
+	output += "putstatic " + _outFileName + "/ENV I \n";
+	 */
+}
+
 void JVMByteCodeGenerator::addInitialMainJasminCode(std::string& output)
 {
 	JASMIN_DIRECTIVE(output, ".method public static main([Ljava/lang/String;)V");	
-	JASMIN_STACK(output, 5);
+	JASMIN_STACK(output, 10);
 	JASMIN_LOCALS(output, 100);
 	JASMIN_INSTR(output, "getstatic java/lang/System/out Ljava/io/PrintStream;");
 }

@@ -16,16 +16,14 @@ boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest1()
 {
 	boost::shared_ptr<AST::EXPR> mainExpr = getCaseExpr(AST::EXPR_INT, "1", "aa", &alt_ZERO, &alt_ONE);
 	boost::shared_ptr<AST::PROGRAM> program(new PROGRAM(mainExpr));
-
 	return program;
 }
 
 boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest2()
 {
 	boost::shared_ptr<AST::EXPR> mainExpr(new EXPR(EXPR_INT, value_ONE));
-	boost::shared_ptr<AST::PROGRAM> program_2(new PROGRAM(mainExpr));
-
-	return program_2;
+	boost::shared_ptr<AST::PROGRAM> program(new PROGRAM(mainExpr));
+	return program;
 }
 
 boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest3()
@@ -33,135 +31,69 @@ boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest3()
 	boost::shared_ptr<AST::EXPR> addition = getBiOpExpr(expr_ZERO, AST::OP_ADDITION, expr_ONE);
 	boost::shared_ptr<AST::EXPR> multiplication = getBiOpExpr(addition, AST::OP_MULTIPLICATION, expr_TWO);
 	
-	boost::shared_ptr<AST::PROGRAM> program_0(new PROGRAM(multiplication));
-	
-	return program_0;
+	boost::shared_ptr<AST::PROGRAM> program(new PROGRAM(multiplication));
+	return program;
 }
 
-/******************
-* Some previous examples
-*******************/
+boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest4()
+{
+	boost::shared_ptr<AST::EXPR> mainExpr(new EXPR(EXPR_BOOL, value_TRUE));
+	boost::shared_ptr<AST::PROGRAM> program(new PROGRAM(mainExpr));
+	return program;
+}
 
-// uValue value_3 = {
-// 				exprVarConstr: 
-// 					{
-// 					ID: new std::string("test"), 
-// 					expr: &expr_0
-// 					}
-// 				};
+boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest5()
+{
+	boost::shared_ptr<AST::EXPR> mainExpr = getBiOpExpr(expr_TRUE, AST::OP_AND, expr_FALSE);
+	boost::shared_ptr<AST::PROGRAM> program(new PROGRAM(mainExpr));
+	return program;
+}
 
-// uValue value_4 = {
-// 				exprCase: 
-// 					{
-// 					expr: &expr_1, 
-// 					alternatives: &alternatives // XXX - does this still work even if alternatives are pushed later?!
-// 					}
-// 				};
+boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest6()
+{
+	boost::shared_ptr<AST::EXPR> mainExpr(new EXPR(EXPR_STRING, value_STRING));
+	boost::shared_ptr<AST::PROGRAM> program(new PROGRAM(mainExpr));
+	return program;
+}
 
-// /*
-// * 0 + 1
-// */
-// uValue value_5 = {
-// 				exprBiOp:
-// 					{
-// 					expr: &expr_0,
-// 					op: &op_add,
-// 					expr1: &expr_1
-// 					}
-// 				};
+boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest7()
+{
+	boost::shared_ptr<AST::EXPR> xExpr = getAssignmentExpr("x", expr_THREE);
+	boost::shared_ptr<AST::PROGRAM> program(new PROGRAM(xExpr));
+	return program;
+}
 
-// /*
-// * testVar :: INT = 0
-// */
-// uValue value_6 = {
-// 				exprNewVar:
-// 					{
-// 					ID: new std::string("testVar"),
-// 					expr: &expr_1,
-// 					}
-// 				};
+boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest8()
+{
+	boost::shared_ptr<AST::EXPR> testVar = getAssignmentExpr("testVar", expr_THREE);
+	 
+	boost::shared_ptr<AST::EXPR> rangeExpr = getBiOpExpr(expr_ZERO, AST::OP_RANGE, expr_THREE);
+	
+	std::vector< boost::shared_ptr<AST::EXPR> > values;
+	Expr_Var_Constr x("x", values);
+	boost::variant< Expr_Var_Constr > value_x(x);
+	boost::shared_ptr<AST::EXPR> xExpr(new EXPR(EXPR_VAR_CONSTR, value_x));
+	Expr_Var_Constr t("testVar", values);
+	boost::variant< Expr_Var_Constr > value_t(t);
+	boost::shared_ptr<AST::EXPR> tExpr(new EXPR(EXPR_VAR_CONSTR, value_t));
+	boost::shared_ptr<AST::EXPR> oper = getBiOpExpr(xExpr, AST::OP_ADDITION, tExpr);
+	boost::shared_ptr<AST::EXPR> doExpr = getAssignmentExpr("testVar", oper);
+	
+	Expr_For_Loop exprFor("x", rangeExpr, doExpr); // FIXME
+	boost::variant< Expr_For_Loop > value_for(exprFor);
+	boost::shared_ptr<AST::EXPR> forExpr(new EXPR(EXPR_FOR_LOOP, value_for));
+	 
+	boost::shared_ptr<AST::EXPR> expr = getGroupExpr("ee", &testVar, &forExpr);
+	boost::shared_ptr<AST::PROGRAM> program(new PROGRAM(expr));
+	return program;
+}
 
-// /*
-// * (1 - 2)
-// */
-// uValue value_7 = {
-// 				exprBiOp:
-// 					{
-// 					expr: &expr_1,
-// 					op: &op_sub,
-// 					expr1: &expr_2
-// 					}
-// 				};
-
-// /*
-// * 1 * 2
-// */
-// uValue value_8 = {
-// 				exprBiOp:
-// 					{
-// 					expr: &expr_1,
-// 					op: &op_mul,
-// 					expr1: &expr_2
-// 					}
-// 				};
-
-// /*
-// * 2 / 1
-// */
-// uValue value_9 = {
-// 				exprBiOp:
-// 					{
-// 					expr: &expr_2,
-// 					op: &op_div,
-// 					expr1: &expr_1
-// 					}
-// 				};
-
-// /*
-// * 2 < 1
-// */
-// uValue value_10 = {
-// 				exprBiOp:
-// 					{
-// 					expr: &expr_2,
-// 					op: &op_less_than,
-// 					expr1: &expr_1
-// 					}
-// 				};
-
-// /*
-// * 2 == 1
-// */
-// uValue value_11 = {
-// 				exprBiOp:
-// 					{
-// 					expr: &expr_2,
-// 					op: &op_eq,
-// 					expr1: &expr_1
-// 					}
-// 				};
-
-// /*
-// * true or false
-// */
-// uValue value_12 = {
-// 				exprBiOp:
-// 					{
-// 					expr: &expr_TRUE,
-// 					op: &op_or,
-// 					expr1: &expr_FALSE
-// 					}
-// 				};
-
-
-// /*
-// * true and false
-// */
-// uValue value_13 = {
-// 				exprBiOp:
-// 					{
-// 					expr: &expr_TRUE,
-// 					op: &op_and,
-// 					expr1: &expr_FALSE
-// 					}
-// 				};
+boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest9()
+{
+	boost::shared_ptr<AST::EXPR> xExpr = getAssignmentExpr("x", expr_THREE);
+	boost::shared_ptr<AST::EXPR> yExpr = getAssignmentExpr("y", expr_THREE);
+	
+	boost::shared_ptr<AST::EXPR> mainExpr = getBiOpExpr(xExpr, AST::OP_ADDITION, yExpr);
+	boost::shared_ptr<AST::PROGRAM> program(new PROGRAM(mainExpr));
+	return program;
+}

@@ -15,5 +15,6 @@ AST::PROGRAM::PROGRAM(boost::shared_ptr<AST::EXPR> expr)
 void AST::PROGRAM::generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod)
 {
 	stateContext cntx;
+	cntx.forceLoad = false;
 	(_expr)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, true, &cntx);
 }

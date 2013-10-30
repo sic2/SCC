@@ -32,15 +32,45 @@ public class ADT_test {
 	// {
 	// 	return a == b;
 	// }
+	static int A = 0;
 
 	public static void main(String[] vars)
 	{
-		TestClass testONE = new TestClass();
-		testONE.integer = 10;
-		TestClass testTWO = new TestClass();
-		testTWO.integer = 5;
-		System.out.println(testTWO.compare(testONE));
 
-		System.out.println("hello");
+
+		String a = "hello";
+		Object b = a;
+		try{
+		String c = (String)b;
+	} catch (Exception e)
+	{
+		
+	}
+		// TestClass testONE = new TestClass();
+		// String s = testONE.toString();
+		// if (A == 0)
+		// {
+		// 	System.out.println("int");
+		// }
+		// if (A == 1)
+		// {
+		// 	System.out.println("bool");
+		// }
+		// if (A == 2)
+		// {
+		// 	System.out.println("str");
+		// }
+		// if (A == 3)
+		// {
+		// 	System.out.println("obj");
+		// }
+
+		// TestClass testONE = new TestClass();
+		// testONE.integer = 10;
+		// TestClass testTWO = new TestClass();
+		// testTWO.integer = 5;
+		// System.out.println(testTWO.compare(testONE));
+
+		// System.out.println("hello");
 	}
 }

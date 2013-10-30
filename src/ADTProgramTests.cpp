@@ -4,18 +4,14 @@ boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest0()
 {
 	std::vector< boost::shared_ptr<AST::EXPR> > expressions;
 	boost::shared_ptr<AST::EXPR> typeDefExpr = getTypedefExpr("Time", "ctct", "Hour", &type_INT, "Min", &type_INT);
-	expressions.push_back(typeDefExpr);
 
 	// Creating a new variable of type Time
 	boost::shared_ptr<AST::EXPR> timeExpr = getNewVarExpr("t", "Time", "Min", "e", &expr_ZERO);
-	expressions.push_back(timeExpr);
 	
-	Expr_Group exprGroup(expressions);
-	boost::variant< Expr_Group > value_group(exprGroup);
-	boost::shared_ptr<AST::EXPR> mainExpr(new EXPR(EXPR_GROUP, value_group));
-	boost::shared_ptr<AST::PROGRAM> program_0(new PROGRAM(mainExpr));
+	boost::shared_ptr<AST::EXPR> expr = getGroupExpr("ee", &typeDefExpr, &timeExpr);
+	boost::shared_ptr<AST::PROGRAM> program(new PROGRAM(expr));
 
-	return program_0;
+	return program;
 }
 
 /*
@@ -62,7 +58,7 @@ boost::shared_ptr<AST::PROGRAM> ADTProgramTests::getTest1()
 	boost::shared_ptr<AST::EXPR> caseExpr = getCaseExpr(AST::EXPR_INT, "kevin", "a", &alt_Person);
 
 	boost::shared_ptr<AST::EXPR> groupExpr = getGroupExpr("eeeee", &ageTypeDefExpr, &addrTypeDefExpr, &personTypeDefExpr, &personExpr, &caseExpr);
-	boost::shared_ptr<AST::PROGRAM> program_0(new PROGRAM(groupExpr));
+	boost::shared_ptr<AST::PROGRAM> program(new PROGRAM(groupExpr));
 
-	return program_0;
+	return program;
 }

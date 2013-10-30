@@ -13,8 +13,6 @@
 * runtime generated content. 
 **********************************************************/
 
-#define PROGRAM_NAME "simple"  // TODO - define name of program from main args
-
 /*
 * General spacing and formatting
 */
@@ -43,6 +41,7 @@
 #define PRINT_STREAM "getstatic java/lang/System/out Ljava/io/PrintStream;"
 #define INVOKE_PRINTLN_INT "invokevirtual java/io/PrintStream/println(I)V"
 #define INVOKE_PRINTLN_BOOL "invokevirtual java/io/PrintStream/println(Z)V"
+#define INVOKE_PRINTLN_STR "invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V"
 #define SUBROUTINE ".method public static "
 
 /**
@@ -80,10 +79,8 @@ public:
 	/**
 	* Generates JVM bytecode and output to file
 	* @param outFileName 
-	* @return 	True if bytecode was generate successfully.
-	*			False otherwise.
 	*/
-	bool generateByteCode(boost::shared_ptr<AST::PROGRAM> program, std::string outFileName);
+	void generateByteCode(boost::shared_ptr<AST::PROGRAM> program, std::string outFileName);
 
 	/**
 	* @return size of the environment (i.e. symbols table)
@@ -153,14 +150,21 @@ public:
 	* Return the last scheduled expression
 	*/
 	Expression_Info* getLastExpression() { return this->_lastExpression; }
+	
+	void updateProgramEnv(std::string& output, int type);
+	
+	std::string getProgramName() { return this->_outFileName; }
 
 private:
 	boost::shared_ptr<AST::PROGRAM> _program;
+	
+	std::string _outFileName;
 
 	void addInitialJasminCode(std::string& output);
 	void addInitialMainJasminCode(std::string& output);
 	void addFinalMainJasminCode(std::string& output);
 	void printLastStatement(std::string& output);
+	std::string getIntByteCode(int Integer); // XXX - duplicate
 
 	/**
 	* The environment or symbol tables
@@ -178,7 +182,7 @@ private:
 	* used to store instances
 	*/
 	std::map<std::string, std::pair<std::string, int> > _objects;
-	std::map<std::string, std::pair<std::string, int> > _tmpObjects; // FIXME -  NEVER cleaned 
+	std::map<std::string, std::pair<std::string, int> > _tmpObjects;
 
 	int _expressionsOnStack;
 	Expression_Info* _lastExpression;

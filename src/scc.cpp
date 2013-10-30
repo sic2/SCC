@@ -25,11 +25,11 @@ int main(int argc, char** argv)
 	// Suite0
 	basicProgramTests suite0;
 	JVMByteCodeGenerator byteCodeGen;
-	byteCodeGen.generateByteCode(suite0.getTest0(), "s0Test1"); // XXX - tmp disabled
+	byteCodeGen.generateByteCode(suite0.getTest9(), "s0Test1"); // XXX - tmp disabled
 	
 	// Suite1
 	 ADTProgramTests suite1;
 	byteCodeGen.cleanup();
-	byteCodeGen.generateByteCode(suite1.getTest1(), "s1Test1");
+	//byteCodeGen.generateByteCode(suite1.getTest1(), "s1Test1");
 	return 0;
 }	
