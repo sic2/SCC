@@ -2,15 +2,18 @@
 #include "ADTByteCode.h"
 #include "PROGRAM.h"
 
+#include "Helper.h"
+
 #include <sstream>
 
 // MACROS
 #define JASMIN_DIRECTIVE_progr(stream, x, progr_Name) stream += x progr_Name NEW_LINE
 
+#define TARGETS "targets/"
+
 JVMByteCodeGenerator::JVMByteCodeGenerator()
 {
-	cleanup();
-	_lastExpression = new Expression_Info(AST::EXPR_UNDEFINED, std::string(" "), 0);
+	cleanup();	
 }
 
 void JVMByteCodeGenerator::cleanup()
@@ -18,8 +21,12 @@ void JVMByteCodeGenerator::cleanup()
 	_numberLabels = -1;
 	_expressionsOnStack = 0;
 	_genericClassForADTsEnabled = false;
+	
+	_lastExpression = new Expression_Info(AST::EXPR_UNDEFINED, std::string(" "), 0);
 
-	// TODO - cleanup other data structures
+	_typeDefinitions.clear();
+	_objects.clear();
+	_subRoutines.clear();
 }
 
 bool JVMByteCodeGenerator::generateByteCode(boost::shared_ptr<AST::PROGRAM> program, std::string outFileName) 
@@ -47,14 +54,13 @@ bool JVMByteCodeGenerator::generateByteCode(boost::shared_ptr<AST::PROGRAM> prog
 	if (_genericClassForADTsEnabled)
 	{
 		std::string adtByteCode = ADTByteCode::getByteCode();
-		if(DEBUG_MODE >= 1)
-		{
-			//printf("ADT BYTECODE: \n\n%s\n\nEND ADT BYTECODE\n", adtByteCode.c_str());
-		}
+		std::string outputFileNameADT = TARGETS + std::string("ADTByteCode.j");
+		Helper::instance().saveToFile(outputFileNameADT, adtByteCode);
 	}
 	
-	// TODO - save code to files
-	return false;
+	outFileName = TARGETS + outFileName + ".j";
+	Helper::instance().saveToFile(outFileName, jasminProgram);
+	return false; // FIXME
 }
 
 void JVMByteCodeGenerator::formatJasminInstruction(std::string& instruction)
@@ -70,11 +76,11 @@ void JVMByteCodeGenerator::printLastStatement(std::string& output)
 	switch(_lastExpression->type)
 	{
 		case AST::EXPR_INT:
-			output += "\tiload " + convert.str() + "\n"; 
+			//output += "\tiload " + convert.str() + "\n"; 
 			JASMIN_INSTR(output, INVOKE_PRINTLN_INT);
 			break;
 		case AST::EXPR_BOOL:
-			output += "\tiload " + convert.str() + "\n"; 
+			//output += "\tiload " + convert.str() + "\n"; 
 			JASMIN_INSTR(output, INVOKE_PRINTLN_BOOL);
 			break;
 		case AST::EXPR_STRING:

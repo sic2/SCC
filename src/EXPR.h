@@ -17,7 +17,7 @@ typedef struct stateContext
 } stateContext; 
 
 /**
-*
+* TODO
 */
 class AST::EXPR
 {
@@ -25,16 +25,6 @@ public:
 
 	EXPR(AST::EXPRESSION_TYPE typeExpr, AST::uValue value);
 	virtual ~EXPR() {}
-
-	/**
-	* @param
-	* @param
-	* @param
-	* @param onStack Set to true the first time
-	* @return
-	*/
-	void generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, 
-									std::string& mainMethod, bool onStack, void* context);
 
 	/*
 	* Fields Getters
@@ -49,13 +39,30 @@ private:
 	AST::EXPRESSION_TYPE _typeExpr;
 	AST::uValue _uValue; 
 
+	
+/* --------------------- *
+ * Functions to generate *
+ * JVM Bytecode			 *
+ * --------------------- */
+public:
+	/**
+	 * @param
+	 * @param
+	 * @param
+	 * @param onStack Set to true the first time
+	 * @return
+	 */
+	void generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, 
+						  std::string& mainMethod, bool onStack, void* context);
+	
+private:
+
 	/* --------- *
 	 * FUNCTIONS *
 	 * --------- */
 	/*
 	* Utility functions
 	*/
-	std::string integerToString(int value);
 	std::string boolToString(bool value);
 	std::string getIStoreByteCode(JVMByteCodeGenerator* bytecodeGenerator);
 	std::string getAStoreByteCode(JVMByteCodeGenerator* bytecodeGenerator);

@@ -10,7 +10,7 @@
 ***********************************************************/
 
 #include "JVMByteCodeGenerator.h"
- #include "basicProgramTests.h"
+#include "basicProgramTests.h"
 #include "ADTProgramTests.h"
 
 // A 2-steps process is used:
@@ -22,12 +22,14 @@ int main(int argc, char** argv)
 	/**************
 	* TEST PROGRAMS
 	***************/
-	basicProgramTests test0;
+	// Suite0
+	basicProgramTests suite0;
 	JVMByteCodeGenerator byteCodeGen;
-	byteCodeGen.generateByteCode(test0.getTest0(), "XXX"); // FIXME - use filename for creating source file
+	// byteCodeGen.generateByteCode(suite0.getTest1(), "s0Test1"); // XXX - tmp disabled
 	
-	// ADTProgramTests test0;
-	// JVMByteCodeGenerator byteCodeGen;
-	// byteCodeGen.generateByteCode(test0.getTest1(), "XXX");
+	// Suite1
+	 ADTProgramTests suite1;
+	byteCodeGen.cleanup();
+	byteCodeGen.generateByteCode(suite1.getTest1(), "s1Test1");
 	return 0;
 }	
