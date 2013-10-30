@@ -68,10 +68,12 @@ public:
 		alt_ONE = boost::shared_ptr<ALT> (new ALT(type_ONE, expr_ZERO)); 
 	}
 
+	virtual ~baseProgramTest() {}
+
 	/*
   	* WRAPPERS 
 	*/
-
+  
 	inline boost::shared_ptr<AST::EXPR> getBiOpExpr(boost::shared_ptr<AST::EXPR> operand0, OP op, boost::shared_ptr<AST::EXPR> operand1)
 	{
 		boost::shared_ptr<OPERATOR> retval;
@@ -106,6 +108,10 @@ public:
 		return expr;
 	}
 
+	/**
+  	* @param fmt
+  				'a' for alternative
+  	*/
 	inline boost::shared_ptr<AST::EXPR> getCaseExpr(AST::EXPRESSION_TYPE type, std::string condition, const char *fmt, ...)
 	{
 		std::vector< boost::shared_ptr<AST::EXPR> > values;
@@ -134,6 +140,11 @@ public:
 		return expr;
 	}
 
+	/**
+  	* @param fmt
+  				'c' for constructor
+  				't' for type
+  	*/
 	inline boost::shared_ptr<AST::EXPR> getTypedefExpr(std::string typeID, const char *fmt, ...)
 	{
 		std::vector< boost::shared_ptr<AST::CONSTR> > constructors;
@@ -142,30 +153,21 @@ public:
 	    va_start(args, fmt);
 		    while (*fmt != '\0') 
 		    {
-		    	printf("%c\n", *fmt);
-		    	int noTypes = 0;
 		        if (*fmt == 'c') // read constructor
 		        {
 		        	char* cnstrID = va_arg(args, char*);
 		        	std::string constructorID = std::string(cnstrID);
 		        	++fmt;
-		        	printf("%c\n", *fmt);
-		        	noTypes = 0;
 		        	std::vector< boost::shared_ptr<AST::TYPE> > types;
 		        	while (*fmt == 't') // read types associated with constructor
 		        	{
-		        		printf("hello eee\n");
 		        		boost::shared_ptr<AST::TYPE>* type = va_arg(args, boost::shared_ptr<AST::TYPE>*);
 		        		types.push_back(*type);
-		        		noTypes++;
 		        		++fmt;
-		        		printf("hello boom\n");
 		        	}
 		        	boost::shared_ptr<AST::CONSTR> constructor(new CONSTR(constructorID, types));
 		        	constructors.push_back(constructor);
-		        	printf("hello boom boom\n");
 		        }
-		        
 		    }
 	    va_end(args);
 
@@ -175,7 +177,37 @@ public:
 		return typeDefExpr;
 	}
 
-	virtual ~baseProgramTest() {}
+	/**
+  	* @param fmt
+  				'e' for expression
+  	*/
+	inline boost::shared_ptr<AST::EXPR> getNewVarExpr(std::string ID, std::string typeID, std::string constructorID, const char *fmt, ...)
+	{
+		std::vector< boost::shared_ptr<AST::EXPR> > params;
+
+		va_list args;
+	    va_start(args, fmt);
+		    while (*fmt != '\0') 
+		    {
+		        if (*fmt == 'e') 
+		        {
+		        	boost::shared_ptr<AST::EXPR>* expr = va_arg(args, boost::shared_ptr<AST::EXPR>*);
+		            params.push_back(*expr); 
+		        }
+		        ++fmt;
+		    }
+	    va_end(args);
+
+		Expr_Var_Constr constr(constructorID, params);
+		boost::variant< Expr_Var_Constr > value_constr(constr);
+		boost::shared_ptr<AST::EXPR> constrExpr(new EXPR(EXPR_VAR_CONSTR, value_constr));
+
+		Expr_New_Var constrNewVar(ID, typeID, constrExpr);
+		boost::variant< Expr_New_Var > value_constrVar(constrNewVar);
+		boost::shared_ptr<AST::EXPR> constrVarExpr(new EXPR(EXPR_NEW_VAR, value_constrVar));
+
+		return constrVarExpr;
+	}
 
 protected:
 	/*
