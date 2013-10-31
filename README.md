@@ -31,7 +31,13 @@ Student: 100003610
 # To run
 
 	$ make
+	$ ./Case
 
+# TODO
+
+	[] Finish implementing ADT Pattern matching for Case statements
+	[] For-Loops
+	
 # Requirements 
 
 Tested Targets: 
