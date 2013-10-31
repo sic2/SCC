@@ -11,10 +11,6 @@ public:
 	virtual ~OPERATOR() {}
 
 	/**
-	* @param
-	* @param
-	* @param
-	* @param
 	* @return EXPRESSION_TYPE
 	*/
 	AST::EXPRESSION_TYPE generateByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, 

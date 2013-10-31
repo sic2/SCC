@@ -1,4 +1,4 @@
-.class public simple
+.class public s1Test1
 .super java/lang/Object
 .field public ENV I
 .method public <init>()V

@@ -9,6 +9,28 @@
 #include <boost/variant.hpp>
 
 // AST - Abstrace Syntax Tree
+/*
+ 
+ This namespace specifies the AST.
+ A boost variant (similar to C-union) is used for expressions.
+ Each expression is represented as a class, where its main components
+ are its fields.
+ So, for example the class for the New Variable has the following fields:
+ 
+ std::string ID;
+ std::string typeID;
+ boost::shared_ptr<EXPR> expr; 
+ 
+ Other subparts of the AST are:
+  OPERATOR;
+  TYPE;
+  ALT;
+  CONSTR;
+  PROGRAM;
+ 
+ for clarity and simplicity only forward declaration are used in the following file.
+ 
+ */
 namespace AST 
 {
 	/*
@@ -24,7 +46,7 @@ namespace AST
 		OP_LESS,
 		OP_OR,
 		OP_AND,
-		OP_RANGE // Not implemented
+		OP_RANGE
 	} OP;
 	
 	/***********************

@@ -28,7 +28,9 @@ Student: 100003610
 
 	<type> ::= "int" | "bool" | "string" | "(" <id> <type>* ")"
 
-## Language decisions
+# To run
+
+	$ make
 
 # Requirements 
 

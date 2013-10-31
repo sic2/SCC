@@ -155,21 +155,6 @@ void JVMByteCodeGenerator::addInitialJasminCode(std::string& output)
 	output += "\n";
 }
 
-std::string JVMByteCodeGenerator::getIntByteCode(int Integer)
-{
-	std::string retval = "iconst_";
-	if (Integer == -1)
-	{
-		return "iconst_m1";
-	}
-	else if (Integer < -1 || Integer > 5)
-	{
-		retval = "bipush ";
-	}
-	
-	return retval + Helper::instance().integerToString(Integer);
-}
-
 void JVMByteCodeGenerator::updateProgramEnv(std::string& output, int type)
 {
 	/*

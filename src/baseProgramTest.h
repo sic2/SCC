@@ -14,7 +14,7 @@
 #include "TYPE.h"
 #include "CONSTR.h"
 
-using namespace AST; // XXX - possibly omit 
+using namespace AST;
 
 // Define a constructor used by all the testing classes on loading
 class baseProgramTest

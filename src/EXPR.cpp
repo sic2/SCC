@@ -162,7 +162,18 @@ void AST::EXPR::generateBiOPByteCode(JVMByteCodeGenerator* bytecodeGenerator,
 void AST::EXPR::generateForByteCode(JVMByteCodeGenerator* bytecodeGenerator, 
 	std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context)
 {
-	// TODO
+	Expr_For_Loop forExpr = boost::get< Expr_For_Loop >(_uValue);
+	std::string ID = forExpr.ID;
+	boost::shared_ptr<EXPR> expr = forExpr.expr; // RANGE
+	
+	boost::shared_ptr<EXPR> lb = boost::get< Expr_Bi_Op >(expr->getValue()).expr;
+	int lowerBound = boost::get< int >( boost::get< Expr_Bi_Op >(expr->getValue()).expr->getValue());
+	int upperBound = boost::get< int >( boost::get< Expr_Bi_Op >(expr->getValue()).expr1->getValue());
+	for (int i = lowerBound; i < upperBound; i++)
+	{
+		// [ TODO ]
+		boost::shared_ptr<EXPR> expr1 = forExpr.expr1; // DO
+	}
 	
 }
 
@@ -278,7 +289,7 @@ void AST::EXPR::stringPatternMatching(JVMByteCodeGenerator* bytecodeGenerator,
 	mainMethod += "def: \n";
 
 	std::string ID = "";
-	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true); // FIXME - make this work for anything
+	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true);
 }
 
 void AST::EXPR::objectPatternMatching(JVMByteCodeGenerator* bytecodeGenerator, 
@@ -308,10 +319,24 @@ void AST::EXPR::objectPatternMatching(JVMByteCodeGenerator* bytecodeGenerator,
 		std::string label = "Label_" + Helper::instance().integerToString(bytecodeGenerator->nextLabel());
 		mainMethod += "\t ifeq " + label + std::string("\n"); 
 		
-		// XXX - needed? 
-		// Map each param for this case to stored value defined by condition
-		mapParams(GET_Condition_FROM_ALT(it)->getTypes(), conditionStackLocation, conditionTypeDef, GET_Condition_FROM_ALT(it)->getID());
-
+		
+		std::vector< boost::shared_ptr<AST::TYPE> > params = GET_Condition_FROM_ALT(it)->getTypes();
+		std::vector< boost::shared_ptr<AST::TYPE> > definedConstructors = conditionTypeDef.constructors[0]->getTypes();
+		if (params.size() == definedConstructors.size())
+		{
+			std::vector< boost::shared_ptr<AST::TYPE> >::iterator dit = definedConstructors.begin();
+			for (std::vector< boost::shared_ptr<AST::TYPE> >::iterator pit = params.begin(); pit != params.end(); ++pit)
+			{
+				std::string paramID = (*pit)->getID();
+				std::string typeID = (*dit)->getID();
+				
+				int labelIndex = bytecodeGenerator->getObj(typeID).second;
+				bytecodeGenerator->addNewGenericObject(paramID, labelIndex, typeID); 
+				
+				++dit;
+			}
+		}
+		
 		GET_EXPR_FROM_ALT(it)->generateByteCode(bytecodeGenerator, jasminProgram, mainMethod, false, context);
 		
 		mainMethod += "goto def \n";
@@ -321,26 +346,6 @@ void AST::EXPR::objectPatternMatching(JVMByteCodeGenerator* bytecodeGenerator,
 	mainMethod += "def: \n";
 	
 	mainMethod += ";CASE STATEMENT END \n";
-}
-
-void AST::EXPR::mapParams(std::vector< boost::shared_ptr<AST::TYPE> > params, int conditionStackLocation,
-						  AST::Expr_Typedef conditionTypeDef, std::string conditionConstructID)
-{
-
-	int noDefinedParams = conditionTypeDef.constructors[0]->getTypes().size();
-	if (noDefinedParams == params.size())
-	{
-		int paramIndex = 0;
-		for (std::vector< boost::shared_ptr<AST::TYPE> >::iterator it = params.begin(); it != params.end(); ++it)
-		{
-			// TODO
-			paramIndex++;
-		}
-	}
-	else
-	{
-		printf("Error: number of params in case and number of params in typedef does not match\n");
-	}
 }
 
 AST::EXPRESSION_TYPE AST::EXPR::evaluateBiOpOperands(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod, bool onStack, void* context, boost::shared_ptr<EXPR> operand)
@@ -364,7 +369,7 @@ int AST::EXPR::newGenericObject(JVMByteCodeGenerator* bytecodeGenerator, std::st
 
 	// Update environment
 	bytecodeGenerator->addNewGenericObject(ID, labelIndex, typeID); 
-	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true); // FIXME - make this work for anything
+	bytecodeGenerator->updateEnvironment(&ID, EXPR_INT, true);
 
 	// Update field about size of objects array
 	mainMethod += "\taload " + Helper::instance().integerToString(labelIndex) + std::string("\n");
@@ -487,25 +492,29 @@ void AST::EXPR::updateTag(JVMByteCodeGenerator* bytecodeGenerator, std::string& 
 */
 std::string AST::EXPR::getAStoreByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod)
 {
-	bytecodeGenerator->updateProgramEnv(mainMethod, 3);
+	// [ NOTE ] Bytecode encapsulated environment disabled
+	// bytecodeGenerator->updateProgramEnv(mainMethod, 3);
 	return "\tastore " + Helper::instance().integerToString(bytecodeGenerator->getEnvironmentSize());
 }
 
 std::string AST::EXPR::boolToString(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, bool value)
 {
-	bytecodeGenerator->updateProgramEnv(mainMethod, 1); 
+	//[ NOTE ] Bytecode encapsulated environment disabled
+	// bytecodeGenerator->updateProgramEnv(mainMethod, 1); 
 	return value ? "\ticonst_1" : "\ticonst_0";
 }
 
 std::string AST::EXPR::stringToByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, std::string str)
 {
-	bytecodeGenerator->updateProgramEnv(mainMethod, 2); 
+	//[ NOTE ] Bytecode encapsulated environment disabled
+	// bytecodeGenerator->updateProgramEnv(mainMethod, 2); 
 	return "ldc \"" + str + "\"";
 }
 
 std::string AST::EXPR::getIntByteCode(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, int Integer)
 {
-	bytecodeGenerator->updateProgramEnv(mainMethod, 0); // FIXME - use constant
+	// [ NOTE ] Bytecode encapsulated environment disabled
+	// bytecodeGenerator->updateProgramEnv(mainMethod, 0);
 	std::string retval = "iconst_";
 	if (Integer == -1)
 	{

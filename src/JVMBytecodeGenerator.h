@@ -164,7 +164,6 @@ private:
 	void addInitialMainJasminCode(std::string& output);
 	void addFinalMainJasminCode(std::string& output);
 	void printLastStatement(std::string& output);
-	std::string getIntByteCode(int Integer); // XXX - duplicate
 
 	/**
 	* The environment or symbol tables

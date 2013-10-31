@@ -13,7 +13,6 @@ typedef struct stateContext
 	std::string typeID;
 	std::string ID;
 	int stackLocation;
-	bool onStack; // FIXME - unused
 	bool forceLoad;
 } stateContext; 
 
@@ -92,8 +91,6 @@ private:
 	 			bool onStack, void* context, std::string condition, std::vector< boost::shared_ptr<ALT> > alternatives);
 	void objectPatternMatching(JVMByteCodeGenerator* bytecodeGenerator, std::string& jasminProgram, std::string& mainMethod,
 	 			bool onStack, void* context, std::string condition, std::vector< boost::shared_ptr<ALT> > alternatives);
-	void mapParams(std::vector< boost::shared_ptr<AST::TYPE> > params, int conditionStackLocation, 
-		AST::Expr_Typedef conditionTypeID, std::string conditionConstructID);
 	void createTmpObject(JVMByteCodeGenerator* bytecodeGenerator, std::string& mainMethod, std::string& ID, int labelIndex,
 									AST::Expr_Typedef conditionTypeDef, int noParams);
 

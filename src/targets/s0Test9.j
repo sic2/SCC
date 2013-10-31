@@ -1,4 +1,4 @@
-.class public s0Test1
+.class public s0Test9
 .super java/lang/Object
 .field static public ENV I
 .method public <init>()V
@@ -110,7 +110,7 @@ getfield ADTByteCode/objs [LADTByteCode;
 iconst_0
 aload 3
 aastore
-	invokestatic s0Test1.ADD_SUBROUTINE(II)I
+	invokestatic s0Test9.ADD_SUBROUTINE(II)I
 	invokevirtual java/io/PrintStream/println(I)V
 	return	; return from main
 .end method

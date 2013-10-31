@@ -65,26 +65,8 @@ boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest7()
 
 boost::shared_ptr<AST::PROGRAM> basicProgramTests::getTest8()
 {
-	boost::shared_ptr<AST::EXPR> testVar = getAssignmentExpr("testVar", expr_THREE);
-	 
-	boost::shared_ptr<AST::EXPR> rangeExpr = getBiOpExpr(expr_ZERO, AST::OP_RANGE, expr_THREE);
-	
-	std::vector< boost::shared_ptr<AST::EXPR> > values;
-	Expr_Var_Constr x("x", values);
-	boost::variant< Expr_Var_Constr > value_x(x);
-	boost::shared_ptr<AST::EXPR> xExpr(new EXPR(EXPR_VAR_CONSTR, value_x));
-	Expr_Var_Constr t("testVar", values);
-	boost::variant< Expr_Var_Constr > value_t(t);
-	boost::shared_ptr<AST::EXPR> tExpr(new EXPR(EXPR_VAR_CONSTR, value_t));
-	boost::shared_ptr<AST::EXPR> oper = getBiOpExpr(xExpr, AST::OP_ADDITION, tExpr);
-	boost::shared_ptr<AST::EXPR> doExpr = getAssignmentExpr("testVar", oper);
-	
-	Expr_For_Loop exprFor("x", rangeExpr, doExpr); // FIXME
-	boost::variant< Expr_For_Loop > value_for(exprFor);
-	boost::shared_ptr<AST::EXPR> forExpr(new EXPR(EXPR_FOR_LOOP, value_for));
-	 
-	boost::shared_ptr<AST::EXPR> expr = getGroupExpr("ee", &testVar, &forExpr);
-	boost::shared_ptr<AST::PROGRAM> program(new PROGRAM(expr));
+	boost::shared_ptr<AST::EXPR> mainExpr = getBiOpExpr(expr_THREE, AST::OP_LESS, expr_ONE);
+	boost::shared_ptr<AST::PROGRAM> program(new PROGRAM(mainExpr));
 	return program;
 }
 

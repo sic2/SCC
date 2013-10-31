@@ -1,27 +1,17 @@
-.class public simple
+.class public s0Test4
 .super java/lang/Object
+.field static public ENV I
 .method public <init>()V
-	aload_0
+	aload 0
 	invokespecial java/lang/Object/<init>()V
 	return
 .end method
 
 .method public static main([Ljava/lang/String;)V
-	.limit stack 5
+	.limit stack 10
 	.limit locals 100
-	iconst_0
-	 istore_0
-	 iload_0
-	 lookupswitch
-		 0 : Label_0
-		 default : DLABEL
-Label_0:
-	bipush -2
-	istore_0
 	getstatic java/lang/System/out Ljava/io/PrintStream;
-	iload_0
-	invokevirtual java/io/PrintStream/println(I)V
-DLABEL:
-return
+	iconst_1
+	invokevirtual java/io/PrintStream/println(Z)V
 	return	; return from main
 .end method

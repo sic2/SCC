@@ -5,10 +5,6 @@
 #define TYPE_IS_PRIMITIVE 0
 #define TYPE_NOT_PRIMITIVE 1
 
-/*
-* TODO
-* use union (i.e. variant) instead of having two constructors
-*/
 class AST::TYPE
 {
 public:

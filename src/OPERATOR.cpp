@@ -97,7 +97,7 @@ AST::EXPRESSION_TYPE AST::OPERATOR::generateByteCode(JVMByteCodeGenerator* bytec
 	callerByteCode += subroutineName + getSubroutineParams(op0Type, op1Type) + returnValue;
 	calleeByteCode += subroutineName + getSubroutineParams(op0Type, op1Type) + returnValue;
 
-	isSubroutineNeeded = bytecodeGenerator->addSubroutine(callerByteCode); // FIXME - not implemented in bytecodegenerato
+	isSubroutineNeeded = bytecodeGenerator->addSubroutine(callerByteCode);
 	if (isSubroutineNeeded)
 	{
 		jasminProgram += getSubroutine(calleeByteCode);
@@ -169,8 +169,7 @@ std::string AST::OPERATOR::getSubroutine(std::string& subroutineCallerName)
 				subroutine += getTrivialLogicSubroutine();
 			}
 			break;
-		case AST::OP_RANGE:
-			// TODO
+		case AST::OP_RANGE: // No logical or mathematical operation is involed, therefore no subroutine is needed.
 		default:
 			printf("subroutine not supported yet\n");
 		break;
