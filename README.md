@@ -28,7 +28,7 @@ Student: 100003610
 
 	<type> ::= "int" | "bool" | "string" | "(" <id> <type>* ")"
 
-# To run
+# HOW to run
 
 	$ make
 	$ ./Case
@@ -37,6 +37,7 @@ Student: 100003610
 
 	[] Finish implementing ADT Pattern matching for Case statements
 	[] For-Loops
+	[] Range ".."
 	
 # Requirements 
 
